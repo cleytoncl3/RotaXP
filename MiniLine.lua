@@ -9,6 +9,16 @@ local SIZE_OUT = { [0] = 466 + 2 / 3, 400, 333 + 1 / 3, 266 + 2 / 3, 200, 133 + 
 local SIZE_IN = { [0] = 300, 240, 180, 120, 80, 50 }
 local CP_STEP = 350   -- jardas entre checkpoints numa caminhada longa
 local CP_MAX = 5      -- máximo de checkpoints no TomTom (para não poluir)
+local RING_R, RING_SEG = 7, 14   -- raio (px) e segmentos do anel do destino
+
+function MM:ShowRing(x, y)
+    for i, l in ipairs(self.ring) do
+        local a1, a2 = (i - 1) / RING_SEG * 2 * math.pi, i / RING_SEG * 2 * math.pi
+        l:SetStartPoint("CENTER", self.overlay, x + RING_R * math.cos(a1), y + RING_R * math.sin(a1))
+        l:SetEndPoint("CENTER", self.overlay, x + RING_R * math.cos(a2), y + RING_R * math.sin(a2))
+        l:Show()
+    end
+end
 
 function MM:Init()
     if self.overlay or not Minimap then return end
@@ -16,11 +26,15 @@ function MM:Init()
     o:SetAllPoints(Minimap)
     o:SetFrameLevel((Minimap:GetFrameLevel() or 1) + 5)
     self.overlay = o
-    local dot = o:CreateTexture(nil, "OVERLAY")
-    dot:SetTexture("Interface\\Minimap\\Ping\\ping5")
-    dot:SetSize(11, 11)
-    dot:SetVertexColor(1, 0.55, 0.1)
-    self.dot = dot
+    -- destino: anel fino e vazado (o "!"/"?" do NPC continua visível no meio)
+    self.ring = {}
+    for i = 1, RING_SEG do
+        local l = o:CreateLine(nil, "OVERLAY")
+        l:SetThickness(1.5)
+        l:SetColorTexture(1, 0.55, 0.1, 0.9)
+        l:Hide()
+        self.ring[i] = l
+    end
     local acc = 0
     o:SetScript("OnUpdate", function(_, e)
         acc = acc + e
@@ -62,7 +76,7 @@ end
 
 function MM:Draw()
     for _, l in ipairs(self.lines) do l:Hide() end
-    self.dot:Hide()
+    for _, l in ipairs(self.ring) do l:Hide() end
     if RX.db and RX.db.miniLine == false then return end
     local dest = RX.Arrow and (RX.Arrow.finalStep or RX.Arrow.step)
     if not dest or not dest.m then return end
@@ -82,14 +96,21 @@ function MM:Draw()
         local x, y, inside = toMini(me, pts[i], radiusYd, radiusPx, rot, square)
         n = n + 1
         local l = self:Line(n)
+        local ex, ey = x, y
+        if i == #pts and inside then
+            -- a linha para na borda do anel, sem cobrir o NPC
+            local dx, dy = x - px, y - py
+            local d = math.sqrt(dx * dx + dy * dy)
+            if d > RING_R + 1 then ex, ey = x - dx / d * RING_R, y - dy / d * RING_R end
+        end
         l:SetStartPoint("CENTER", self.overlay, px, py)
-        l:SetEndPoint("CENTER", self.overlay, x, y)
+        l:SetEndPoint("CENTER", self.overlay, ex, ey)
         if n == 1 then l:SetColorTexture(1, 0.5, 0, 0.95) else l:SetColorTexture(1, 0.85, 0.3, 0.8) end
         l:Show()
         if not inside then break end
         px, py = x, y
         if i == #pts then
-            self.dot:ClearAllPoints(); self.dot:SetPoint("CENTER", self.overlay, "CENTER", x, y); self.dot:Show()
+            self:ShowRing(x, y)
         end
     end
 end
@@ -141,7 +162,7 @@ function MM:SetCheckpoints(dest)
         local m, x, y = worldToMap(mk.p, mk.p.m or dest.m)
         if m then
             local ok, uid = pcall(TomTom.AddWaypoint, TomTom, m, x, y, {
-                title = "RotaXP: " .. mk.name, persistent = false, minimap = true, world = true, crazy = false, silent = true, cleardistance = 25,
+                title = "RotaXP: " .. mk.name, persistent = false, minimap = false, world = true, crazy = false, silent = true, cleardistance = 25,
             })
             if ok and uid then table.insert(self.cps, uid) end
         end

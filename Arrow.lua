@@ -120,7 +120,7 @@ function Arrow:SetTarget(step, final)
             if RX.db.useTomTom and TomTom and TomTom.AddWaypoint then
                 local ok, uid = pcall(TomTom.AddWaypoint, TomTom, final.m, final.x / 100, final.y / 100, {
                     title = "RotaXP: " .. (RX:NpcName(final) or RX:QName(final) or RX.LF(final, "d") or RX.T("destino", "destination")),
-                    persistent = false, minimap = true, world = true, crazy = false, silent = true,
+                    persistent = false, minimap = false, world = true, crazy = false, silent = true,  -- minimapa: o RotaXP desenha um anel fino
                 })
                 if ok then self.tomtomUID = uid end
             end

@@ -226,6 +226,14 @@ function UI:QuestTypeIcon(s)
     return ot and TYPE_ICON[ot] or nil
 end
 
+-- etiqueta no título quando dá para comprar o item da quest no leilão
+function UI:MarketTag(s)
+    if not (s.q and RX.Market and RX.db.marketHint ~= false) then return "" end
+    if s.t == "A" and RX.Q:InLog(s.q) then return "" end
+    if not RX.Market:Buyable(s.q) then return "" end
+    return " |T" .. RX.Market.ICON .. ":14|t|cff33ddff" .. T("leilão", "AH") .. "|r"
+end
+
 function UI:StepText(s)
     if s.t == "V" then
         return "|cff80c0ff" .. (s.d or "") .. "|r", s.note and ("|cffb0b0b0" .. s.note .. "|r") or nil
@@ -238,9 +246,9 @@ function UI:StepText(s)
     local note = LF(s, "note")
     local txt
     if t == "A" then
-        txt = T("Aceitar ", "Accept ") .. name
+        txt = T("Aceitar ", "Accept ") .. name .. self:MarketTag(s)
     elseif t == "C" then
-        txt = T("Fazer ", "Complete ") .. name
+        txt = T("Fazer ", "Complete ") .. name .. self:MarketTag(s)
     elseif t == "T" then
         txt = T("Entregar ", "Turn in ") .. name
     elseif t == "G" then
@@ -275,7 +283,7 @@ function UI:StepText(s)
     -- itens à venda no leilão (preço do Auctionator): comprar em vez de farmar
     if s.q and RX.Market and RX.db.marketHint ~= false and (t == "C" or (t == "A" and not RX.Q:InLog(s.q))) then
         local mh = RX.Market:Hint(s.q)
-        if mh then add("|cffffd100", mh) end
+        if mh then add("", mh) end
     end
     -- quest de profissão: o que fabricar e os ingredientes
     if s.q and RX.Craft and RX.Craft:Info(s.q) and (t == "A" or t == "C" or (t == "T" and not RX.Q:IsReady(s.q))) then

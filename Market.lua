@@ -68,33 +68,52 @@ function MK:Tradeable(id)
     return bind ~= 1 and bind ~= 4
 end
 
--- segunda via: "Ou compre no leilão: 4x Pena (12s cada = 50s)" para os itens que podem ser negociados
+-- ícone do leiloeiro (bem visível em tamanho pequeno)
+MK.ICON = "Interface\\MINIMAP\\Tracking\\Auctioneer"
+local CY, WH, GR = "|cff33ddff", "|cffffffff", "|cffaaaaaa"
+
+-- a quest pede algum item que dá para comprar no leilão? (para marcar o título)
+function MK:Buyable(q)
+    local miss = q and self:Missing(q)
+    if not miss then return false end
+    for _, m in ipairs(miss) do if self:Tradeable(m.id) then return true end end
+    return false
+end
+
+-- segunda via em bloco destacado:
+--   [leiloeiro] DÁ PARA COMPRAR NO LEILÃO (em vez de dropar)
+--     • 6x Pena de Urubu  12s 50c cada
+--     Total: 75s
 function MK:Hint(q)
     local miss = self:Missing(q)
     if not miss or #miss == 0 then return nil end
-    local parts, total, priced = {}, 0, true
+    local lines, total, priced = {}, 0, true
     for _, m in ipairs(miss) do
         if self:Tradeable(m.id) then
             local p, age = self:Price(m.id)
             local name = itemName(m.id) or ("item " .. m.id)
+            local price
             if p then
                 total = total + p * m.left
-                parts[#parts + 1] = string.format(T("%dx %s (%s cada%s)", "%dx %s (%s each%s)"), m.left, name, money(p),
-                    (age and age > 3) and string.format(T(", preço de %d dias", ", %d days old"), age) or "")
+                price = string.format(T("%s cada", "%s each"), money(p)) ..
+                    ((age and age > 3) and (GR .. string.format(T(" (preço de %d dias)", " (%d days old)"), age) .. "|r") or "")
             else
                 priced = false
-                parts[#parts + 1] = string.format("%dx %s", m.left, name)
+                price = GR .. T("sem preço", "no price") .. "|r"
             end
+            lines[#lines + 1] = string.format("   %s•|r %s%dx %s|r  %s", CY, WH, m.left, name, price)
         end
     end
-    if #parts == 0 then return nil end
-    local tail
-    if total > 0 then tail = string.format(T(" = %s", " = %s"), money(total)) else tail = "" end
+    if #lines == 0 then return nil end
+    local out = { string.format("|T%s:16|t %s%s|r %s", MK.ICON, CY, T("DÁ PARA COMPRAR NO LEILÃO", "YOU CAN BUY THIS ON THE AH"),
+        GR .. T("(em vez de dropar)", "(instead of farming)") .. "|r") }
+    for _, l in ipairs(lines) do out[#out + 1] = l end
+    if total > 0 then out[#out + 1] = string.format("   %s%s|r %s", CY, T("Total:", "Total:"), money(total)) end
     if not priced then
-        tail = tail .. (api() and T(" (sem preço no Auctionator: faça uma varredura)", " (no Auctionator price: run a scan)")
-            or T(" (instale o Auctionator para ver o preço)", " (install Auctionator to see the price)"))
+        out[#out + 1] = "   " .. GR .. (api() and T("Sem preço no Auctionator: faça uma varredura.", "No Auctionator price: run a scan.")
+            or T("Instale o Auctionator para ver o preço.", "Install Auctionator to see the price.")) .. "|r"
     end
-    return string.format(T("Segunda via: compre no leilão em vez de dropar: %s%s", "Alternative: buy it on the AH instead of farming: %s%s"), table.concat(parts, "; "), tail)
+    return table.concat(out, "\n")
 end
 
 -- tudo o que falta para as quests do log e tem preço no leilão
