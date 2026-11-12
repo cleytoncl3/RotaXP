@@ -99,29 +99,57 @@ end
 ----------------------------------------------------------------------
 -- Texto do passo
 ----------------------------------------------------------------------
--- Tipo do objetivo: "k" matar, "i" coletar, "o" usar/interagir, "e" explorar/falar
+-- Tipo do objetivo: "k" matar, "d" item que cai de mob, "g" item pego clicando (chão/objeto),
+-- "i" item (origem desconhecida), "o" usar/interagir, "e" explorar/falar
+-- de onde vêm os itens que a quest ainda pede (Data/QuestItemSource.lua)
+local function itemKind(q)
+    local need = q and RX.QuestNeeds and RX.QuestNeeds[q]
+    if not need or not RX.ItemSource then return "i" end
+    local list = (RX.Market and RX.Q:InLog(q)) and RX.Market:Missing(q) or nil
+    local ids = {}
+    if list and #list > 0 then for _, m in ipairs(list) do ids[#ids + 1] = m.id end
+    else for _, n in ipairs(need) do ids[#ids + 1] = n[1] end end
+    local mob, obj = false, false
+    for _, id in ipairs(ids) do
+        local src = RX.ItemSource[id]
+        if src then
+            if src:find("m") then mob = true end
+            if src:find("o") then obj = true end
+        end
+    end
+    if mob then return "d" elseif obj then return "g" end
+    return "i"
+end
+UI.ItemKind = itemKind
+
 function UI:ObjectiveType(s)
     if s.q and RX.Q:InLog(s.q) then
         local objs = RX.Q:Objectives(s.q)
         if objs and #objs > 0 then
             local has = {}
             for _, o in ipairs(objs) do if not o.finished then has[o.type or ""] = true end end
-            if has.item then return "i" elseif has.monster then return "k" elseif has.object then return "o"
+            if has.item then return itemKind(s.q) elseif has.monster then return "k" elseif has.object then return "o"
             elseif next(has) then return "e" end
         end
     end
-    return s.ot or ((s.cc and s.cc > 0) and "i") or nil
+    local ot = s.ot or ((s.cc and s.cc > 0) and "i") or nil
+    if ot == "i" then return itemKind(s.q) end
+    return ot
 end
 
 local TYPE_ICON = {
-    k = "Interface\\Icons\\Ability_DualWield",          -- espadinhas: matar
-    i = "Interface\\Icons\\INV_Misc_Bag_08",            -- bolsinha: coletar itens
-    o = "Interface\\Icons\\INV_Misc_Gear_01",           -- engrenagem: usar/clicar em objeto
-    e = "Interface\\Icons\\INV_Misc_Map_01",            -- mapa: explorar/falar
+    k = "Interface\\CURSOR\\Attack",                  -- espada: só matar mobs
+    d = "Interface\\Buttons\\Button-Backpack-Up",     -- saquinho: coletar item que cai de mob
+    i = "Interface\\Buttons\\Button-Backpack-Up",     -- saquinho: coletar itens
+    g = "Interface\\CURSOR\\Interact",                -- engrenagem: pegar no chão / clicar em objeto
+    o = "Interface\\CURSOR\\Interact",                -- engrenagem: interagir com objeto
+    e = "Interface\\GossipFrame\\GossipGossipIcon",   -- balão com 3 pontinhos: só falar com NPC e entregar
 }
 local TYPE_LABEL = {
-    k = { "Matar", "Kill" }, i = { "Coletar", "Collect" }, o = { "Usar objetos", "Use objects" }, e = { "Explorar/falar", "Explore/talk" },
+    k = { "Matar mobs", "Kill mobs" }, d = { "Coletar (drop de mobs)", "Collect (mob drops)" }, g = { "Pegar no chão/objeto", "Pick up from ground/object" },
+    o = { "Interagir/clicar", "Interact/click" }, i = { "Coletar itens", "Collect items" }, e = { "Falar com NPC", "Talk to NPC" },
 }
+UI.TYPE_ICON, UI.TYPE_LABEL = TYPE_ICON, TYPE_LABEL
 
 -- passo "Fazer" de uma quest em qualquer guia (para mostrar a prévia já no "Aceitar")
 local cByQ
@@ -139,11 +167,11 @@ end
 
 -- tipo do objetivo sem a quest no log: dado do guia ou pelo texto do objetivo
 local function guessType(c)
+    if c.ot == "i" or (not c.ot and c.cc and c.cc > 0) then return itemKind(c.q) end
     if c.ot then return c.ot end
-    if c.cc and c.cc > 0 then return "i" end
     local o = (c.obj or ""):lower()
     if o:find("^kill") or o:find("^slay") or o:find("^destroy") or o:find(" kill ") then return "k" end
-    if o:find("^bring") or o:find("^collect") or o:find("^gather") or o:find("^retrieve") or o:find("^get ") or o:find("^recover") then return "i" end
+    if o:find("^bring") or o:find("^collect") or o:find("^gather") or o:find("^retrieve") or o:find("^get ") or o:find("^recover") then return itemKind(c.q) end
     if o:find("^use") or o:find("^place") or o:find("^light") or o:find("^search") then return "o" end
     if o:find("^find") or o:find("^explore") or o:find("^speak") or o:find("^talk") or o:find("^travel") or o:find("^go ") then return "e" end
     return nil
@@ -182,8 +210,20 @@ local LEG_ICON = {
 
 function UI:StepIcon(s)
     if s.t == "V" then return LEG_ICON[s.leg] or LEG_ICON.walk end
-    if s.t == "C" then return TYPE_ICON[self:ObjectiveType(s) or "k"] end
+    if s.t == "C" then return ICON.T end   -- "?" (cinza: em andamento)
     return ICON[s.t] or ICON.N
+end
+
+-- tipo da quest para o ícone ao lado do ! / ?: espada, saquinho, engrenagem ou 3 pontinhos (só falar)
+function UI:QuestTypeIcon(s)
+    if not s.q then return nil end
+    local ot
+    if s.t == "C" then ot = self:ObjectiveType(s)
+    elseif s.t == "A" or (s.t == "T" and not RX.Q:InLog(s.q)) then
+        local c = doStepFor(s.q)
+        if c then ot = guessType(c) else ot = "e" end
+    end
+    return ot and TYPE_ICON[ot] or nil
 end
 
 function UI:StepText(s)
@@ -308,7 +348,10 @@ function UI:StepText(s)
     -- recomendações (uma vez por quest: no Aceitar e no Fazer)
     if t ~= "T" or s.turnin then
         local f = s.flags
-        if s.cc and s.cc >= 3 then
+        local kindI = (s.cc and s.cc >= 3) and itemKind(s.q) or nil
+        if kindI == "g" then
+            add("|cffff9050", string.format(T("Pegar %d itens clicando no chão/objetos", "Pick up %d items by clicking on the ground/objects"), s.cc))
+        elseif kindI then
             add("|cffff9050", string.format(T("Coletar %d itens que caem de mobs%s", "Collect %d items dropped by mobs%s"), s.cc,
                 f.drop and T(" - lento em duo/grupo (cada um precisa do seu)", " - slow in duo/group (everyone needs their own)") or ""))
         elseif f.drop or f.coleta then
@@ -316,8 +359,13 @@ function UI:StepText(s)
         end
         if t == "C" then
             local ot = UI:ObjectiveType(s)
-            if ot == "k" then add("|cffd0d0d0", T("Matar mobs: em duo/grupo todos ganham o crédito", "Kill mobs: in a duo/group everyone gets credit"))
-            elseif ot == "o" then add("|cffd0d0d0", T("Usar/clicar em objetos no local", "Use/click objects at the spot")) end
+            local lab = ot and TYPE_LABEL[ot]
+            local ic = ot and ("|T" .. TYPE_ICON[ot] .. ":14|t ") or ""
+            if ot == "k" then add("|cffd0d0d0", ic .. T("Matar mobs: em duo/grupo todos ganham o crédito", "Kill mobs: in a duo/group everyone gets credit"))
+            elseif ot == "d" then add("|cffd0d0d0", ic .. T("Item que cai de mobs: mate e saqueie", "Item dropped by mobs: kill and loot"))
+            elseif ot == "g" then add("|cffd0d0d0", ic .. T("Item no chão/objeto: só clicar para pegar", "Item on the ground/object: just click to pick it up"))
+            elseif ot == "o" then add("|cffd0d0d0", ic .. T("Usar/clicar em objetos no local", "Use/click objects at the spot"))
+            elseif lab then add("|cffd0d0d0", ic .. T(lab[1], lab[2])) end
         end
         if f.elite then add("|cffff5050", T("Mobs de elite: recomendado fazer em duo ou grupo", "Elite mobs: recommended in a duo or group")) end
         if s.lvl and s.lvl - UnitLevel("player") >= 3 then
@@ -635,6 +683,10 @@ function UI:GetLine(i)
     l.icon = l:CreateTexture(nil, "ARTWORK")
     l.icon:SetSize(16, 16)
     l.icon:SetPoint("TOPLEFT", 18, -1)
+    l.typeIcon = l:CreateTexture(nil, "ARTWORK")
+    l.typeIcon:SetSize(14, 14)
+    l.typeIcon:SetPoint("LEFT", l.icon, "RIGHT", 2, 0)
+    l.typeIcon:Hide()
     l.text = l:CreateFontString(nil, "OVERLAY")
     l.text:SetFontObject(self.fontNormal)
     l.text:SetPoint("TOPLEFT", l.icon, "TOPRIGHT", 4, 0)
@@ -836,7 +888,17 @@ function UI:Refresh()
         local l = self:GetLine(i)
         l.step = s
         l.icon:SetTexture(self:StepIcon(s))
-        l.text:SetWidth(textW)
+        l.icon:SetDesaturated(s.t == "C")
+        local ti = self:QuestTypeIcon(s)
+        l.text:ClearAllPoints()
+        if ti then
+            l.typeIcon:SetTexture(ti); l.typeIcon:Show()
+            l.text:SetPoint("TOPLEFT", l.typeIcon, "TOPRIGHT", 3, 0)
+        else
+            l.typeIcon:Hide()
+            l.text:SetPoint("TOPLEFT", l.icon, "TOPRIGHT", 4, 0)
+        end
+        l.text:SetWidth(ti and (textW - 17) or textW)
         l.sub:SetWidth(textW - 4)
         local txt, sub = self:StepText(s)
         l.text:SetText(txt)
@@ -859,7 +921,8 @@ function UI:Refresh()
         local l = self:GetLine(1)
         l.step = nil
         l.check:Hide()
-        l.icon:SetTexture("Interface\\RaidFrame\\ReadyCheck-Ready")
+        l.icon:SetTexture("Interface\\RaidFrame\\ReadyCheck-Ready"); l.icon:SetDesaturated(false); l.typeIcon:Hide()
+        l.text:ClearAllPoints(); l.text:SetPoint("TOPLEFT", l.icon, "TOPRIGHT", 4, 0)
         local n = RX:NextGuide(g)
         l.text:SetWidth(textW)
         l.text:SetText("|cff40ff40" .. T("Guia concluído!", "Guide complete!") .. "|r " ..

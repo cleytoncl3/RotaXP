@@ -5,7 +5,7 @@ _G.RotaXP = RX
 RX.guides = {}
 RX.guideOrder = {}
 RX.questMeta = {}
-RX.version = "0.21.0"
+RX.version = "0.22.0"
 
 local defaults = {
     style = "speedrun",
@@ -724,10 +724,68 @@ function RX:PLAYER_XP_UPDATE() self:XPTick(); if self.UI then self.UI:RefreshXP(
 ----------------------------------------------------------------------
 local function autoOff() return IsShiftKeyDown() end
 
+-- Decisão de aceitar SEMPRE pelo ID da quest (o nome muda com o idioma do jogo).
+-- Se o NPC está oferecendo a quest, o jogo já disse que ela está disponível: não confere pré-requisito/nível aqui
+-- (essa conferência do guia às vezes erra e fazia o addon não aceitar uma quest do guia).
+function RX:AcceptDecision(q)
+    if not q or q <= 0 then return false, RX.T("sem ID da quest", "no quest ID") end
+    local g = self:CurrentGuide()
+    if not g then return false, RX.T("nenhum guia ativo", "no active guide") end
+    if self.Q:InLog(q) then return false, RX.T("já está no log", "already in the log") end
+    if self:CharState().skipped[q] then return false, RX.T("você pulou/abandonou", "you skipped/abandoned it") end
+    local found, why = false, nil
+    for _, s in ipairs(g.steps) do
+        if s.q == q then
+            found = true
+            local f = self:StepFilteredByOptions(s)
+            if not f then return true, RX.T("está no guia", "in the guide") end
+            why = why or f
+        end
+    end
+    if not found then return false, RX.T("não está no guia", "not in the guide") end
+    return false, RX.T("o seu estilo pula: ", "your style skips it: ") .. tostring(why)
+end
+
+-- Entregar: quest do log que está no guia (mesmo que o estilo pularia: você já fez) ou Modo Entregas
+function RX:TurnInDecision(q)
+    if not q or q <= 0 then return false, "sem ID" end
+    if self.Turnin and self.Turnin.skip[q] then return false, "pulada" end
+    if self.db.turninMode and self.Q:InLog(q) then return true, "modo entregas" end
+    local g = self:CurrentGuide()
+    if not g then return false, "sem guia" end
+    for _, s in ipairs(g.steps) do if s.q == q then return true, "no guia" end end
+    return false, "fora do guia"
+end
+
+-- registro das decisões (para conferir: /rota aceite)
+function RX:LogDecision(src, q, title, ok, why)
+    local cs = self:CharState()
+    cs.acceptDebug = cs.acceptDebug or {}
+    table.insert(cs.acceptDebug, { when = date and date("%H:%M:%S") or "?", src = src, q = q, title = title, ok = ok and true or false, why = why })
+    while #cs.acceptDebug > 60 do table.remove(cs.acceptDebug, 1) end
+end
+
+function RX:ShowDecisions()
+    local log = self:CharState().acceptDebug or {}
+    if #log == 0 then self:Print(RX.T("Nenhuma decisão registrada ainda: fale com um NPC de quest.", "No decision logged yet: talk to a quest NPC.")) return end
+    self:Print(RX.T("Últimas decisões de aceitar/entregar (pelo ID da quest):", "Last accept/turn-in decisions (by quest ID):"))
+    for i = math.max(1, #log - 14), #log do
+        local e = log[i]
+        self:Print(string.format("  %s %s |cffffff00%s|r #%s: %s%s|r (%s)", e.when, e.src, e.title or "?", tostring(e.q),
+            e.ok and "|cff40ff40" or "|cffff6060", e.ok and RX.T("sim", "yes") or RX.T("não", "no"), e.why or ""))
+    end
+end
+
+local function qtitle(q, fallback)
+    return (q and C_QuestLog and C_QuestLog.GetTitleForQuestID and C_QuestLog.GetTitleForQuestID(q)) or fallback or (q and ("#" .. q)) or "?"
+end
+
 function RX:QUEST_DETAIL()
     if not self.db.autoAccept or autoOff() then return end
     local q = GetQuestID and GetQuestID()
-    if q and q > 0 and self:GuideWantsQuest(q) then
+    local ok, why = self:AcceptDecision(q)
+    self:LogDecision(RX.T("aceitar", "accept"), q, qtitle(q, GetTitleText and GetTitleText()), ok, why)
+    if ok then
         self.autoAccepting = q
         if QuestGetAutoAccept and QuestGetAutoAccept() then
             if AcknowledgeAutoAcceptQuest then AcknowledgeAutoAcceptQuest() end
@@ -740,13 +798,15 @@ end
 function RX:QUEST_PROGRESS()
     if not self.db.autoTurnIn or autoOff() then return end
     local q = GetQuestID and GetQuestID()
-    if q and self:GuideWantsQuest(q, "T") and IsQuestCompletable() then CompleteQuest() end
+    if q and self:TurnInDecision(q) and IsQuestCompletable() then CompleteQuest() end
 end
 
 function RX:QUEST_COMPLETE()
     if not self.db.autoTurnIn or autoOff() then return end
     local q = GetQuestID and GetQuestID()
-    if q and self:GuideWantsQuest(q, "T") then
+    local okT, whyT = self:TurnInDecision(q)
+    self:LogDecision(RX.T("entregar", "turn in"), q, qtitle(q, GetTitleText and GetTitleText()), okT, whyT)
+    if q and okT then
         local choices = GetNumQuestChoices and GetNumQuestChoices() or 0
         if choices <= 1 then
             GetQuestReward(choices)
@@ -776,8 +836,12 @@ local function pick(self, options, kind)
     local rank = self:StepRank()
     local best, bestR
     for _, o in ipairs(options) do
-        if o.q and self:GuideWantsQuest(o.q, kind) then
-            local r = rank[o.q .. kind] or 1000
+        local ok, why
+        if kind == "A" then ok, why = self:AcceptDecision(o.q) else ok, why = self:TurnInDecision(o.q) end
+        if o.byName then why = (why or "") .. RX.T(" (achada pelo nome: o jogo não deu o ID)", " (matched by name: the game gave no ID)") end
+        self:LogDecision(kind == "A" and RX.T("NPC: aceitar", "NPC: accept") or RX.T("NPC: entregar", "NPC: turn in"), o.q, qtitle(o.q, o.title), ok, why)
+        if ok then
+            local r = rank[o.q .. kind] or rank[o.q .. "C"] or rank[o.q .. "T"] or 1000
             if not bestR or r < bestR then best, bestR = o, r end
         end
     end
@@ -790,14 +854,14 @@ function RX:GOSSIP_SHOW()
     if self.db.autoTurnIn then
         local opts = {}
         for _, info in ipairs(C_GossipInfo.GetActiveQuests() or {}) do
-            if info.isComplete then opts[#opts + 1] = { q = info.questID } end
+            if info.isComplete then opts[#opts + 1] = { q = info.questID, title = info.title } end
         end
         local o = pick(self, opts, "T")
         if o then C_GossipInfo.SelectActiveQuest(o.q); return end
     end
     if self.db.autoAccept then
         local opts = {}
-        for _, info in ipairs(C_GossipInfo.GetAvailableQuests() or {}) do opts[#opts + 1] = { q = info.questID } end
+        for _, info in ipairs(C_GossipInfo.GetAvailableQuests() or {}) do opts[#opts + 1] = { q = info.questID, title = info.title } end
         local o = pick(self, opts, "A")
         if o then self.autoAccepting = o.q; C_GossipInfo.SelectAvailableQuest(o.q); return end
     end
@@ -821,8 +885,10 @@ function RX:QUEST_GREETING()
         local opts = {}
         for i = 1, (GetNumActiveQuests() or 0) do
             local title, complete = GetActiveTitle(i)
-            local q = (GetActiveQuestID and GetActiveQuestID(i)) or byTitle["T" .. (title or "")]
-            if complete and q then opts[#opts + 1] = { q = q, i = i } end
+            local q = GetActiveQuestID and GetActiveQuestID(i)
+            local byName = false
+            if not q or q <= 0 then q = byTitle["T" .. (title or "")]; byName = q ~= nil end
+            if complete and q then opts[#opts + 1] = { q = q, i = i, title = title, byName = byName } end
         end
         local o = pick(self, opts, "T")
         if o then SelectActiveQuest(o.i); return end
@@ -832,8 +898,10 @@ function RX:QUEST_GREETING()
         for i = 1, (GetNumAvailableQuests() or 0) do
             local q
             if GetAvailableQuestInfo then q = select(5, GetAvailableQuestInfo(i)) end
-            q = q or byTitle["A" .. (GetAvailableTitle(i) or "")]
-            if q then opts[#opts + 1] = { q = q, i = i } end
+            local title = GetAvailableTitle(i)
+            local byName = false
+            if not q or q <= 0 then q = byTitle["A" .. (title or "")]; byName = q ~= nil end
+            if q then opts[#opts + 1] = { q = q, i = i, title = title, byName = byName } end
         end
         local o = pick(self, opts, "A")
         if o then self.autoAccepting = o.q; SelectAvailableQuest(o.i); return end
@@ -875,7 +943,8 @@ function RX:OnQuestAccepted(q)
     local byUs = self.autoAccepting == q
     self.autoAccepting = nil
     local g = self:CurrentGuide()
-    local inGuide = self:GuideWantsQuest(q, "A") or self:GuideWantsQuest(q)
+    local inGuide = false
+    if g then for _, s in ipairs(g.steps) do if s.q == q then inGuide = true break end end end
     local title = (C_QuestLog and C_QuestLog.GetTitleForQuestID and C_QuestLog.GetTitleForQuestID(q)) or self.Q:Title(q) or ("#" .. q)
     cs.acceptLog = cs.acceptLog or {}
     table.insert(cs.acceptLog, { when = date and date("%Y-%m-%d %H:%M:%S") or "?", q = q, title = title, guide = g and g.id, inGuide = inGuide and true or false, byRotaXP = byUs })
@@ -934,6 +1003,7 @@ SlashCmdList.ROTAXP = function(msg)
     elseif msg == "pular" or msg == "skip" then UI:SkipCurrent()
     elseif msg == "itens" or msg == "items" then RX.QuestItems:Toggle()
     elseif msg == "compras" or msg == "comprar" or msg == "shop" then RX.Market:ToggleWindow()
+    elseif msg == "aceite" or msg == "aceitar" or msg == "accept" then RX:ShowDecisions()
     elseif msg == "manter" or msg == "keep" then RX.Abandon:Keep()
     elseif msg == "leilao" or msg == "leilão" or msg == "ah" then RX.Market:Offer(true)
     elseif msg:match("^bloqueio") or msg:match("^blocked") then RX.BlockLog:Command(msg:match("^%S+%s+(.*)$"))
