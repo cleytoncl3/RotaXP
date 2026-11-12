@@ -139,6 +139,7 @@ function ML:SetGameWaypoint(step)
     if not ok or not point then return end
     pcall(C_Map.SetUserWaypoint, point)
     -- quest no log já está super-rastreada; para NPCs sem quest no log usamos o waypoint
+    if InCombatLockdown and InCombatLockdown() then return end
     if C_SuperTrack and C_SuperTrack.SetSuperTrackedUserWaypoint and not (step.q and RX.Q:InLog(step.q)) then
         pcall(C_SuperTrack.SetSuperTrackedUserWaypoint, true)
     end

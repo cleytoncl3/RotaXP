@@ -679,6 +679,8 @@ end
 function UI:SelectInGame(s)
     local q = s and s.q
     if not q or not RX.Q:InLog(q) then return end
+    -- em combate o rastreador/mapa do jogo ficam protegidos: não mexe neles (evita "ação bloqueada")
+    if InCombatLockdown and InCombatLockdown() then self.selectedQuest = q; return end
     if C_SuperTrack and C_SuperTrack.SetSuperTrackedQuestID then
         pcall(C_SuperTrack.SetSuperTrackedQuestID, q)          -- destaca no mapa e no rastreador
     end

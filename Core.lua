@@ -5,7 +5,7 @@ _G.RotaXP = RX
 RX.guides = {}
 RX.guideOrder = {}
 RX.questMeta = {}
-RX.version = "0.15.0"
+RX.version = "0.15.1"
 
 local defaults = {
     style = "speedrun",
@@ -796,6 +796,7 @@ SlashCmdList.ROTAXP = function(msg)
     elseif msg == "aqui" or msg == "here" then RX.Advisor:UseHere()
     elseif msg == "agora" or msg == "now" then UI:ShowPanel("now")
     elseif msg == "pular" or msg == "skip" then UI:SkipCurrent()
+    elseif msg:match("^bloqueio") or msg:match("^blocked") then RX.BlockLog:Command(msg:match("^%S+%s+(.*)$"))
     elseif msg == "atualizar" or msg == "update" then
         RX:Print(RX.T("Versão instalada: v" .. RX.version .. ". Para atualizar: feche o jogo (ou fique no menu de personagens) e dê dois cliques em |cffffff00Atualizar-RotaXP.bat|r, na pasta Interface\\AddOns\\RotaXP. Depois entre no jogo (ou /reload). Página: github.com/cleytoncl3/RotaXP",
             "Installed version: v" .. RX.version .. ". To update: close the game (or stay at character select) and double-click |cffffff00Atualizar-RotaXP.bat|r in Interface\\AddOns\\RotaXP. Then log in (or /reload). Page: github.com/cleytoncl3/RotaXP"))

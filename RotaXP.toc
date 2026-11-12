@@ -4,7 +4,7 @@
 ## Author: cleytoncl3 (feito com Claude)
 ## X-Website: https://github.com/cleytoncl3/RotaXP
 ## X-License: GPL-3.0
-## Version: 0.15.0
+## Version: 0.15.1
 ## SavedVariables: RotaXPDB
 ## SavedVariablesPerCharacter: RotaXPCharDB
 ## OptionalDeps: TomTom, Questie, GearQuestForever, TalentsForeverBook
@@ -37,6 +37,7 @@ Talents.lua
 UI.lua
 Menu.lua
 Party.lua
+BlockLog.lua
 Data\Zones.lua
 Data\Routes.lua
 Data\Enders.lua
