@@ -232,6 +232,17 @@ function UI:StepText(s)
         local pl = RX.Party:LinesFor(s)
         if pl then for _, l in ipairs(pl) do add("|cffffffff", l) end end
     end
+    -- quest que precisa USAR um item (num mob, objeto ou local): manda clicar no botão da janela de itens
+    if s.q and (t == "C" or (t == "T" and not RX.Q:IsReady(s.q))) and RX.QuestItems and RX.db.questItems ~= false then
+        local iid = RX.QuestItems:ItemFor(s.q)
+        if iid then
+            local icon = (C_Item and C_Item.GetItemIconByID and C_Item.GetItemIconByID(iid)) or (GetItemIcon and GetItemIcon(iid)) or 134400
+            local nm = (C_Item and C_Item.GetItemNameByID and C_Item.GetItemNameByID(iid)) or (GetItemInfo and (GetItemInfo(iid))) or T("item da quest", "quest item")
+            local key = GetBindingKey and GetBindingKey("CLICK RotaXPQuestItem1:LeftButton")
+            add("|cffffb040", "|T" .. icon .. ":16|t " .. string.format(T("Use o item %s: clique no ícone dele na janela Itens da quest%s", "Use the item %s: click its icon in the Quest items window%s"), nm,
+                key and string.format(T(" (ou tecla %s)", " (or key %s)"), key) or ""))
+        end
+    end
     if t == "A" then
         local pv = UI:QuestPreview(s)
         if pv then add("|cffffe0a0", pv) end
@@ -1356,6 +1367,7 @@ function UI:ShowPanel(which, sub)
         check("autoTurnIn", T("Auto entregar quests do guia", "Auto turn in guide quests"), T("Quando há só uma recompensa. Segure SHIFT para desativar.", "When there is only one reward. Hold SHIFT to disable."))
         check("smartOrder", T("Rota inteligente (pegar tudo no mesmo lugar)", "Smart route (grab everything at the same spot)"), T("Reorganiza os próximos passos pelo caminho mais curto e puxa as quests da mesma cidade/base.", "Reorders the next steps by the shortest path and pulls in quests at the same town/hub."))
         check("suggestZone", T("Sugerir o guia da zona ao entrar nela", "Suggest the zone guide when entering it"), nil)
+        check("questItems", T("Janela de itens da quest (clicar para usar)", "Quest item window (click to use)"), T("Botões para usar os itens que as quests dão. Atalho: Opções > Atalhos > AddOns > RotaXP.", "Buttons to use quest items. Hotkey: Options > Keybindings > AddOns > RotaXP."), function() RX.QuestItems:Refresh() end)
 
         -- 3) Navegação
         section(T("Navegação", "Navigation"))

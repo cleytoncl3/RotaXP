@@ -13,6 +13,8 @@ Addon de leveling no estilo Zygor / RestedXP para o **WoW: Forever** (Horda, ní
 - **Modo Entregas**, **Perto de mim**, **Agora** (dicas para onde você está).
 - **Grind & Masmorras**: farm solo e duo, masmorras com XP/hora, **farm de ouro + XP** com XP/h e ouro/h estimados, equipamento do GearQuest e talentos do Talents Forever.
 - **Grupo (share)**: quem está no grupo com o RotaXP troca o guia, o progresso de cada quest (ex.: `Amigo: Basilisco 2/10`) e locais marcados. Isso usa o canal de addon do próprio jogo, sem internet. Quem só usa o Questie também aparece.
+- **Itens da quest**: janelinha com botões para usar os itens que as quests pedem (num mob, objeto ou local). O item da quest atual fica em destaque e dá para pôr uma tecla de atalho (Opções > Atalhos > AddOns > RotaXP). A lista de quests também avisa quando precisa usar o item.
+- **Log de ações bloqueadas**: `/rota bloqueios`.
 - **Cronômetro de XP** para medir XP/hora.
 
 ## Instalação
@@ -32,7 +34,7 @@ No jogo, `/rota atualizar` mostra a versão instalada. Se alguém do seu grupo t
 
 ## Comandos
 
-`/rota` abre/fecha · `/rota ajuda` lista os comandos · `/rota opcoes` · `/rota entregas` · `/rota perto` · `/rota farm` · `/rota timer` · `/rota atualizar`
+`/rota` abre/fecha · `/rota ajuda` lista os comandos · `/rota opcoes` · `/rota entregas` · `/rota perto` · `/rota farm` · `/rota timer` · `/rota itens` · `/rota bloqueios` · `/rota atualizar`
 
 ## Addons opcionais
 
