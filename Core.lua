@@ -5,7 +5,7 @@ _G.RotaXP = RX
 RX.guides = {}
 RX.guideOrder = {}
 RX.questMeta = {}
-RX.version = "0.18.1"
+RX.version = "0.19.0"
 
 local defaults = {
     style = "speedrun",
@@ -430,15 +430,15 @@ function RX:VisibleSteps(maxCount)
     end
     -- passos "Fazer": local real do objetivo que falta (lido da quest no jogo)
     if self.QuestLoc then pcall(self.QuestLoc.ResolveList, self.QuestLoc, list, 25) end
+    -- quests do log que não estão no guia continuam na lista (no fim; as que estão perto sobem na rota)
+    if self.Nearby and self.Nearby.LogExtras then
+        local ok, extra = pcall(self.Nearby.LogExtras, self.Nearby, list)
+        if ok and extra then for _, s in ipairs(extra) do list[#list + 1] = s end end
+    end
     -- rota inteligente: pega/entrega o que está no mesmo lugar e segue pelo caminho mais curto
     if self.db.smartOrder ~= false and self.Optimize then
         local ok, res = pcall(self.Optimize.Order, self.Optimize, list)
         if ok and res then list = res end
-    end
-    -- quests do log que não estão no guia continuam na lista (no fim, da mais perto para a mais longe)
-    if self.Nearby and self.Nearby.LogExtras then
-        local ok, extra = pcall(self.Nearby.LogExtras, self.Nearby, list)
-        if ok and extra then for _, s in ipairs(extra) do list[#list + 1] = s end end
     end
     self.visCache = { guide = g, serial = self.updateSerial, list = list }
     local out = {}
@@ -926,6 +926,7 @@ SlashCmdList.ROTAXP = function(msg)
     elseif msg == "agora" or msg == "now" then UI:ShowPanel("now")
     elseif msg == "pular" or msg == "skip" then UI:SkipCurrent()
     elseif msg == "itens" or msg == "items" then RX.QuestItems:Toggle()
+    elseif msg == "leilao" or msg == "leilão" or msg == "ah" then RX.Market:Offer()
     elseif msg:match("^bloqueio") or msg:match("^blocked") then RX.BlockLog:Command(msg:match("^%S+%s+(.*)$"))
     elseif msg == "atualizar" or msg == "update" then
         RX:Print(RX.T("Versão instalada: v" .. RX.version .. ". Para atualizar: feche o jogo (ou fique no menu de personagens) e dê dois cliques em |cffffff00Atualizar-RotaXP.bat|r, na pasta Interface\\AddOns\\RotaXP. Depois entre no jogo (ou /reload). Página: github.com/cleytoncl3/RotaXP",

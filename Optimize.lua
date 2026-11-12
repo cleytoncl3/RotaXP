@@ -10,6 +10,7 @@ local MAX_EXTRA = 15   -- quantos passos de mais adiante podem ser puxados por e
 local KEEP = 60        -- histerese: mantém o 1º passo se a troca ganha menos que isso (evita a lista "pular")
 local RANK = { A = 1, C = 2, T = 3 }
 local READY_NEAR = 250 -- jardas: entrega pronta a esta distância sobe para o topo
+local WORK_NEAR = 450  -- jardas: objetivo de quest do log a esta distância vem antes de entregar longe
 
 local function wpos(s)
     if s._wx == nil and s.m and s.x then
@@ -117,20 +118,28 @@ function OP:Order(list)
     for _, s in ipairs(ordered) do table.insert(out, s) end
     for _, s in ipairs(rest) do if not pulled[s] then table.insert(out, s) end end
 
-    -- entregas PRONTAS perto de você vão sempre para o topo (da mais perto para a mais longe):
-    -- se dá para entregar aqui, entrega antes de sair andando
+    -- 1) entregas PRONTAS perto de você (dá para entregar aqui) e 2) objetivos de quests do seu log que estão
+    -- perto (matar/coletar aqui do lado) vêm antes de qualquer coisa longe: termina o que está ao seu redor antes de
+    -- voltar para a cidade entregar. Cada grupo da mais perto para a mais longe.
     local Q = RX.Q
-    local near, others = {}, {}
+    local near, work, others = {}, {}, {}
     for _, s in ipairs(out) do
-        if s.t == "T" and s.q and Q:InLog(s.q) and Q:IsReady(s.q) and dist(s, me.cont, me.wx, me.wy) <= READY_NEAR then
+        local inLog = s.q and Q:InLog(s.q)
+        if s.t == "T" and inLog and Q:IsReady(s.q) and dist(s, me.cont, me.wx, me.wy) <= READY_NEAR then
             s._rd = dist(s, me.cont, me.wx, me.wy); near[#near + 1] = s
+        elseif s.t == "C" and inLog and not Q:IsReady(s.q) and dist(s, me.cont, me.wx, me.wy) <= WORK_NEAR then
+            s._rd = dist(s, me.cont, me.wx, me.wy); work[#work + 1] = s
         else
             others[#others + 1] = s
         end
     end
-    if #near == 0 then return out end
-    table.sort(near, function(a, b) return a._rd < b._rd end)
-    for _, s in ipairs(others) do near[#near + 1] = s end
-    self.lastFirst = near[1]
-    return near
+    if #near == 0 and #work == 0 then return out end
+    table.sort(near, function(x, y) return x._rd < y._rd end)
+    table.sort(work, function(x, y) return x._rd < y._rd end)
+    local res = {}
+    for _, s in ipairs(near) do res[#res + 1] = s end
+    for _, s in ipairs(work) do res[#res + 1] = s end
+    for _, s in ipairs(others) do res[#res + 1] = s end
+    self.lastFirst = res[1]
+    return res
 end

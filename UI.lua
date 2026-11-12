@@ -232,6 +232,11 @@ function UI:StepText(s)
         local pl = RX.Party:LinesFor(s)
         if pl then for _, l in ipairs(pl) do add("|cffffffff", l) end end
     end
+    -- itens à venda no leilão (preço do Auctionator): comprar em vez de farmar
+    if s.q and RX.Market and (t == "C" or (t == "A" and not RX.Q:InLog(s.q))) then
+        local mh = RX.Market:Hint(s.q)
+        if mh then add("|cffffd100", mh) end
+    end
     -- quest de profissão: o que fabricar e os ingredientes
     if s.q and RX.Craft and RX.Craft:Info(s.q) and (t == "A" or t == "C" or (t == "T" and not RX.Q:IsReady(s.q))) then
         local h1, h2, h3 = RX.Craft:Hint(s.q)
