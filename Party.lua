@@ -139,14 +139,16 @@ end
 
 -- NUNCA reatribuir a global StaticPopupDialogs (contamina o código da Blizzard: ESC dá "ação bloqueada");
 -- só adicionamos as nossas chaves na tabela que já existe.
-StaticPopupDialogs["ROTAXP_PARTY_GUIDE"] = {
-    text = "%s", button1 = YES or "Sim", button2 = NO or "Não", timeout = 60, whileDead = true, hideOnEscape = true,
-    OnAccept = function(_, data) if data and RX.guides[data] then RX:SetGuide(data, true) end end,
-}
-StaticPopupDialogs["ROTAXP_PARTY_SPOT"] = {
-    text = "%s", button1 = YES or "Sim", button2 = NO or "Não", timeout = 60, whileDead = true, hideOnEscape = true,
-    OnAccept = function(_, data) if data and RX.Arrow then RX.Arrow:PointTo(data, true); RX:Update(true) end end,
-}
+if StaticPopupDialogs then
+    StaticPopupDialogs["ROTAXP_PARTY_GUIDE"] = {
+        text = "%s", button1 = YES or "Sim", button2 = NO or "Não", timeout = 60, whileDead = true, hideOnEscape = true,
+        OnAccept = function(_, data) if data and RX.guides[data] then RX:SetGuide(data, true) end end,
+    }
+    StaticPopupDialogs["ROTAXP_PARTY_SPOT"] = {
+        text = "%s", button1 = YES or "Sim", button2 = NO or "Não", timeout = 60, whileDead = true, hideOnEscape = true,
+        OnAccept = function(_, data) if data and RX.Arrow then RX.Arrow:PointTo(data, true); RX:Update(true) end end,
+    }
+end
 
 function P:OnMessage(prefix, msg, _, sender)
     if prefix ~= PREFIX or not msg then return end
