@@ -50,6 +50,9 @@ function BL:Record(event, addon, func)
         table.insert(db.blockLog, entry)
         while #db.blockLog > MAX_LOG do table.remove(db.blockLog, 1) end
     end
+    -- no chat só 1 aviso a cada 60 s (o log guarda todos)
+    if self.lastPrint and t - self.lastPrint < 60 then return end
+    self.lastPrint = t
     RX:Print(string.format(T("|cffff6060Ação bloqueada:|r %s%s. Última ação do RotaXP: %s. Veja |cff00ff00/rota bloqueios|r.",
         "|cffff6060Blocked action:|r %s%s. Last RotaXP action: %s. See |cff00ff00/rota blocked|r."),
         entry.func, entry.combat and T(" (em combate)", " (in combat)") or "", entry.recent ~= "" and entry.recent or T("nenhuma", "none")))

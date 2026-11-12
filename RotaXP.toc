@@ -4,7 +4,7 @@
 ## Author: cleytoncl3 (feito com Claude)
 ## X-Website: https://github.com/cleytoncl3/RotaXP
 ## X-License: GPL-3.0
-## Version: 0.16.0
+## Version: 0.16.1
 ## SavedVariables: RotaXPDB
 ## SavedVariablesPerCharacter: RotaXPCharDB
 ## OptionalDeps: TomTom, Questie, GearQuestForever, TalentsForeverBook

@@ -5,7 +5,7 @@ _G.RotaXP = RX
 RX.guides = {}
 RX.guideOrder = {}
 RX.questMeta = {}
-RX.version = "0.16.0"
+RX.version = "0.16.1"
 
 local defaults = {
     style = "speedrun",
