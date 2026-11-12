@@ -5,7 +5,7 @@ _G.RotaXP = RX
 RX.guides = {}
 RX.guideOrder = {}
 RX.questMeta = {}
-RX.version = "0.18.0"
+RX.version = "0.18.1"
 
 local defaults = {
     style = "speedrun",
@@ -316,8 +316,8 @@ end
 function RX:IsStepHidden(s, blocked)
     if s.q and self:CharState().skipped[s.q] then return true end
     local why = self:StepFilteredByOptions(s)
-    -- quest lenta/elite que você JÁ pegou continua aparecendo; quests de coleta somem mesmo assim
-    if why and not (s.q and self.Q:InLog(s.q) and (why == "lenta" or why == "elite" or why == "masmorra")) then return true end
+    -- quest que você JÁ pegou sempre aparece (Fazer/Entregar), qualquer que seja o estilo: você escolheu fazê-la
+    if why and not (s.q and self.Q:InLog(s.q) and s.t ~= "A") then return true end
     if s.q and blocked[s.q] and not self.Q:IsCompleted(s.q) and not self.Q:InLog(s.q) then return true end
     return false
 end
