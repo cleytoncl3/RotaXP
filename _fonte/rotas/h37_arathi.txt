@@ -1,0 +1,41 @@
+#guide h37_arathi|37-40 Arathi Highlands (Hammerfall)|36|41|h38_riverglades
+#desc Hammerfall: raptors, ogros Boulderfist e os sigilos. Pegue "Finding Tan'jani" no final para ir para Riverglades.
+@Arathi
+N Voe para Hammerfall (ou vá a pé de Tarren Mill).
+R Hammerfall
+A Hammerfall
+T Hammerfall
+A Raising Spirits#672
+A Call to Arms#678
+A Ward Restocking
+A Silky Sutures [drop]
+A The Real Threat
+A Foul Magics#673
+C Raising Spirits#672 [drop]
+T Raising Spirits#672 [drop]
+A Raising Spirits#674
+T Raising Spirits#674
+A Raising Spirits#675
+T Raising Spirits#675
+A Guile of the Raptor#701 [drop]
+C Guile of the Raptor#701 [drop]
+T Guile of the Raptor#701 [drop]
+A Guile of the Raptor#702
+T Guile of the Raptor#702
+A Guile of the Raptor#847
+T Guile of the Raptor#847
+C Ward Restocking
+T Ward Restocking
+C Call to Arms#678
+T Call to Arms#678
+A Call to Arms#679
+C Call to Arms#679
+T Call to Arms#679
+C Silky Sutures [drop]
+T Silky Sutures [drop]
+C The Real Threat
+T The Real Threat
+C Foul Magics#673
+T Foul Magics#673
+A Finding Tan'jani -- Ponte para Riverglades (zona nova). Recomendado!
+N Próximo: Riverglades (Rog'mar), seguindo a quest Finding Tan'jani.

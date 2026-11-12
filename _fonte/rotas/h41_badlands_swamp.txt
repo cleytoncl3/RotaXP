@@ -1,0 +1,65 @@
+#guide h41_badlands_swamp|41-44 Badlands + Swamp of Sorrows|40|45|h45_tanaris
+#desc Alternativa no Eastern Kingdoms: Kargath (Badlands), Lotwil e Rigglefuzz, e depois Stonard (Swamp of Sorrows). Uldaman fica em Badlands.
+@Badlands
+F Kargath
+R Kargath
+A Badlands Reagent Run
+A Coyote Thieves [drop]
+A Report to Helgrum [long]
+A Broken Alliances
+A Uldaman Reagent Run [dungeon]
+N Fale com Rigglefuzz e Lotwil (centro e oeste de Badlands).
+A Power Stones [drop]
+A Barbecued Buzzard Wings
+A Study of the Elements: Rock#710
+A Coolant Heads Prevail
+A Solution to Doom
+A Indurium [drop]
+C Badlands Reagent Run
+C Barbecued Buzzard Wings
+C Coyote Thieves [drop]
+C Study of the Elements: Rock#710
+C Power Stones [drop]
+T Barbecued Buzzard Wings
+T Power Stones [drop]
+T Study of the Elements: Rock#710
+A Study of the Elements: Rock#711
+C Study of the Elements: Rock#711
+T Study of the Elements: Rock#711
+A Study of the Elements: Rock#712
+C Study of the Elements: Rock#712
+T Study of the Elements: Rock#712
+C Solution to Doom
+T Solution to Doom
+C Broken Alliances
+T Badlands Reagent Run
+T Coyote Thieves [drop]
+T Broken Alliances
+@Swamp
+F Stonard
+R Stonard
+A Lack of Surplus#698
+A Fresh Meat [drop]
+A Pool of Tears
+A The Atal'ai Exile
+A Noboru the Cudgel
+C Lack of Surplus#698 [drop]
+C Fresh Meat [drop]
+T Lack of Surplus#698 [drop]
+T Fresh Meat [drop]
+A Lack of Surplus#699 [drop]
+C Lack of Surplus#699 [drop]
+T Lack of Surplus#699 [drop]
+A Threat From the Sea#1426
+C Threat From the Sea#1426
+T Threat From the Sea#1426
+A Continued Threat
+C Continued Threat
+T Continued Threat
+C Pool of Tears
+T Pool of Tears
+C The Atal'ai Exile
+T The Atal'ai Exile
+A Return to Fel'Zerul
+T Return to Fel'Zerul
+N Próximo: Tanaris (Gadgetzan).

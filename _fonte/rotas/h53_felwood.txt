@@ -1,0 +1,35 @@
+#guide h53_felwood|53-55 Felwood (Bloodvenom Post)|52|56|h55_winterspring
+#desc Jaedenar, cachorros-sabre corrompidos e os Timbermaw. Use as Corrupted Songflowers para buff de stats.
+@Felwood
+F Bloodvenom Post
+R Bloodvenom Post
+A Well of Corruption
+A Corrupted Sabers [long]
+A A Husband's Last Battle
+A Wild Guardians
+A Forces of Jaedenar
+A Timbermaw Ally
+A Cleansing Felwood [drop]
+C Forces of Jaedenar
+T Forces of Jaedenar
+A Collection of the Corrupt Water
+C Collection of the Corrupt Water
+T Collection of the Corrupt Water
+A Seeking Spiritual Aid [long]
+C Well of Corruption
+T Well of Corruption
+C Timbermaw Ally
+T Timbermaw Ally
+C A Husband's Last Battle
+C Cleansing Felwood [drop]
+T A Husband's Last Battle
+T Cleansing Felwood [drop]
+C Corrupted Sabers [long]
+T Corrupted Sabers [long]
+A Speak to Nafien
+T Speak to Nafien
+A Deadwood of the North
+C Deadwood of the North
+T Deadwood of the North
+A Speak to Salfa -- Atravesse Timbermaw Hold para chegar em Winterspring.
+N Próximo: Winterspring. Atravesse a caverna de Timbermaw Hold (norte de Felwood).

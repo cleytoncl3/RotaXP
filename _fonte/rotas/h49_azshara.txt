@@ -1,0 +1,62 @@
+#guide h49_azshara|49-51 Azshara (Valormok) + Searing Gorge|48|52|h51_ungoro
+#desc Valormok ganhou várias quests novas no Forever (Kurll, Izvi, Jediga). Depois uma passada rápida em Searing Gorge.
+@Azshara
+#hub 22.3,51.5
+F Valormok
+R Valormok
+A Spiritual Unrest
+A A Land Filled with Hatred
+A Home on the Range
+A Gettin' Buzzed
+A Long Walks on the Beach
+A Stealing Knowledge [long]
+A Betrayed#3505
+C Spiritual Unrest
+C A Land Filled with Hatred
+T Spiritual Unrest
+T A Land Filled with Hatred
+C Home on the Range
+C Gettin' Buzzed
+T Home on the Range
+T Gettin' Buzzed
+C Betrayed#3505
+C Long Walks on the Beach
+T Long Walks on the Beach
+T Betrayed#3505
+C Stealing Knowledge [long]
+T Stealing Knowledge [long]
+A Kim'jael Indeed!
+C Kim'jael Indeed!
+T Kim'jael Indeed!
+@SearingGorge
+N Searing Gorge: voe para Kargath (Badlands) e entre pelo portão a oeste. A base neutra é Thorium Point.
+A Caught!
+C Caught!
+T Caught!
+A JOB OPPORTUNITY: Culling the Competition
+A STOLEN: Smithing Tuyere and Lookout's Spyglass
+A Curse These Fat Fingers
+A Fiery Menace!
+A Incendosaurs? Whateverosaur is More Like It
+A What the Flux? [drop]
+A Divine Retribution
+T Divine Retribution
+A The Flawless Flame
+A Forging the Shaft [drop]
+C JOB OPPORTUNITY: Culling the Competition
+C STOLEN: Smithing Tuyere and Lookout's Spyglass
+C Curse These Fat Fingers
+C Fiery Menace!
+C Incendosaurs? Whateverosaur is More Like It
+C What the Flux? [drop]
+C The Flawless Flame
+C Forging the Shaft [drop]
+T JOB OPPORTUNITY: Culling the Competition
+T STOLEN: Smithing Tuyere and Lookout's Spyglass
+T Curse These Fat Fingers
+T Fiery Menace!
+T Incendosaurs? Whateverosaur is More Like It
+T What the Flux? [drop]
+T The Flawless Flame
+T Forging the Shaft [drop]
+N Próximo: Un'Goro Crater. Voe para Gadgetzan e desça a rampa oeste de Tanaris.

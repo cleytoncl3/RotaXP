@@ -1,0 +1,72 @@
+#guide h51_ungoro|51-54 Un'Goro Crater|50|55|h53_felwood
+#desc Uma das zonas de mais XP do jogo. Marshal's Refuge, pilões de cristal, A-Me 01 e Lar'korwi. Pegue os cristais coloridos enquanto mata.
+@UnGoro
+N Entre em Un'Goro pela rampa no oeste de Tanaris. Pegue o voo de Marshal's Refuge (norte).
+R Marshal's Refuge
+A Roll the Bones [drop]
+A Shizzle's Flyer [drop]
+A Alien Ecology
+A Expedition Salvation
+A Beware of Pterrordax
+A Larion and Muigin
+A Chasing A-Me 01#4243
+A Ravasaur Provisions
+A Crystals of Power -- J.D. Collie fica na caverna logo acima do Refuge.
+A The Northern Pylon
+A The Eastern Pylon
+A The Western Pylon
+A Lost!
+C Larion and Muigin
+C Beware of Pterrordax
+C Roll the Bones [drop]
+C Shizzle's Flyer [drop]
+C Ravasaur Provisions
+C The Northern Pylon
+T Chasing A-Me 01#4243
+A Chasing A-Me 01#4244
+C Chasing A-Me 01#4244
+T Chasing A-Me 01#4244
+A Chasing A-Me 01#4245 [long] -- Escolta do robô até Marshal's Refuge.
+C Chasing A-Me 01#4245 [long]
+A The Fare of Lar'korwi
+A The Apes of Un'Goro [drop]
+A The Scent of Lar'korwi
+C The Eastern Pylon
+C The Fare of Lar'korwi
+T The Fare of Lar'korwi
+C The Scent of Lar'korwi
+T The Scent of Lar'korwi
+A The Bait for Lar'korwi
+C The Bait for Lar'korwi
+T The Bait for Lar'korwi
+C The Apes of Un'Goro [drop]
+T The Apes of Un'Goro [drop]
+A The Mighty U'cha [elite]
+C The Mighty U'cha [elite]
+T The Mighty U'cha [elite]
+C Lost!
+T Lost!
+A A Little Help From My Friends
+C A Little Help From My Friends
+T A Little Help From My Friends
+C The Western Pylon
+C Expedition Salvation
+C Alien Ecology
+C Crystals of Power
+A Finding the Source
+C Finding the Source
+T Finding the Source
+T Larion and Muigin
+T Beware of Pterrordax
+T Roll the Bones [drop]
+T Shizzle's Flyer [drop]
+T Ravasaur Provisions
+T Expedition Salvation
+T Alien Ecology
+T The Northern Pylon
+T The Eastern Pylon
+T The Western Pylon
+T Crystals of Power
+T Chasing A-Me 01#4245 [long]
+A The New Springs -- Leva para Winterspring (próximos guias).
+N Próximo: Felwood (Bloodvenom Post). Voe de Marshal's Refuge para Bloodvenom Post.

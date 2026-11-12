@@ -1,0 +1,78 @@
+#guide h37_stv|37-39 Stranglethorn Vale (Grom'gol)|36|40|h38_riverglades
+#desc Zepelim Orgrimmar -> Grom'gol. Raptors, Nesingwary, trolls Bloodscalp e as quests novas da Drowned City. Termina mandando você para Riverglades (zona nova).
+@STV
+N Pegue o zepelim de Orgrimmar (torre a oeste da cidade) ou de Undercity para Grom'gol, em Stranglethorn.
+R Grom'gol -- Faça a estalagem de Grom'gol sua casa.
+N Fale com o mestre de voo de Grom'gol para liberar o voo.
+A The Defense of Grom'gol#568
+A Enemies in the Water
+A The Only Good Brinescale...
+A Hunt for Yenniku
+A Bloody Bone Necklaces [drop] -- 25 colares de drop: lento em grupo.
+A The Vile Reef
+A Mok'thardin's Enchantment#570
+A The Gurubashi Legends of Old
+A Locating the Lost City
+A Welcome to the Jungle -- (no acampamento de Nesingwary, ao norte)
+T Welcome to the Jungle
+A Tiger Mastery#185
+A Panther Mastery#190
+A Raptor Mastery#194
+C Tiger Mastery#185
+C Panther Mastery#190
+T Tiger Mastery#185
+T Panther Mastery#190
+A Tiger Mastery#186
+A Panther Mastery#191
+C Raptor Mastery#194
+C The Defense of Grom'gol#568
+C Tiger Mastery#186
+C Panther Mastery#191
+T Raptor Mastery#194
+T Tiger Mastery#186
+T Panther Mastery#191
+A Tiger Mastery#187
+A Raptor Mastery#195
+A Panther Mastery#192
+C Tiger Mastery#187
+C Panther Mastery#192
+C Raptor Mastery#195
+T Tiger Mastery#187
+T Panther Mastery#192
+T Raptor Mastery#195
+A Tiger Mastery#188 [elite] -- Sin'Dall: tigre forte, chame alguém se precisar.
+C Tiger Mastery#188 [elite]
+T Tiger Mastery#188 [elite]
+C Mok'thardin's Enchantment#570 -- Shadowmaw Panthers (furtivas) e a Tigresa (Pristine Tigress Fang).
+C Hunt for Yenniku
+C Bloody Bone Necklaces [drop]
+T The Defense of Grom'gol#568
+A The Defense of Grom'gol#569
+T Hunt for Yenniku
+A Headhunting
+T Mok'thardin's Enchantment#570
+A Mok'thardin's Enchantment#572
+T Bloody Bone Necklaces [drop]
+C The Vile Reef -- Vile Reef fica embaixo d'água a oeste de Grom'gol. Leve poção de respiração se tiver.
+G 24.5,22.6 Vile Reef: a entrada fica embaixo d'água a oeste de Grom'gol.
+C Locating the Lost City
+T Locating the Lost City
+A The Drowned City
+C Enemies in the Water
+C The Drowned City
+C The Only Good Brinescale...
+C The Gurubashi Legends of Old
+T The Vile Reef
+T Enemies in the Water
+T The Only Good Brinescale...
+T The Drowned City
+T The Gurubashi Legends of Old
+C The Defense of Grom'gol#569 -- Ogros de Mosh'Ogg (leste). Cuidado com elites dentro do forte.
+C Headhunting [drop] -- 20 Shrunken Heads dos trolls Skullsplitter.
+C Mok'thardin's Enchantment#572 [drop]
+T The Defense of Grom'gol#569
+T Headhunting [drop]
+T Mok'thardin's Enchantment#572 [drop]
+L 39
+A Report to Rog'mar -- Comandante Aggro'gosh: esta quest leva para a zona NOVA Riverglades.
+N Pronto! Siga para o próximo guia: Riverglades (Rog'mar). Se preferir rotas clássicas, escolha Desolace/Arathi em Guias.

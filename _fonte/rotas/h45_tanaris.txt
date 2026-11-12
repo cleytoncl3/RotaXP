@@ -1,0 +1,62 @@
+#guide h45_tanaris|45-48 Tanaris (Gadgetzan)|44|49|h47_hinterlands_stv
+#desc Wastewander, piratas de Lost Rigger Cove, escaravelhos e Dunemaul. Zona central do 45-48. Zul'Farrak fica aqui se tiver grupo.
+@Tanaris
+#hub 51.5,27.6
+F Gadgetzan
+R Gadgetzan
+A Wastewander Justice
+A Water Pouch Bounty#1707
+A Scarab Shells
+A Gadgetzan Water Survey
+A Gritty Business
+A Thistleshrub Valley [opt]
+A Tanaris Field Sampling [opt]
+A Troll Temper [dungeon] -- Trolls de Zul'Farrak.
+C Wastewander Justice
+C Water Pouch Bounty#1707
+C Gadgetzan Water Survey
+T Wastewander Justice
+T Water Pouch Bounty#1707
+T Gadgetzan Water Survey
+A More Wastewander Justice
+A Noxious Lair Investigation
+C More Wastewander Justice
+T More Wastewander Justice
+N Siga para Steamwheedle Port (leste de Gadgetzan).
+A Stoley's Shipment
+A WANTED: Andre Firebeard
+A Southsea Shakedown
+A Pirate Hats Ahoy! [drop]
+A Screecher Spirits
+A Dunemaul Dues
+C Southsea Shakedown
+C Pirate Hats Ahoy! [drop]
+C WANTED: Andre Firebeard
+C Stoley's Shipment
+T Southsea Shakedown
+T Pirate Hats Ahoy! [drop]
+T WANTED: Andre Firebeard
+T Stoley's Shipment
+A Deliver to MacKinley [long]
+C Dunemaul Dues
+T Dunemaul Dues
+C Screecher Spirits
+T Screecher Spirits
+A The Prophecy of Mosh'aru [dungeon]
+C Scarab Shells
+C Noxious Lair Investigation
+C Gritty Business
+T Scarab Shells
+T Noxious Lair Investigation
+T Gritty Business
+A The Scrimshank Redemption
+A Rise of the Silithid [long]
+A Insect Part Analysis#110
+C The Scrimshank Redemption
+C Insect Part Analysis#110
+T The Scrimshank Redemption
+T Insect Part Analysis#110
+C Thistleshrub Valley [opt]
+T Thistleshrub Valley [opt]
+A Tooga's Quest [long] -- Escolta lenta da tartaruga. Pule no modo speedrun.
+N Próximo: Hinterlands. Zepelim/voo até Orgrimmar -> Undercity -> Tarren Mill -> Revantusk Village.

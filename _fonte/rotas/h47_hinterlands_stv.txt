@@ -1,0 +1,94 @@
+#guide h47_hinterlands_stv|47-50 Hinterlands + Stranglethorn (sul)|46|50|h49_azshara
+#desc Revantusk Village (trolls Vilebranch, Wildhammer) e depois Booty Bay: piratas Bloodsail, Zanzil e o fim do Nesingwary.
+@Hinterlands
+#hub 79.0,79.5
+N Voe até Tarren Mill (Hillsbrad) e siga a estrada para Revantusk Village, na costa leste de Hinterlands.
+N Fale com o mestre de voo de Revantusk.
+R Revantusk Village
+A Vilebranch Hooligans
+A Gammerita, Mon!
+A Snapjaws, Mon!
+A Stalking the Stalkers
+A Hunt the Savages
+A Avenging the Fallen
+A Cannibalistic Cousins
+A Lard Lost His Lunch
+A Message to the Wildhammer
+A Witch Doctor Ti'ik
+C Lard Lost His Lunch
+T Lard Lost His Lunch
+C Gammerita, Mon!
+C Snapjaws, Mon!
+T Gammerita, Mon!
+T Snapjaws, Mon!
+C Stalking the Stalkers
+C Hunt the Savages
+C Message to the Wildhammer
+C Avenging the Fallen
+T Stalking the Stalkers
+T Hunt the Savages
+T Message to the Wildhammer
+T Avenging the Fallen
+A Another Message to the Wildhammer
+A Separation Anxiety
+C Vilebranch Hooligans
+C Cannibalistic Cousins
+C Witch Doctor Ti'ik
+C Another Message to the Wildhammer
+T Vilebranch Hooligans
+T Cannibalistic Cousins
+T Witch Doctor Ti'ik
+T Another Message to the Wildhammer
+A The Final Message to the Wildhammer
+A Dark Vessels
+A Kidnapped Elder Torntusk!
+T Kidnapped Elder Torntusk!
+A Recover the Key!
+C Recover the Key!
+T Recover the Key!
+A Return to Primal Torntusk
+T Return to Primal Torntusk
+C Separation Anxiety
+C Dark Vessels
+C The Final Message to the Wildhammer
+T Separation Anxiety
+T Dark Vessels
+T The Final Message to the Wildhammer
+A Wanted: Vile Priestess Hexx and Her Minions [elite]
+C Wanted: Vile Priestess Hexx and Her Minions [elite]
+T Wanted: Vile Priestess Hexx and Her Minions [elite]
+@STV
+N Vá para Booty Bay (zepelim para Grom'gol ou voo para Booty Bay).
+A Zanzil's Secret
+A Skullsplitter Tusks
+A Stranglethorn Fever [opt]
+A The Bloodsail Buccaneers#595
+C The Bloodsail Buccaneers#595
+T The Bloodsail Buccaneers#595
+A The Bloodsail Buccaneers#597
+T The Bloodsail Buccaneers#597
+A The Bloodsail Buccaneers#599
+T The Bloodsail Buccaneers#599
+A The Bloodsail Buccaneers#604
+C The Bloodsail Buccaneers#604
+C Zanzil's Secret
+C Skullsplitter Tusks
+T The Bloodsail Buccaneers#604
+T Zanzil's Secret
+T Skullsplitter Tusks
+A The Bloodsail Buccaneers#608 [elite]
+C The Bloodsail Buccaneers#608 [elite]
+T The Bloodsail Buccaneers#608 [elite]
+A Panther Mastery#193
+A Raptor Mastery#196
+C Panther Mastery#193
+C Raptor Mastery#196
+T Panther Mastery#193
+T Raptor Mastery#196
+A Raptor Mastery#197
+C Raptor Mastery#197
+T Raptor Mastery#197
+A Big Game Hunter [elite]
+C Big Game Hunter [elite]
+T Big Game Hunter [elite]
+N Próximo: Azshara (Valormok). Voe de Orgrimmar para Valormok.

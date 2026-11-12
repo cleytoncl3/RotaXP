@@ -1,0 +1,141 @@
+#guide h38_riverglades|38-44 Riverglades (Rog'mar)|38|45|h44_feralas
+#tag forever
+#desc Zona NOVA do WoW: Forever. Muitas quests juntas = XP rápido. Bases: Rog'mar (Horda), Powderfuse Port (goblins) e Bolder'ok (ogros). Algumas quests novas ainda não têm o NPC mapeado: procure o "!" amarelo na base.
+@Riverglades
+#hub 59.4,45.6
+T Report to Rog'mar
+T Finding Tan'jani
+N Fale com Grakna (mestre de wind rider) em Rog'mar para liberar o voo.
+R Rog'mar -- Estalagem: Innkeeper Toka.
+A A Message in Blood
+A Food for the Taking
+A Show Them How It's Done
+A Borrowed Blades
+A Fetch 'n' Fletch
+A Stick 'Em
+A Feathers for Fletching
+A Gnoll Infestation -- NPC ainda não mapeado: procure o "!" em Rog'mar (provável Neza Bloodsnout).
+A Bristle Hills Bandits [drop] -- 40 minérios de drop: péssimo em grupo.
+A Poison Tips
+A A Hunter's Quiver [drop]
+A Song of the Strider
+C A Message in Blood
+C Food for the Taking
+T A Message in Blood
+T Food for the Taking
+A A Gift From Our Enemies
+T A Gift From Our Enemies
+A A Serving of Strength
+C A Serving of Strength
+T A Serving of Strength
+C Borrowed Blades [drop]
+C Fetch 'n' Fletch
+C Show Them How It's Done
+C Stick 'Em
+C Feathers for Fletching
+C Poison Tips
+C A Hunter's Quiver [drop]
+C Song of the Strider
+T Borrowed Blades [drop]
+T Fetch 'n' Fletch
+T Show Them How It's Done
+T Stick 'Em
+T Feathers for Fletching
+T Poison Tips
+T A Hunter's Quiver [drop]
+T Song of the Strider
+A King of the Wild Plains
+C King of the Wild Plains
+T King of the Wild Plains
+C Gnoll Infestation
+C Bristle Hills Bandits [drop]
+A Snargl's Snout
+C Snargl's Snout
+T Gnoll Infestation
+T Bristle Hills Bandits [drop]
+T Snargl's Snout
+L 40
+N NÍVEL 40: volte à sua capital e faça a quest de montaria (Learning to Ride / Your First Riding ...). É o maior ganho de velocidade do leveling!
+// --- Powderfuse Port (goblins, leste) ---
+#hub 78.6,53.2
+A Frazzlespark's Crate
+A Not My Circus [drop]
+A A Taste of the Sea [drop]
+A Saltwater Savages
+A Unfriendly Competition
+A The Monster Surfaces
+A Smuggler's Special
+C Saltwater Savages
+C A Taste of the Sea [drop]
+C Not My Circus [drop]
+C The Monster Surfaces
+C Unfriendly Competition
+T Saltwater Savages
+T A Taste of the Sea [drop]
+T Not My Circus [drop]
+T The Monster Surfaces
+T Unfriendly Competition
+A See Ya, Scallywags!
+C See Ya, Scallywags!
+T See Ya, Scallywags!
+T Smuggler's Special
+T Frazzlespark's Crate
+// --- Sunnyglade (Twilight's Hammer) ---
+A Encroaching Twilight
+A Twilight Missives [drop]
+A Tome of Twilight
+C Encroaching Twilight
+C Twilight Missives [drop]
+#hub off
+A Digging for Answers
+C Digging for Answers
+A The Purple Ones#95417
+T The Purple Ones#95417
+A The Purple Ones#95601
+A Sickening Lights
+C The Purple Ones#95601
+C Sickening Lights
+T The Purple Ones#95601
+T Sickening Lights
+A Twilight No More!
+C Twilight No More!
+T Twilight No More!
+#hub 59.4,44.2
+T Encroaching Twilight
+T Twilight Missives [drop]
+// --- Bolder'ok (ogros, norte) ---
+#hub 65.3,20.5
+A Clugfist's Decree
+A Might Makes Right
+C Might Makes Right
+T Might Makes Right
+A Paletusk Harvesting [drop]
+A Drive Them Back
+A Step One: Rock [drop]
+C Paletusk Harvesting [drop]
+C Drive Them Back
+C Step One: Rock [drop]
+T Paletusk Harvesting [drop]
+T Drive Them Back
+T Step One: Rock [drop]
+A Bloodmaster's Ring#94668 [opt] -- Arena dos ogros: lutas 1x1, bom XP mas cada luta é demorada.
+T Clugfist's Decree
+L 43
+// --- Twilight's Shroud / Krol'dok ---
+#hub off
+A The Wayward Warrior
+T The Wayward Warrior
+A Carving a Path
+A Break Their Chains
+C Carving a Path
+C Break Their Chains
+T Carving a Path
+T Break Their Chains
+C Tome of Twilight
+T Tome of Twilight
+A Eye of Mugg [elite]
+C Eye of Mugg [elite]
+T Eye of Mugg [elite]
+#hub 58.1,45.2
+A On the Other Side -- Tan'jani manda você para Camp Mojache, em Feralas: é a ponte para o próximo guia.
+N Fim de Riverglades! Siga para Feralas (Camp Mojache) com a quest On the Other Side.

@@ -1,0 +1,46 @@
+#guide h55_winterspring|55-57 Winterspring (Everlook)|54|58|h56_plaguelands
+#desc Everlook, Donova Snowden e os furbolgs Winterfall. Inclui as quests novas do Forever (Sarna Brownhorn e Rilan Howard).
+@Winterspring
+T Speak to Salfa
+A Winterfall Activity
+A Beads for Salfa [drop]
+T The New Springs
+A Strange Sources
+A Threat of the Winterfall
+A Toxic Horrors [drop]
+N Siga a estrada para Everlook. Fale com o mestre de voo.
+R Everlook
+A Are We There, Yeti?#3783 [drop]
+A Ursius of the Shardtooth
+A Chillwind Horns [drop]
+A Shardtooth Pulling
+A Two-Headed Ravagers
+A Too Bad to Bear
+A Luck Be With You [opt]
+C Threat of the Winterfall
+C Winterfall Activity
+C Beads for Salfa [drop]
+C Toxic Horrors [drop]
+C Strange Sources
+T Threat of the Winterfall
+T Toxic Horrors [drop]
+T Strange Sources
+A Winterfall Firewater
+T Winterfall Firewater
+A Falling to Corruption
+C Shardtooth Pulling
+C Ursius of the Shardtooth
+C Are We There, Yeti?#3783 [drop]
+C Too Bad to Bear
+C Two-Headed Ravagers
+C Chillwind Horns [drop]
+T Shardtooth Pulling
+T Ursius of the Shardtooth
+T Are We There, Yeti?#3783 [drop]
+T Too Bad to Bear
+T Two-Headed Ravagers
+T Chillwind Horns [drop]
+A Brumeran of the Chillwind
+C Brumeran of the Chillwind
+T Brumeran of the Chillwind
+N Próximo: Plaguelands. Volte para Orgrimmar e pegue o zepelim para Undercity.

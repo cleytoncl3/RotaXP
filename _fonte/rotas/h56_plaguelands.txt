@@ -1,0 +1,71 @@
+#guide h56_plaguelands|56-58 Western + Eastern Plaguelands|55|59|h58_silithus
+#desc The Bulwark (caldeirões, Felstone/Dalson/Gahrron) e depois Eastern Plaguelands com Nathanos e Tirion Fordring. Ótimo em grupo (muita quest de matar).
+@WPL
+N Saia de Undercity para o leste até The Bulwark (entrada de Western Plaguelands).
+N Peça para a Shadow Priestess / Argent em The Bulwark as quests dos caldeirões.
+A Better Late Than Never#5021
+T Better Late Than Never#5021
+A Better Late Than Never#5023 [long]
+A Felstone Field Cauldron
+C Felstone Field Cauldron
+T Felstone Field Cauldron
+A Return to the Bulwark#5230
+T Return to the Bulwark#5230
+A Dalson's Tears Cauldron
+C Dalson's Tears Cauldron
+T Dalson's Tears Cauldron
+A Return to the Bulwark#5232
+T Return to the Bulwark#5232
+A Mrs. Dalson's Diary
+T Mrs. Dalson's Diary
+A Locked Away#5059
+T Locked Away#5059
+A Locked Away#5060
+T Locked Away#5060
+A The Wildlife Suffers Too#4984
+C The Wildlife Suffers Too#4984
+T The Wildlife Suffers Too#4984
+A The Wildlife Suffers Too#4985
+C The Wildlife Suffers Too#4985
+T The Wildlife Suffers Too#4985
+A A Matter of Time
+C A Matter of Time
+T A Matter of Time
+A Counting Out Time#4972 [drop]
+C Counting Out Time#4972 [drop]
+T Counting Out Time#4972 [drop]
+A Gahrron's Withering Cauldron
+C Gahrron's Withering Cauldron
+T Gahrron's Withering Cauldron
+@EPL
+N Eastern Plaguelands: siga a estrada leste. Visite Nathanos Blightcaller (Marris Stead, sudoeste) e Tirion Fordring (oeste).
+A To Kill With Purpose
+A Un-Life's Little Annoyances
+A Demon Dogs
+A Blood Tinged Skies
+A Carrion Grubbage [drop]
+C To Kill With Purpose
+C Un-Life's Little Annoyances
+C Demon Dogs
+C Blood Tinged Skies
+C Carrion Grubbage [drop]
+T To Kill With Purpose
+T Un-Life's Little Annoyances
+T Demon Dogs
+T Blood Tinged Skies
+T Carrion Grubbage [drop]
+A Redemption
+T Redemption
+A Of Forgotten Memories [elite]
+C Of Forgotten Memories [elite]
+T Of Forgotten Memories [elite]
+N Light's Hope Chapel (leste): pegue o voo e as quests de lá.
+A Defenders of Darrowshire
+A Zaeldarr the Outcast [elite]
+A Plagued Hatchlings
+C Defenders of Darrowshire
+C Plagued Hatchlings
+T Defenders of Darrowshire
+T Plagued Hatchlings
+A Heroes of Darrowshire [opt]
+N Próximo: Silithus (Cenarion Hold) ou Mount Hyjal (zona nova do Forever).

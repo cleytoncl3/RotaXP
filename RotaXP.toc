@@ -1,0 +1,83 @@
+## Interface: 16001
+## Title: |cffff7f00Rota|rXP - Guia de Leveling Horda
+## Notes: Guia de leveling Horda 30-60 para WoW: Forever. Rotas da comunidade, guias completos por zona, estilos Speedrun/Duo/Sem coleta, seta, auto aceitar/entregar, nomes em PT/EN. /rota
+## Author: cleytoncl3 (feito com Claude)
+## X-Website: https://github.com/cleytoncl3/RotaXP
+## X-License: GPL-3.0
+## Version: 0.15.0
+## SavedVariables: RotaXPDB
+## SavedVariablesPerCharacter: RotaXPCharDB
+## OptionalDeps: TomTom, Questie, GearQuestForever, TalentsForeverBook
+## IconTexture: Interface\Icons\INV_Misc_Map_01
+## AddonCompartmentFunc: RotaXP_OnAddonCompartmentClick
+## AddonCompartmentFuncOnEnter: RotaXP_OnAddonCompartmentEnter
+## AddonCompartmentFuncOnLeave: RotaXP_OnAddonCompartmentLeave
+
+Libs\LibStub\LibStub.lua
+Libs\CallbackHandler-1.0\CallbackHandler-1.0.lua
+Libs\LibDataBroker-1.1\LibDataBroker-1.1.lua
+Libs\LibDBIcon-1.0\LibDBIcon-1.0.lua
+Locale.lua
+Data\PlaceNames.lua
+Core.lua
+Quests.lua
+QuestLoc.lua
+Arrow.lua
+TravelPlan.lua
+Optimize.lua
+Nearby.lua
+MapLine.lua
+MiniLine.lua
+Turnin.lua
+Advisor.lua
+Leveling.lua
+Timer.lua
+Farm.lua
+Talents.lua
+UI.lua
+Menu.lua
+Party.lua
+Data\Zones.lua
+Data\Routes.lua
+Data\Enders.lua
+Data\Travel.lua
+Data\DungeonList.lua
+Data\Grind.lua
+Data\GoldSpots.lua
+Guides\z_arathi.lua
+Guides\z_azshara.lua
+Guides\z_badlands.lua
+Guides\z_burning.lua
+Guides\z_desolace.lua
+Guides\z_dustwallow.lua
+Guides\z_epl.lua
+Guides\z_felwood.lua
+Guides\z_feralas.lua
+Guides\z_hinterlands.lua
+Guides\z_hyjal.lua
+Guides\z_needles.lua
+Guides\z_riverglades.lua
+Guides\z_searing.lua
+Guides\z_shendralas.lua
+Guides\z_silithus.lua
+Guides\z_stv.lua
+Guides\z_swamp.lua
+Guides\z_tanaris.lua
+Guides\z_ungoro.lua
+Guides\z_winterspring.lua
+Guides\z_wpl.lua
+Guides\h37_arathi.lua
+Guides\h37_desolace.lua
+Guides\h37_stv.lua
+Guides\h38_riverglades.lua
+Guides\h40_needles_dustwallow.lua
+Guides\h41_badlands_swamp.lua
+Guides\h44_feralas.lua
+Guides\h45_tanaris.lua
+Guides\h47_hinterlands_stv.lua
+Guides\h49_azshara.lua
+Guides\h51_ungoro.lua
+Guides\h53_felwood.lua
+Guides\h55_winterspring.lua
+Guides\h56_plaguelands.lua
+Guides\h58_silithus.lua

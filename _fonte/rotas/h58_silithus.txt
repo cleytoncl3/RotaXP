@@ -1,0 +1,40 @@
+#guide h58_silithus|58-60 Silithus + Mount Hyjal|57|61
+#desc Final do leveling. Cenarion Hold em Silithus. Mount Hyjal é zona nova do Forever (Elderwild) com várias quests 54-60: vá se quiser variar.
+@Silithus
+F Cenarion Hold
+R Cenarion Hold
+A Securing the Supply Lines
+A Deadly Desert Venom
+A Noggle's Last Hope
+A Wanted - Deathclasp, Terror of the Sands [elite]
+A The Twilight Mystery
+C Securing the Supply Lines
+C Deadly Desert Venom
+T Securing the Supply Lines
+T Deadly Desert Venom
+A Stepping Up Security
+C Stepping Up Security
+T Stepping Up Security
+C Noggle's Last Hope
+T Noggle's Last Hope
+A Noggle's Lost Satchel
+C Noggle's Lost Satchel
+T Noggle's Lost Satchel
+C The Twilight Mystery
+T The Twilight Mystery
+@Hyjal
+N Mount Hyjal (Forever): a base da Horda é Elderwild. Procure Zet'gan, Kal'tinzan e Ortak Lomgok. As quests de lá ainda não estão todas mapeadas no banco de dados do Questie, então siga os "!" amarelos.
+A Feathers in Flight
+A Herbs for the Bruised and Weary
+A Blight No More
+A Flags of Our Forebears
+C Feathers in Flight
+C Herbs for the Bruised and Weary
+C Blight No More
+C Flags of Our Forebears
+T Feathers in Flight
+T Herbs for the Bruised and Weary
+T Blight No More
+T Flags of Our Forebears
+L 60
+N PARABÉNS, NÍVEL 60! Agora: Journeyman Riding (quest Swift as the Wind), masmorras (BRD, LBRS, Strat, Scholo) e reputações.

@@ -1,0 +1,63 @@
+#guide h37_desolace|37-40 Desolace + Shen'dralas|36|41|h40_needles_dustwallow
+#desc Alternativa em Kalimdor. Shadowprey Village, centauros (escolha Gelkis), Kodo Graveyard e as quests novas do Forever no Valley of Bones (Shen'dralas).
+@Desolace
+#hub 25.3,67.2
+F Shadowprey Village
+R Shadowprey Village
+A Clam Bait
+A Other Fish to Fry
+A Hand of Iruxos
+A Portals of the Legion
+A Hate the Hatefury
+C Clam Bait
+C Other Fish to Fry
+T Clam Bait
+T Other Fish to Fry
+A Stealing Supplies
+A Ongeku
+A Khan Jehn#1374
+A Valley of Bones
+C Stealing Supplies
+T Stealing Supplies
+C Ongeku
+T Ongeku
+A Khan Dez'hepah
+A Carved Centaur Totems
+A Kodo Roundup [long]
+A Bone Collector
+C Bone Collector
+C Khan Dez'hepah
+C Carved Centaur Totems
+T Bone Collector
+T Khan Dez'hepah
+T Carved Centaur Totems
+C Hate the Hatefury
+C Portals of the Legion
+C Hand of Iruxos
+T Hate the Hatefury
+T Portals of the Legion
+T Hand of Iruxos
+@ShenDralas
+T Valley of Bones
+A Ravaging Ravagers
+A Outing Outcasts
+A Facing the Truth
+A Checking Things Out
+C Ravaging Ravagers
+C Outing Outcasts
+C Checking Things Out
+T Ravaging Ravagers
+T Outing Outcasts
+T Checking Things Out
+A Saving Our Own
+A Bone Burying
+C Saving Our Own
+C Bone Burying
+T Saving Our Own
+T Bone Burying
+@Desolace
+C Facing the Truth
+T Facing the Truth
+C Khan Jehn#1374
+T Khan Jehn#1374
+N Próximo: Thousand Needles + Dustwallow, ou Riverglades (zona nova) a partir de Stranglethorn/Arathi.

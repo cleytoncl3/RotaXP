@@ -1,0 +1,341 @@
+[
+ {
+  "id": "z_riverglades",
+  "name": "Riverglades COMPLETO (Rog'mar)",
+  "zoneName": "Riverglades",
+  "area": 16591,
+  "lo": 35,
+  "hi": 47,
+  "min": 36,
+  "max": 45,
+  "forever": true,
+  "hubName": "Rog'mar",
+  "desc": "Zona NOVA do Forever (35-45), a mais recomendada pelos guias da comunidade para a Horda. Todas as quests da Horda do mapa, em ordem de cadeia.",
+  "intro": [
+   "Como chegar: navio de Steamwheedle Port (Tanaris) para Powderfuse Port, OU a pé subindo ao norte por Redridge, OU a quest 'Report to Rog'mar' em Grom'gol (Stranglethorn).",
+   "Depois da primeira vez, use o voo de Rog'mar (há voo Rog'mar <-> Stonard)."
+  ],
+  "hub": [
+   59.4,
+   45.6
+  ]
+ },
+ {
+  "id": "z_stv",
+  "name": "Stranglethorn Vale COMPLETO",
+  "zoneName": "Stranglethorn Vale",
+  "area": 33,
+  "lo": 32,
+  "hi": 47,
+  "min": 34,
+  "max": 46,
+  "hubName": "Grom'gol",
+  "desc": "Grom'gol (norte) e Booty Bay (sul): Nesingwary, trolls, piratas e as quests novas da Drowned City. Zepelim direto de Orgrimmar/Undercity.",
+  "intro": [
+   "Pegue o zepelim de Orgrimmar ou Undercity para Grom'gol."
+  ]
+ },
+ {
+  "id": "z_desolace",
+  "name": "Desolace COMPLETO",
+  "zoneName": "Desolace",
+  "area": 405,
+  "lo": 30,
+  "hi": 44,
+  "min": 32,
+  "max": 41,
+  "hubName": "Shadowprey Village",
+  "desc": "Shadowprey Village, centauros, Kodo Graveyard e demônios. Quests novas de reputação Gelkis/Magram.",
+  "intro": [
+   "Escolha UM clã de centauros (Gelkis ou Magram): o guia esconde as quests do outro clã quando você começar."
+  ]
+ },
+ {
+  "id": "z_shendralas",
+  "name": "Shen'dralas / Valley of Bones (Forever)",
+  "zoneName": "Shen'dralas",
+  "area": 16651,
+  "lo": 34,
+  "hi": 46,
+  "min": 36,
+  "max": 44,
+  "forever": true,
+  "desc": "Área nova ao sul de Desolace (Valley of Bones). Quests de reputação Gelkis e Magram.",
+  "intro": [
+   "Entrada pelo sul de Desolace, passando pelo Valley of Bones. A quest 'Valley of Bones' (Uthek the Wise) leva até lá."
+  ],
+  "hub": [
+   21.2,
+   23.2
+  ]
+ },
+ {
+  "id": "z_arathi",
+  "name": "Arathi Highlands COMPLETO",
+  "zoneName": "Arathi Highlands",
+  "area": 45,
+  "lo": 29,
+  "hi": 44,
+  "min": 31,
+  "max": 41,
+  "hubName": "Hammerfall",
+  "desc": "Hammerfall: raptors, ogros Boulderfist, Stromgarde e os sigilos.",
+  "intro": [
+   "Voe para Hammerfall ou vá a pé de Tarren Mill."
+  ]
+ },
+ {
+  "id": "z_needles",
+  "name": "Thousand Needles COMPLETO",
+  "zoneName": "Thousand Needles",
+  "area": 400,
+  "lo": 26,
+  "hi": 43,
+  "min": 28,
+  "max": 40,
+  "hubName": "Freewind Post",
+  "desc": "Freewind Post e Shimmering Flats (corrida de goblins x gnomos). Muitas entregas rápidas.",
+  "intro": [
+   "Voe para Freewind Post."
+  ]
+ },
+ {
+  "id": "z_dustwallow",
+  "name": "Dustwallow Marsh COMPLETO",
+  "zoneName": "Dustwallow Marsh",
+  "area": 15,
+  "lo": 34,
+  "hi": 48,
+  "min": 36,
+  "max": 45,
+  "hubName": "Brackenwall Village",
+  "desc": "Brackenwall Village: Escudo Negro, ninhos de Onyxia e as quests novas de Alcaz.",
+  "intro": [
+   "Voe para Brackenwall Village."
+  ]
+ },
+ {
+  "id": "z_badlands",
+  "name": "Badlands COMPLETO",
+  "zoneName": "Badlands",
+  "area": 3,
+  "lo": 34,
+  "hi": 47,
+  "min": 36,
+  "max": 45,
+  "hubName": "Kargath",
+  "desc": "Kargath, Lotwil, Rigglefuzz e os ogros. Uldaman fica aqui.",
+  "intro": [
+   "Voe para Kargath."
+  ]
+ },
+ {
+  "id": "z_swamp",
+  "name": "Swamp of Sorrows COMPLETO",
+  "zoneName": "Swamp of Sorrows",
+  "area": 8,
+  "lo": 33,
+  "hi": 47,
+  "min": 36,
+  "max": 45,
+  "hubName": "Stonard",
+  "desc": "Stonard: murlocs, crocolisks e o caminho para o Sunken Temple.",
+  "intro": [
+   "Voe para Stonard (há voo direto de Rog'mar)."
+  ]
+ },
+ {
+  "id": "z_tanaris",
+  "name": "Tanaris COMPLETO",
+  "zoneName": "Tanaris",
+  "area": 440,
+  "lo": 40,
+  "hi": 52,
+  "min": 42,
+  "max": 49,
+  "hubName": "Gadgetzan",
+  "desc": "Gadgetzan e Steamwheedle Port: Wastewander, piratas, escaravelhos. O navio para Riverglades sai daqui.",
+  "intro": [
+   "Voe para Gadgetzan."
+  ]
+ },
+ {
+  "id": "z_feralas",
+  "name": "Feralas COMPLETO",
+  "zoneName": "Feralas",
+  "area": 357,
+  "lo": 40,
+  "hi": 52,
+  "min": 42,
+  "max": 49,
+  "hubName": "Camp Mojache",
+  "desc": "Camp Mojache: Woodpaw, Gordunni, Muisek. Dire Maul fica aqui.",
+  "intro": [
+   "Voe para Camp Mojache."
+  ]
+ },
+ {
+  "id": "z_hinterlands",
+  "name": "The Hinterlands COMPLETO",
+  "zoneName": "The Hinterlands",
+  "area": 47,
+  "lo": 40,
+  "hi": 53,
+  "min": 43,
+  "max": 50,
+  "hubName": "Revantusk Village",
+  "desc": "Revantusk Village: trolls Vilebranch e Wildhammer.",
+  "intro": [
+   "Vá de Tarren Mill pela estrada até Revantusk Village (costa leste)."
+  ]
+ },
+ {
+  "id": "z_azshara",
+  "name": "Azshara COMPLETO",
+  "zoneName": "Azshara",
+  "area": 16,
+  "lo": 44,
+  "hi": 57,
+  "min": 46,
+  "max": 54,
+  "hubName": "Valormok",
+  "desc": "Valormok com várias quests novas do Forever (Kurll, Izvi, Jediga).",
+  "intro": [
+   "Voe de Orgrimmar para Valormok."
+  ]
+ },
+ {
+  "id": "z_searing",
+  "name": "Searing Gorge COMPLETO",
+  "zoneName": "Searing Gorge",
+  "area": 51,
+  "lo": 42,
+  "hi": 55,
+  "min": 45,
+  "max": 51,
+  "hubName": "Thorium Point",
+  "desc": "Thorium Point (neutro): Kalaran, Thorium Brotherhood.",
+  "intro": [
+   "Vá de Kargath (Badlands) pelo portão oeste até Searing Gorge."
+  ]
+ },
+ {
+  "id": "z_ungoro",
+  "name": "Un'Goro Crater COMPLETO",
+  "zoneName": "Un'Goro Crater",
+  "area": 490,
+  "lo": 47,
+  "hi": 58,
+  "min": 49,
+  "max": 55,
+  "hubName": "Marshal's Refuge",
+  "desc": "Muito XP: pilões, A-Me 01, Lar'korwi. Pegue os cristais coloridos.",
+  "intro": [
+   "Desça a rampa no oeste de Tanaris."
+  ]
+ },
+ {
+  "id": "z_felwood",
+  "name": "Felwood COMPLETO",
+  "zoneName": "Felwood",
+  "area": 361,
+  "lo": 46,
+  "hi": 58,
+  "min": 48,
+  "max": 56,
+  "hubName": "Bloodvenom Post",
+  "desc": "Bloodvenom Post, Jaedenar, Timbermaw.",
+  "intro": [
+   "Voe para Bloodvenom Post."
+  ]
+ },
+ {
+  "id": "z_burning",
+  "name": "Burning Steppes COMPLETO",
+  "zoneName": "Burning Steppes",
+  "area": 46,
+  "lo": 48,
+  "hi": 60,
+  "min": 51,
+  "max": 57,
+  "hubName": "Flame Crest",
+  "desc": "Flame Crest: dragonkin e Blackrock.",
+  "intro": [
+   "Voe para Flame Crest."
+  ]
+ },
+ {
+  "id": "z_wpl",
+  "name": "Western Plaguelands COMPLETO",
+  "zoneName": "Western Plaguelands",
+  "area": 28,
+  "lo": 49,
+  "hi": 60,
+  "min": 51,
+  "max": 58,
+  "desc": "The Bulwark, caldeirões, Andorhal, Chromie. Sem voo da Horda: vá a pé de Undercity.",
+  "intro": [
+   "Saia de Undercity para o leste até The Bulwark."
+  ]
+ },
+ {
+  "id": "z_epl",
+  "name": "Eastern Plaguelands COMPLETO",
+  "zoneName": "Eastern Plaguelands",
+  "area": 139,
+  "lo": 51,
+  "hi": 60,
+  "min": 53,
+  "max": 60,
+  "hubName": "Light's Hope Chapel",
+  "desc": "Nathanos, Tirion Fordring, Light's Hope. Muita quest de matar: ótimo em duo.",
+  "intro": [
+   "Siga a estrada a leste de Western Plaguelands."
+  ]
+ },
+ {
+  "id": "z_winterspring",
+  "name": "Winterspring COMPLETO",
+  "zoneName": "Winterspring",
+  "area": 618,
+  "lo": 51,
+  "hi": 60,
+  "min": 53,
+  "max": 60,
+  "hubName": "Everlook",
+  "desc": "Everlook, Donova Snowden, furbolgs Winterfall e as quests novas do Forever.",
+  "intro": [
+   "Atravesse Timbermaw Hold (norte de Felwood) ou voe para Everlook."
+  ]
+ },
+ {
+  "id": "z_silithus",
+  "name": "Silithus COMPLETO",
+  "zoneName": "Silithus",
+  "area": 1377,
+  "lo": 53,
+  "hi": 60,
+  "min": 55,
+  "max": 60,
+  "hubName": "Cenarion Hold",
+  "desc": "Cenarion Hold: Cenarion Circle e Twilight's Hammer.",
+  "intro": [
+   "Voe para Cenarion Hold."
+  ]
+ },
+ {
+  "id": "z_hyjal",
+  "name": "Mount Hyjal (Forever)",
+  "zoneName": "Mount Hyjal",
+  "area": 616,
+  "lo": 53,
+  "hi": 61,
+  "min": 55,
+  "max": 60,
+  "forever": true,
+  "desc": "Zona nova do Forever (55-60). Muitos NPCs ainda não estão mapeados no banco: siga os '!' amarelos.",
+  "intro": [
+   "Chegue pelo sul de Winterspring, atravessando Darkwhisper Gorge. Voos: Summit of Eternity e Tainted Foothills."
+  ]
+ }
+]

@@ -1,0 +1,56 @@
+#guide h40_needles_dustwallow|39-43 Thousand Needles + Dustwallow Marsh|38|44|h44_feralas
+#desc Alternativa clássica: Shimmering Flats (goblins/gnomos, entregas rápidas) e Brackenwall Village (cadeia do Escudo Negro e dragões de Onyxia).
+@ThousandNeedles
+N Voe para Freewind Post e siga para o leste até Shimmering Flats (Mirage Raceway).
+A Encrusted Tail Fins [drop]
+A The Eighteenth Pilot
+T The Eighteenth Pilot
+A Razzeric's Tweaking
+C Razzeric's Tweaking
+T Razzeric's Tweaking
+A Safety First#1188 [long]
+A Martek the Exiled [long]
+C Encrusted Tail Fins [drop]
+T Encrusted Tail Fins [drop]
+@Dustwallow
+N Dustwallow Marsh: voe para Brackenwall Village.
+R Brackenwall Village
+A Theramore Spies
+A The Theramore Docks
+A Hungry!
+A Jarl Needs Eyes [drop]
+A Skin Careful, Skin Sharp [drop]
+A Overlord Mok'Morokk's Concern
+A Army of the Black Dragon
+A Identifying the Brood
+C Theramore Spies
+C Hungry!
+C Skin Careful, Skin Sharp [drop]
+T Theramore Spies
+T Hungry!
+T Skin Careful, Skin Sharp [drop]
+C The Theramore Docks
+T The Theramore Docks
+C Jarl Needs Eyes [drop]
+T Jarl Needs Eyes [drop]
+A The Black Shield#1321
+T The Black Shield#1321
+A The Black Shield#1322 [drop]
+C The Black Shield#1322 [drop]
+T The Black Shield#1322 [drop]
+A The Black Shield#1323
+T The Black Shield#1323
+C Army of the Black Dragon
+C Identifying the Brood
+C Overlord Mok'Morokk's Concern
+T Army of the Black Dragon
+T Identifying the Brood
+T Overlord Mok'Morokk's Concern
+A The Brood of Onyxia#1170
+T The Brood of Onyxia#1170
+A The Brood of Onyxia#1171
+T The Brood of Onyxia#1171
+A The Brood of Onyxia#1172
+C The Brood of Onyxia#1172
+T The Brood of Onyxia#1172
+N Próximo: Feralas (Camp Mojache).

@@ -1,0 +1,55 @@
+#guide h44_feralas|44-46 Feralas (Camp Mojache)|43|47|h45_tanaris
+#desc Gnolls Woodpaw, ogros Gordunni e os Muisek do Witch Doctor Uzer'i. Chegue por Riverglades (On the Other Side) ou voando para Camp Mojache.
+@Feralas
+#hub 74.4,43.4
+T On the Other Side
+N Fale com o mestre de voo de Camp Mojache.
+R Camp Mojache
+A War on the Woodpaw
+A Alpha Strike
+A Woodpaw Investigation
+A The Ogres of Feralas#2975
+A Gordunni Cobalt
+A A New Cloak's Sheen
+A A Grim Discovery#2974
+A Zukk'ash Infestation
+A The Mark of Quality
+A A Strange Request [long] -- Leva até Orgrimmar e volta. Pule no modo speedrun.
+C War on the Woodpaw
+C Alpha Strike
+C Woodpaw Investigation
+T Woodpaw Investigation
+A The Battle Plans
+T War on the Woodpaw
+T Alpha Strike
+T The Battle Plans
+C Zukk'ash Infestation
+T Zukk'ash Infestation
+A Stinglasher
+C Stinglasher
+T Stinglasher
+A Zukk'ash Report [long]
+C The Ogres of Feralas#2975
+C Gordunni Cobalt
+C A Grim Discovery#2974
+C A New Cloak's Sheen
+C The Mark of Quality
+T The Ogres of Feralas#2975
+T Gordunni Cobalt
+T A Grim Discovery#2974
+T A New Cloak's Sheen
+T The Mark of Quality
+A The Ogres of Feralas#2980
+A Dark Ceremony
+A A Grim Discovery#2976 [long]
+C The Ogres of Feralas#2980
+C Dark Ceremony
+T The Ogres of Feralas#2980
+T Dark Ceremony
+A Faerie Dragon Muisek [long]
+A Hippogryph Muisek [long]
+C Faerie Dragon Muisek [long]
+C Hippogryph Muisek [long]
+T Faerie Dragon Muisek [long]
+T Hippogryph Muisek [long]
+N Próximo: Tanaris (Gadgetzan). Voe de Camp Mojache para Gadgetzan.
