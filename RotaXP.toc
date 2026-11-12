@@ -4,7 +4,7 @@
 ## Author: cleytoncl3 (feito com Claude)
 ## X-Website: https://github.com/cleytoncl3/RotaXP
 ## X-License: GPL-3.0
-## Version: 0.16.1
+## Version: 0.17.0
 ## SavedVariables: RotaXPDB
 ## SavedVariablesPerCharacter: RotaXPCharDB
 ## OptionalDeps: TomTom, Questie, GearQuestForever, TalentsForeverBook
@@ -22,6 +22,7 @@ Data\PlaceNames.lua
 Core.lua
 Quests.lua
 QuestLoc.lua
+Craft.lua
 Arrow.lua
 TravelPlan.lua
 Optimize.lua
@@ -46,6 +47,7 @@ Data\Travel.lua
 Data\DungeonList.lua
 Data\Grind.lua
 Data\GoldSpots.lua
+Data\Crafted.lua
 Guides\z_arathi.lua
 Guides\z_azshara.lua
 Guides\z_badlands.lua

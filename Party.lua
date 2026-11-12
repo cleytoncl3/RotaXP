@@ -13,6 +13,13 @@ local PROTO = "1"
 ----------------------------------------------------------------------
 local function short(name) return name and (Ambiguate and Ambiguate(name, "short") or name:gsub("%-.*$", "")) end
 local function me() return short(UnitName("player")) end
+-- é você? (nomes com espaço/servidor/maiúsculas diferentes não podem virar "parceiro")
+local function norm(n) return n and tostring(n):gsub("%-.*$", ""):gsub("%s+", ""):lower() end
+local function isMe(n)
+    if not n then return false end
+    if UnitIsUnit then local ok, r = pcall(UnitIsUnit, n, "player"); if ok and r then return true end end
+    return norm(n) == norm(UnitName("player"))
+end
 
 local function channel()
     if IsInRaid and IsInRaid() then return "RAID" end
@@ -153,7 +160,7 @@ end
 function P:OnMessage(prefix, msg, _, sender)
     if prefix ~= PREFIX or not msg then return end
     local who = short(sender)
-    if not who or who == me() then return end
+    if not who or isMe(who) or isMe(sender) then return end
     local f = split(msg)
     local kind = f[1]
     local m = self:Member(who)
@@ -266,7 +273,7 @@ function P:LinesFor(s)
     if logs then
         for name, objs in pairs(logs) do
             local n = short(name)
-            if not done[n] and n ~= me() and inGroup(n) then
+            if not done[n] and not isMe(n) and not isMe(name) and inGroup(n) then
                 local list, all = {}, true
                 for i, o in pairs(objs) do
                     if type(o) == "table" and o.required then

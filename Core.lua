@@ -5,7 +5,7 @@ _G.RotaXP = RX
 RX.guides = {}
 RX.guideOrder = {}
 RX.questMeta = {}
-RX.version = "0.16.1"
+RX.version = "0.17.0"
 
 local defaults = {
     style = "speedrun",
@@ -247,6 +247,8 @@ function RX:StepFilteredByOptions(s, o)
     end
     if f.drop and o.groupMode then return "drop" end
     if (f.long or f.opt) and o.speedrun then return "lenta" end
+    -- quest de profissão (fabricar o item) só aparece no speedrun/sem coleta se você tiver a perícia
+    if f.craft and (o.speedrun or lim) and self.Craft and not self.Craft:HasSkill(s.q) then return "profissão" end
     if f.elite and not (o.showElite or o.groupMode) then return "elite" end
     if f.group and not o.groupMode then return "grupo" end
     if f.dungeon and not o.showDungeon then return "masmorra" end
@@ -390,11 +392,22 @@ function RX:VisibleSteps(maxCount)
             if s.q and (s.t == "A" or s.t == "C") then pending[s.q] = true end
         end
         local kept = {}
+        self.synthC = self.synthC or {}
         for _, s in ipairs(list) do
             local hide = false
             if s.t == "T" and s.q and pending[s.q] then
                 local inLog = self.Q:InLog(s.q)
                 hide = (not inLog) or not self.Q:IsReady(s.q)
+            elseif s.t == "T" and s.q and self.Q:InLog(s.q) and not self.Q:IsReady(s.q) then
+                -- quest no log, ainda não pronta e o guia não tem o passo "Fazer": cria um (local vem do jogo)
+                local c = self.synthC[s.q]
+                if not c then
+                    c = { t = "C", q = s.q, n = s.n, pn = s.pn, lvl = s.lvl, req = s.req, xp = s.xp, cc = s.cc, f = s.f, flags = s.flags or {},
+                          m = s.m, x = s.x, y = s.y, synth = true, index = s.index }
+                    self.synthC[s.q] = c
+                end
+                kept[#kept + 1] = c
+                hide = true
             end
             if not hide then kept[#kept + 1] = s end
         end

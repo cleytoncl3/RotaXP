@@ -232,6 +232,15 @@ function UI:StepText(s)
         local pl = RX.Party:LinesFor(s)
         if pl then for _, l in ipairs(pl) do add("|cffffffff", l) end end
     end
+    -- quest de profissão: o que fabricar e os ingredientes
+    if s.q and RX.Craft and RX.Craft:Info(s.q) and (t == "A" or t == "C" or (t == "T" and not RX.Q:IsReady(s.q))) then
+        local h1, h2, h3 = RX.Craft:Hint(s.q)
+        if h1 then add("|cffffd040", h1) end
+        if h2 then add("|cffd0d0d0", h2) end
+        if h3 then add("|cffaaaaaa", h3) end
+    elseif s.synth and not s.locSrc then
+        add("|cffaaaaaa", T("O guia não tem o local deste objetivo: veja o objetivo no mapa do jogo/Questie.", "The guide has no location for this objective: check the game map/Questie."))
+    end
     -- quest que precisa USAR um item (num mob, objeto ou local): manda clicar no botão da janela de itens
     if s.q and (t == "C" or (t == "T" and not RX.Q:IsReady(s.q))) and RX.QuestItems and RX.db.questItems ~= false then
         local iid = RX.QuestItems:ItemFor(s.q)
