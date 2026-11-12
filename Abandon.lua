@@ -1,9 +1,9 @@
--- Abandono automático: quando você aceita uma quest que demora demais (escolta, muitos itens de drop,
--- entrega em outra zona, profissão que você não tem), o RotaXP avisa e abandona depois de alguns segundos.
+-- Abandono automático (opcional, Opções > Automação): quando você aceita uma quest que não vale a pena
+-- (lenta: escolta, muitos drops, outra zona, profissão; pouco XP/cinza; ou fora dos guias), avisa e abandona depois de alguns segundos.
 -- "/rota manter" cancela. Nunca abandona: quest que abre corrente do guia, quest que começou com item,
 -- quest já pronta, ou quando o item está barato no leilão (aí é só comprar).
 local _, RX = ...
-local AB = { pending = {} }
+local AB = { pending = {}, why = {} }
 RX.Abandon = AB
 local T = RX.T
 local DELAY = 8
@@ -69,12 +69,53 @@ function AB:SlowReason(q)
     return nil
 end
 
+-- pouco XP: quest cinza (6+ níveis abaixo) ou recompensa < 1,5% do XP do nível
+function AB:LowXPReason(q)
+    local lvl = UnitLevel and UnitLevel("player") or 0
+    if lvl >= 60 then return nil end
+    local qlvl
+    for _, g in pairs(RX.guides or {}) do
+        for _, s in ipairs(g.steps or {}) do if s.q == q and s.lvl then qlvl = s.lvl break end end
+        if qlvl then break end
+    end
+    if not qlvl and C_QuestLog and C_QuestLog.GetQuestDifficultyLevel then
+        local ok, v = pcall(C_QuestLog.GetQuestDifficultyLevel, q); if ok and type(v) == "number" and v > 0 then qlvl = v end
+    end
+    if qlvl and lvl - qlvl >= 6 then return string.format(T("cinza: nível %d", "grey: level %d"), qlvl) end
+    local xp
+    if GetQuestLogRewardXP then local ok, v = pcall(GetQuestLogRewardXP, q); if ok and type(v) == "number" and v > 0 then xp = v end end
+    local max = UnitXPMax and UnitXPMax("player") or 0
+    if xp and max > 0 and xp < max * 0.015 then return string.format(T("pouco XP: %d", "low XP: %d"), xp) end
+    return nil
+end
+
+-- fora dos guias: nenhum guia (com o seu estilo) usa esta quest
+function AB:NotGuideReason(q)
+    if not RX:CurrentGuide() then return nil end
+    if RX:GuideWantsQuest(q) then return nil end
+    for _, g in pairs(RX.guides or {}) do
+        for _, s in ipairs(g.steps or {}) do
+            if s.q == q and not RX:StepFilteredByOptions(s) then return nil end
+        end
+    end
+    return T("não está no guia", "not in the guide")
+end
+
+-- motivo para abandonar, conforme as opções ligadas (nil = fica)
+function AB:Reason(q)
+    local o = RX.db
+    if o.abandonSlow ~= false then local w = self:SlowReason(q); if w then return w, "slow" end end
+    if o.abandonLowXP ~= false then local w = self:LowXPReason(q); if w then return w, "xp" end end
+    if o.abandonNotGuide ~= false then local w = self:NotGuideReason(q); if w then return w, "guide" end end
+    return nil
+end
+
 -- motivo para NÃO abandonar (nil = pode abandonar)
-function AB:KeepReason(q)
+function AB:KeepReason(q, kind)
     if RX.Q:IsReady(q) then return "pronta" end
     if RX.QuestStart and (RX.QuestStart[q] or 0) > 0 then return "começa com item" end
     if opensChain(q) then return "abre corrente" end
-    if buyable(q) then return "leilão" end
+    if kind == "slow" and buyable(q) then return "leilão" end
     return nil
 end
 
@@ -101,17 +142,18 @@ local function abandon(q)
 end
 
 function AB:Do(q)
-    if not self.pending[q] then return end
+    local kind = self.pending[q]
+    if not kind then return end
     self.pending[q] = nil
-    if not RX.Q:InLog(q) or RX.db.autoAbandon == false then return end
-    if self:KeepReason(q) then return end
+    if not RX.Q:InLog(q) or not RX.db.autoAbandon then return end
+    if self:KeepReason(q, kind) then return end
     RX.Q:Scan()
     local ok, done = pcall(abandon, q)
     if ok and done then
         RX:CharState().skipped[q] = true
         local cs = RX:CharState()
         cs.abandonLog = cs.abandonLog or {}
-        table.insert(cs.abandonLog, { when = date and date("%Y-%m-%d %H:%M:%S") or "?", q = q, title = title(q) })
+        table.insert(cs.abandonLog, { when = date and date("%Y-%m-%d %H:%M:%S") or "?", q = q, title = title(q), why = self.why[q] })
         while #cs.abandonLog > 50 do table.remove(cs.abandonLog, 1) end
         RX:Print(string.format(T("Abandonei |cffffff00%s|r. Ela não vai mais aparecer no guia.", "Abandoned |cffffff00%s|r. It won't show in the guide anymore."), title(q)))
         RX:Update(true)
@@ -121,20 +163,32 @@ function AB:Do(q)
 end
 
 function AB:OnAccepted(q)
-    if not q or RX.db.autoAbandon == false then return end
-    local why = self:SlowReason(q)
+    if not q or not RX.db.autoAbandon then return end
+    local why, kind = self:Reason(q)
     if not why then return end
-    local keep = self:KeepReason(q)
+    local keep = self:KeepReason(q, kind)
     if keep then
         if keep == "leilão" then
             RX:Print(string.format(T("\"%s\" é lenta (%s), mas o item está à venda no leilão: mantive a quest.", "\"%s\" is slow (%s), but the item is on the AH: kept the quest."), title(q), why))
         end
         return
     end
-    self.pending[q] = true
-    RX:Print(string.format(T("|cffff9050\"%s\" demora demais (%s): vou abandonar em %ds.|r Digite |cffffff00/rota manter|r para ficar com ela.",
-        "|cffff9050\"%s\" takes too long (%s): abandoning in %ds.|r Type |cffffff00/rota keep|r to keep it."), title(q), why, DELAY))
+    self.pending[q] = kind
+    self.why[q] = why
+    RX:Print(string.format(T("|cffff9050\"%s\" não vale a pena (%s): vou abandonar em %ds.|r Digite |cffffff00/rota manter|r para ficar com ela.",
+        "|cffff9050\"%s\" isn't worth it (%s): abandoning in %ds.|r Type |cffffff00/rota keep|r to keep it."), title(q), why, DELAY))
     if C_Timer then C_Timer.After(DELAY, function() AB:Do(q) end) end
+end
+
+-- lista as últimas quests abandonadas no chat
+function AB:ShowLog()
+    local log = RX:CharState().abandonLog or {}
+    if #log == 0 then RX:Print(T("Nenhuma quest abandonada ainda.", "No quest abandoned yet.")) return end
+    RX:Print(T("Últimas quests abandonadas:", "Last abandoned quests:"))
+    for i = math.max(1, #log - 9), #log do
+        local e = log[i]
+        RX:Print(string.format("  %s  %s%s", e.when or "?", e.title or ("#" .. tostring(e.q)), e.why and (" |cffaaaaaa(" .. e.why .. ")|r") or ""))
+    end
 end
 
 -- /rota manter: cancela os abandonos pendentes e tira a quest dos "pulados"

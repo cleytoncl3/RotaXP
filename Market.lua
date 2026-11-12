@@ -126,10 +126,13 @@ function MK:Search(list)
     if not ok then RX:Print(T("Abra a Casa de Leilões (aba do Auctionator) e tente de novo.", "Open the Auction House (Auctionator tab) and try again.")) end
 end
 
-function MK:Offer()
-    if RX.db.marketOffer == false then return end
+function MK:Offer(force)
+    if not force and RX.db.marketOffer == false then return end
     local list, total = self:ShoppingList()
-    if #list == 0 then return end
+    if #list == 0 then
+        if force then RX:Print(T("Nada à venda para as quests do seu log (ou sem preço no Auctionator).", "Nothing on sale for your log quests (or no Auctionator price).")) end
+        return
+    end
     local lines = {}
     for i, it in ipairs(list) do
         if i <= 8 then lines[#lines + 1] = string.format("%dx %s (%s)", it.left, it.name, money(it.price)) end

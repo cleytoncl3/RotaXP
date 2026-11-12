@@ -16,7 +16,8 @@ Addon de leveling no estilo Zygor / RestedXP para o **WoW: Forever** (Horda, ní
 - **Itens da quest**: janelinha com botões para usar os itens que as quests pedem (num mob, objeto ou local). O item da quest atual fica em destaque e dá para pôr uma tecla de atalho (Opções > Atalhos > AddOns > RotaXP). A lista de quests também avisa quando precisa usar o item.
 - **Leilão (segunda via)**: em cada quest que pede itens negociáveis aparece a opção de comprar no leilão em vez de dropar, com preço do Auctionator. Itens vinculados (de quest) ficam de fora.
 - **Lista de compras do guia**: ao escolher um guia, abre uma janela com todos os itens das quests dele que dá para comprar, quantidade e preço, e um botão para buscar no Auctionator (`/rota compras`). Ao abrir a Casa de Leilões, oferece buscar o que falta das quests do log (`/rota leilao`).
-- **Abandono automático**: quest que demora demais (escolta, 8+ itens de drop, entrega em outra zona, profissão que você não tem) é abandonada sozinha depois de 8 segundos, com aviso. `/rota manter` cancela. Nunca abandona quest que abre corrente do guia, que começou com item, ou cujo item está à venda no leilão.
+- **Abandono automático (opcional)**: Opções > Automação. Abandona sozinho, com aviso de 8 segundos, quests que não valem a pena: lentas (escolta, 8+ drops, outra zona, profissão), de pouco XP (cinzas ou < 1,5% do nível) ou fora do guia. Cada critério liga/desliga. `/rota manter` cancela. Nunca abandona quest que abre corrente do guia, que começou com item, ou lenta cujo item está à venda no leilão.
+- **Opções em abas**: Guia, Automação, Qualidade de vida, Leilão, Navegação e Aparência.
 - **Log de ações bloqueadas**: `/rota bloqueios`.
 - **Cronômetro de XP** para medir XP/hora.
 

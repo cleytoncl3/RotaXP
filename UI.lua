@@ -233,7 +233,7 @@ function UI:StepText(s)
         if pl then for _, l in ipairs(pl) do add("|cffffffff", l) end end
     end
     -- itens à venda no leilão (preço do Auctionator): comprar em vez de farmar
-    if s.q and RX.Market and (t == "C" or (t == "A" and not RX.Q:InLog(s.q))) then
+    if s.q and RX.Market and RX.db.marketHint ~= false and (t == "C" or (t == "A" and not RX.Q:InLog(s.q))) then
         local mh = RX.Market:Hint(s.q)
         if mh then add("|cffffd100", mh) end
     end
@@ -1300,20 +1300,20 @@ function UI:ShowPanel(which, sub)
             table.insert(p.widgets, line)
             y = y - 6
         end
-        local function check(key, label, desc, onChange)
+        local function check(key, label, desc, onChange, indent)
             local holder = CreateFrame("Frame", nil, p.child)
-            holder:SetPoint("TOPLEFT", 4, y)
+            holder:SetPoint("TOPLEFT", 4 + (indent or 0), y)
             local cb = CreateFrame("CheckButton", nil, holder, "UICheckButtonTemplate")
             cb:SetPoint("TOPLEFT", -4, 2)
             cb:SetChecked(RX.db[key] and true or false)
             local lab = holder:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-            lab:SetPoint("TOPLEFT", 28, -4); lab:SetWidth(460); lab:SetJustifyH("LEFT")
+            lab:SetPoint("TOPLEFT", 28, -4); lab:SetWidth(460 - (indent or 0)); lab:SetJustifyH("LEFT")
             lab:SetText(label)
             local d = holder:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-            d:SetPoint("TOPLEFT", lab, "BOTTOMLEFT", 0, -3); d:SetWidth(450); d:SetJustifyH("LEFT"); d:SetSpacing(2)
+            d:SetPoint("TOPLEFT", lab, "BOTTOMLEFT", 0, -3); d:SetWidth(450 - (indent or 0)); d:SetJustifyH("LEFT"); d:SetSpacing(2)
             d:SetText(desc or "")
             local h = 4 + lab:GetStringHeight() + 3 + (desc and d:GetStringHeight() or 0) + 4
-            holder:SetSize(500, math.max(26, h))
+            holder:SetSize(500 - (indent or 0), math.max(26, h))
             -- fundo quando ligado: mostra o que está ativo
             local bg = holder:CreateTexture(nil, "BACKGROUND"); bg:SetAllPoints(); bg:SetColorTexture(0.2, 0.9, 0.2, 0.07)
             if cb:GetChecked() then bg:Show() else bg:Hide() end
@@ -1357,66 +1357,111 @@ function UI:ShowPanel(which, sub)
         end
         local function custom() RX.db.style = "custom" end
 
-        -- 1) Estilo
-        section(T("Estilo de leveling", "Leveling style"), T("atalhos prontos; depois ajuste abaixo combinando várias opções", "ready presets; then fine-tune below by combining options"))
-        local presets = {}
-        for _, st in ipairs(RX.Styles) do
-            table.insert(presets, { text = LF(st, "name"), selected = (st.id == RX.db.style), tip = LF(st, "desc"),
-                onClick = function() RX:ApplyStyle(st.id); UI:ShowPanel("options") end })
+        -- abas: cada assunto no seu lugar
+        local TABS = {
+            { "guia", T("Guia", "Guide") }, { "auto", T("Automação", "Automation") }, { "qol", T("Qualidade de vida", "Quality of life") },
+            { "leilao", T("Leilão", "Auction House") }, { "nav", T("Navegação", "Navigation") }, { "visual", T("Aparência", "Appearance") },
+        }
+        local tab = UI.optTab or "guia"
+        local tabDefs = {}
+        for _, t in ipairs(TABS) do
+            table.insert(tabDefs, { text = t[2], selected = tab == t[1], onClick = function() UI.optTab = t[1]; UI:ShowPanel("options") end })
         end
-        buttonRow(presets)
-        check("speedrun", T("Pular quests lentas", "Skip slow quests"), T("Escoltas, entregas em outra zona, pouco XP e quests cinzas.", "Escorts, deliveries to another zone, low XP and grey quests."), custom)
-        check("showDungeon", T("Mostrar quests de masmorra", "Show dungeon quests"), T("Uldaman, ZF, Maraudon, ST, BRD...", "Uldaman, ZF, Maraudon, ST, BRD..."), custom)
-        check("showElite", T("Mostrar quests de elite", "Show elite quests"), T("Mobs fortes: melhor em duo/grupo.", "Strong mobs: better in a duo/group."), custom)
-        check("groupMode", T("Duo / grupo", "Duo / group"), T("Pula quests de 10+ itens de drop e mostra elites.", "Skips 10+ dropped-item quests and shows elites."), custom)
-        y = self:AddText(T("Quests de coletar itens que caem de mobs:", "Quests collecting items dropped by mobs:"), y - 2, "GameFontNormal")
-        local lim = RX.db.collectMax
-        local function setLim(v) RX.db.collectMax = v; RX.db.skipCollect = false; custom(); RX:Update(true); UI:ShowPanel("options") end
-        buttonRow({
-            { text = T("Sem limite", "No limit"), selected = (not lim) and not RX.db.skipCollect, onClick = function() setLim(false) end },
-            { text = T("Até 10 itens", "Up to 10"), selected = lim == 10, onClick = function() setLim(10) end },
-            { text = T("Até 5 itens", "Up to 5"), selected = lim == 5, onClick = function() setLim(5) end },
-            { text = T("Sem coleta (1-2)", "No collecting (1-2)"), selected = lim == 2, onClick = function() setLim(2) end },
-        })
+        buttonRow(tabDefs)
 
-        -- 2) Ajudas
-        section(T("Ajudas automáticas", "Automatic help"))
-        check("autoAccept", T("Auto aceitar quests do guia", "Auto accept guide quests"), T("Só aceita as do guia. Segure SHIFT para desativar na hora.", "Only accepts guide quests. Hold SHIFT to disable it on the spot."))
-        check("autoTurnIn", T("Auto entregar quests do guia", "Auto turn in guide quests"), T("Quando há só uma recompensa. Segure SHIFT para desativar.", "When there is only one reward. Hold SHIFT to disable."))
-        check("smartOrder", T("Rota inteligente (pegar tudo no mesmo lugar)", "Smart route (grab everything at the same spot)"), T("Reorganiza os próximos passos pelo caminho mais curto e puxa as quests da mesma cidade/base.", "Reorders the next steps by the shortest path and pulls in quests at the same town/hub."))
-        check("suggestZone", T("Sugerir o guia da zona ao entrar nela", "Suggest the zone guide when entering it"), nil)
-        check("questItems", T("Janela de itens da quest (clicar para usar)", "Quest item window (click to use)"), T("Botões para usar os itens que as quests dão. Atalho: Opções > Atalhos > AddOns > RotaXP.", "Buttons to use quest items. Hotkey: Options > Keybindings > AddOns > RotaXP."), function() RX.QuestItems:Refresh() end)
-        check("autoAbandon", T("Abandonar sozinho quests que demoram demais", "Auto-abandon quests that take too long"), T("Escolta, muitos drops, entrega em outra zona. Avisa antes; /rota manter cancela.", "Escorts, many drops, far turn-ins. Warns first; /rota keep cancels."))
-        check("shopWindow", T("Lista de compras do leilão ao escolher guia", "AH shopping list when choosing a guide"), T("Itens das quests do guia que dá para comprar em vez de dropar. /rota compras reabre.", "Guide quest items you can buy instead of farming. /rota shop reopens."))
+        if tab == "guia" then
+            section(T("Estilo de leveling", "Leveling style"), T("atalhos prontos; depois ajuste abaixo", "ready presets; then fine-tune below"))
+            local presets = {}
+            for _, st in ipairs(RX.Styles) do
+                table.insert(presets, { text = LF(st, "name"), selected = (st.id == RX.db.style), tip = LF(st, "desc"),
+                    onClick = function() RX:ApplyStyle(st.id); UI:ShowPanel("options") end })
+            end
+            buttonRow(presets)
+            section(T("Quais quests o guia mostra", "Which quests the guide shows"))
+            check("speedrun", T("Pular quests lentas", "Skip slow quests"), T("Escoltas, entregas em outra zona, pouco XP e quests cinzas.", "Escorts, deliveries to another zone, low XP and grey quests."), custom)
+            check("showDungeon", T("Mostrar quests de masmorra", "Show dungeon quests"), T("Uldaman, ZF, Maraudon, ST, BRD...", "Uldaman, ZF, Maraudon, ST, BRD..."), custom)
+            check("showElite", T("Mostrar quests de elite", "Show elite quests"), T("Mobs fortes: melhor em duo/grupo.", "Strong mobs: better in a duo/group."), custom)
+            check("groupMode", T("Duo / grupo", "Duo / group"), T("Pula quests de 10+ itens de drop e mostra elites.", "Skips 10+ dropped-item quests and shows elites."), custom)
+            y = self:AddText(T("Quests de coletar itens que caem de mobs:", "Quests collecting items dropped by mobs:"), y - 2, "GameFontNormal")
+            local lim = RX.db.collectMax
+            local function setLim(v) RX.db.collectMax = v; RX.db.skipCollect = false; custom(); RX:Update(true); UI:ShowPanel("options") end
+            buttonRow({
+                { text = T("Sem limite", "No limit"), selected = (not lim) and not RX.db.skipCollect, onClick = function() setLim(false) end },
+                { text = T("Até 10 itens", "Up to 10"), selected = lim == 10, onClick = function() setLim(10) end },
+                { text = T("Até 5 itens", "Up to 5"), selected = lim == 5, onClick = function() setLim(5) end },
+                { text = T("Sem coleta (1-2)", "No collecting (1-2)"), selected = lim == 2, onClick = function() setLim(2) end },
+            })
+            section(T("Ordem da rota", "Route order"))
+            check("smartOrder", T("Rota inteligente (pegar tudo no mesmo lugar)", "Smart route (grab everything at the same spot)"), T("Reorganiza os próximos passos pelo caminho mais curto, faz o que está perto antes de voltar para entregar.", "Reorders the next steps by the shortest path and does nearby objectives before going back to turn in."))
+            check("suggestZone", T("Sugerir o guia da zona ao entrar nela", "Suggest the zone guide when entering it"), nil)
 
-        -- 3) Navegação
-        section(T("Navegação", "Navigation"))
-        check("showArrow", T("Seta de navegação", "Navigation arrow"), nil, function() RX.Arrow:Retarget() end)
-        check("travelPlan", T("Rota de viagem (a pé, voo, zepelim/barco)", "Travel route (walk, flight, zeppelin/boat)"), nil)
-        check("mapLine", T("Linha da rota no mapa-múndi", "Route line on the world map"), nil)
-        check("miniLine", T("Linha da rota no minimapa", "Route line on the minimap"), nil)
-        check("useTomTom", T("Destino no TomTom", "Destination in TomTom"), nil)
-        check("checkpoints", T("Checkpoints no TomTom pelo caminho", "TomTom checkpoints along the way"), T("Poucos pontos: etapas de voo/porto e até 3 pontos nas caminhadas longas.", "Few points: flight/dock legs and up to 3 points on long walks."))
-        check("mapPin", T("Pino de destino do próprio jogo", "The game's own waypoint pin"), nil)
+        elseif tab == "auto" then
+            section(T("Aceitar e entregar", "Accept and turn in"))
+            check("autoAccept", T("Auto aceitar quests do guia", "Auto accept guide quests"), T("Só aceita as do guia. Segure SHIFT para desativar na hora.", "Only accepts guide quests. Hold SHIFT to disable it on the spot."))
+            check("autoTurnIn", T("Auto entregar quests do guia", "Auto turn in guide quests"), T("Quando há só uma recompensa. Segure SHIFT para desativar.", "When there is only one reward. Hold SHIFT to disable."))
+            section(T("Abandonar quests que não valem a pena", "Abandon quests that aren't worth it"))
+            check("autoAbandon", T("Abandonar automaticamente", "Abandon automatically"), T("Quando você aceita uma quest assim, avisa no chat e abandona em 8 segundos. |cffffff00/rota manter|r cancela.", "When you accept such a quest, warns in chat and abandons it in 8 seconds. |cffffff00/rota keep|r cancels."), function() UI:ShowPanel("options") end)
+            if RX.db.autoAbandon then
+                check("abandonSlow", T("Lentas", "Slow"), T("Escolta, 8+ itens de drop, entrega em outra zona, profissão que você não tem, PvP.", "Escort, 8+ dropped items, turn-in in another zone, a profession you don't have, PvP."), nil, 24)
+                check("abandonLowXP", T("Pouco XP", "Low XP"), T("Quest cinza (6+ níveis abaixo) ou que dá menos de 1,5% do XP do seu nível.", "Grey quest (6+ levels below) or under 1.5% of your level's XP."), nil, 24)
+                check("abandonNotGuide", T("Fora do guia", "Not in the guide"), T("Nenhum guia do RotaXP usa a quest com o seu estilo atual.", "No RotaXP guide uses the quest with your current style."), nil, 24)
+                y = self:AddText("|cffaaaaaa" .. T("Nunca abandona: quest que abre corrente do guia, que começou com item, que já está pronta, ou lenta cujo item está à venda no leilão.", "Never abandons: quests that open a guide chain, started from an item, already complete, or slow ones whose item is on the AH.") .. "|r", y - 2)
+                buttonRow({ { text = T("Ver últimas abandonadas", "Show last abandoned"), onClick = function() RX.Abandon:ShowLog() end } })
+            end
 
-        -- 4) Aparência
-        section(T("Aparência", "Appearance"))
-        stepper(T("Tamanho da letra da lista", "List font size"), function() return RX.db.fontSize end, function(v) RX.db.fontSize = v; UI:ApplyFonts(); RX:Update(true) end, 8, 22, 1)
-        stepper(T("Escala da janela", "Window scale"), function() return RX.db.scale end, function(v) RX.db.scale = math.floor(v * 10 + 0.5) / 10; UI.frame:SetScale(RX.db.scale) end, 0.6, 1.6, 0.1)
-        stepper(T("Tamanho da seta", "Arrow size"), function() return RX.db.arrowScale or 1 end, function(v) RX.db.arrowScale = math.floor(v * 10 + 0.5) / 10; RX.Arrow:ApplySize() end, 0.5, 2.5, 0.1)
-        stepper(T("Texto da seta (distância e destino)", "Arrow text (distance and target)"), function() return RX.db.arrowFont or 11 end, function(v) RX.db.arrowFont = v; RX.Arrow:ApplySize() end, 8, 24, 1)
-        y = self:AddText(T("Idioma (interface e nomes das quests):", "Language (interface and quest names):"), y - 2, "GameFontNormal")
-        buttonRow({
-            { text = T("Automático", "Automatic") .. " (" .. (RX:ClientLang() == "pt" and "Português" or "English") .. ")", selected = RX.db.langMode == "auto", onClick = function() RX:SetLang("auto"); UI:ShowPanel("options") end },
-            { text = "Português", selected = RX.db.langMode == "pt", onClick = function() RX:SetLang("pt"); UI:ShowPanel("options") end },
-            { text = "English", selected = RX.db.langMode == "en", onClick = function() RX:SetLang("en"); UI:ShowPanel("options") end },
-        })
-        check("locked", T("Travar janelas", "Lock windows"), T("Impede mover/redimensionar.", "Prevents moving/resizing."))
-        buttonRow({
-            { text = T("Tamanho padrão da janela", "Default window size"), onClick = function() RX.db.width, RX.db.height = 380, 260; UI.frame:SetSize(380, 260); RX:Update(true) end },
-            { text = T("Voltar quests puladas", "Restore skipped quests"), onClick = function() RX:UnskipAll(); RX:Print(T("Todas as quests puladas voltaram para a rota.", "All skipped quests are back on the route.")) end },
-        })
-        y = self:AddText("|cffaaaaaa" .. T("Dica: arraste o canto inferior direito da janela do guia para aumentá-la.", "Tip: drag the bottom-right corner of the guide window to make it bigger.") .. "|r", y - 4)
+        elseif tab == "qol" then
+            section(T("Janelas e atalhos", "Windows and shortcuts"))
+            check("questItems", T("Janela de itens da quest (clicar para usar)", "Quest item window (click to use)"), T("Botões para usar os itens que as quests dão. Atalho: Opções > Atalhos > AddOns > RotaXP.", "Buttons to use quest items. Hotkey: Options > Keybindings > AddOns > RotaXP."), function() RX.QuestItems:Refresh() end)
+            section(T("Duo / grupo", "Duo / group"))
+            check("partyShare", T("Compartilhar com quem usa RotaXP no grupo", "Share with RotaXP users in your group"), T("Mesmo guia, progresso do parceiro em cada quest e pontos de farm.", "Same guide, partner progress on each quest and farm spots."))
+            section(T("Quests puladas", "Skipped quests"))
+            buttonRow({
+                { text = T("Voltar quests puladas", "Restore skipped quests"), onClick = function() RX:UnskipAll(); RX:Print(T("Todas as quests puladas voltaram para a rota.", "All skipped quests are back on the route.")) end },
+            })
+
+        elseif tab == "leilao" then
+            local hasAuc = Auctionator and Auctionator.API and Auctionator.API.v1
+            y = self:AddText(hasAuc and ("|cff40ff40" .. T("Auctionator encontrado: preços da última varredura.", "Auctionator found: prices from the last scan.") .. "|r")
+                or ("|cffff6060" .. T("Auctionator não está ligado: sem preços e sem busca automática.", "Auctionator is not enabled: no prices and no automatic search.") .. "|r"), y - 2)
+            section(T("Comprar em vez de dropar", "Buy instead of farming"))
+            check("marketHint", T("Segunda via em cada quest", "Alternative on each quest"), T("Mostra embaixo da quest os itens que dá para comprar no leilão, com preço e quanto falta.", "Shows under the quest the items you can buy on the AH, with price and how many are left."))
+            check("shopWindow", T("Lista de compras ao escolher um guia", "Shopping list when choosing a guide"), T("Janela com todos os itens das quests do guia que dá para comprar.", "Window with every quest item for the guide that can be bought."))
+            check("marketOffer", T("Oferecer busca ao abrir a Casa de Leilões", "Offer a search when opening the Auction House"), T("Lista o que falta das quests do seu log e busca tudo no Auctionator.", "Lists what your log quests still need and searches it all in Auctionator."))
+            buttonRow({
+                { text = T("Abrir lista de compras", "Open shopping list"), onClick = function() RX.Market:ShowWindow(false) end },
+                { text = T("Buscar o que falta (log)", "Search what's missing (log)"), onClick = function() RX.Market:Offer(true) end },
+            })
+
+        elseif tab == "nav" then
+            section(T("Navegação", "Navigation"))
+            check("showArrow", T("Seta de navegação", "Navigation arrow"), nil, function() RX.Arrow:Retarget() end)
+            check("travelPlan", T("Rota de viagem (a pé, voo, zepelim/barco)", "Travel route (walk, flight, zeppelin/boat)"), nil)
+            check("mapLine", T("Linha da rota no mapa-múndi", "Route line on the world map"), nil)
+            check("miniLine", T("Linha da rota no minimapa", "Route line on the minimap"), nil)
+            check("mapPin", T("Pino de destino do próprio jogo", "The game's own waypoint pin"), nil)
+            section("TomTom")
+            check("useTomTom", T("Destino no TomTom", "Destination in TomTom"), nil)
+            check("checkpoints", T("Checkpoints no TomTom pelo caminho", "TomTom checkpoints along the way"), T("Poucos pontos: etapas de voo/porto e até 3 pontos nas caminhadas longas.", "Few points: flight/dock legs and up to 3 points on long walks."))
+
+        elseif tab == "visual" then
+            section(T("Tamanhos", "Sizes"))
+            stepper(T("Tamanho da letra da lista", "List font size"), function() return RX.db.fontSize end, function(v) RX.db.fontSize = v; UI:ApplyFonts(); RX:Update(true) end, 8, 22, 1)
+            stepper(T("Escala da janela", "Window scale"), function() return RX.db.scale end, function(v) RX.db.scale = math.floor(v * 10 + 0.5) / 10; UI.frame:SetScale(RX.db.scale) end, 0.6, 1.6, 0.1)
+            stepper(T("Tamanho da seta", "Arrow size"), function() return RX.db.arrowScale or 1 end, function(v) RX.db.arrowScale = math.floor(v * 10 + 0.5) / 10; RX.Arrow:ApplySize() end, 0.5, 2.5, 0.1)
+            stepper(T("Texto da seta (distância e destino)", "Arrow text (distance and target)"), function() return RX.db.arrowFont or 11 end, function(v) RX.db.arrowFont = v; RX.Arrow:ApplySize() end, 8, 24, 1)
+            section(T("Idioma", "Language"), T("interface e nomes das quests", "interface and quest names"))
+            buttonRow({
+                { text = T("Automático", "Automatic") .. " (" .. (RX:ClientLang() == "pt" and "Português" or "English") .. ")", selected = RX.db.langMode == "auto", onClick = function() RX:SetLang("auto"); UI:ShowPanel("options") end },
+                { text = "Português", selected = RX.db.langMode == "pt", onClick = function() RX:SetLang("pt"); UI:ShowPanel("options") end },
+                { text = "English", selected = RX.db.langMode == "en", onClick = function() RX:SetLang("en"); UI:ShowPanel("options") end },
+            })
+            section(T("Janela do guia", "Guide window"))
+            check("locked", T("Travar janelas", "Lock windows"), T("Impede mover/redimensionar.", "Prevents moving/resizing."))
+            buttonRow({
+                { text = T("Tamanho padrão da janela", "Default window size"), onClick = function() RX.db.width, RX.db.height = 380, 260; UI.frame:SetSize(380, 260); RX:Update(true) end },
+            })
+            y = self:AddText("|cffaaaaaa" .. T("Dica: arraste o canto inferior direito da janela do guia para aumentá-la.", "Tip: drag the bottom-right corner of the guide window to make it bigger.") .. "|r", y - 4)
+        end
     end
     p.child:SetHeight(-y + 10)
 end

@@ -5,7 +5,7 @@ _G.RotaXP = RX
 RX.guides = {}
 RX.guideOrder = {}
 RX.questMeta = {}
-RX.version = "0.20.0"
+RX.version = "0.21.0"
 
 local defaults = {
     style = "speedrun",
@@ -31,7 +31,12 @@ local defaults = {
     autoTurnIn = true,
     partyShare = true,
     questItems = true,
-    autoAbandon = true,    -- abandona sozinho quests que demoram demais
+    autoAbandon = false,   -- abandona sozinho quests que não valem a pena (opcional)
+    abandonSlow = true,    --   lentas (escolta, muitos drops, outra zona)
+    abandonLowXP = true,   --   pouco XP / cinzas
+    abandonNotGuide = true, --  fora dos guias
+    marketHint = true,     -- segunda via no leilão em cada quest
+    marketOffer = true,    -- oferecer busca ao abrir a Casa de Leilões
     shopWindow = true,     -- janela de compras no leilão ao escolher um guia
     useTomTom = true,
     showArrow = true,
@@ -930,7 +935,7 @@ SlashCmdList.ROTAXP = function(msg)
     elseif msg == "itens" or msg == "items" then RX.QuestItems:Toggle()
     elseif msg == "compras" or msg == "comprar" or msg == "shop" then RX.Market:ToggleWindow()
     elseif msg == "manter" or msg == "keep" then RX.Abandon:Keep()
-    elseif msg == "leilao" or msg == "leilão" or msg == "ah" then RX.Market:Offer()
+    elseif msg == "leilao" or msg == "leilão" or msg == "ah" then RX.Market:Offer(true)
     elseif msg:match("^bloqueio") or msg:match("^blocked") then RX.BlockLog:Command(msg:match("^%S+%s+(.*)$"))
     elseif msg == "atualizar" or msg == "update" then
         RX:Print(RX.T("Versão instalada: v" .. RX.version .. ". Para atualizar: feche o jogo (ou fique no menu de personagens) e dê dois cliques em |cffffff00Atualizar-RotaXP.bat|r, na pasta Interface\\AddOns\\RotaXP. Depois entre no jogo (ou /reload). Página: github.com/cleytoncl3/RotaXP",
