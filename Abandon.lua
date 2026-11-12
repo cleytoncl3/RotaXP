@@ -147,19 +147,47 @@ function AB:Do(q)
     self.pending[q] = nil
     if not RX.Q:InLog(q) or not RX.db.autoAbandon then return end
     if self:KeepReason(q, kind) then return end
+    self:AbandonNow(q, self.why[q])
+end
+
+-- abandona já (botão "X" da lista ou automático); a quest sai do guia
+function AB:AbandonNow(q, why)
+    if not (q and RX.Q:InLog(q)) then return false end
     RX.Q:Scan()
+    local name = title(q)
     local ok, done = pcall(abandon, q)
     if ok and done then
         RX:CharState().skipped[q] = true
         local cs = RX:CharState()
         cs.abandonLog = cs.abandonLog or {}
-        table.insert(cs.abandonLog, { when = date and date("%Y-%m-%d %H:%M:%S") or "?", q = q, title = title(q), why = self.why[q] })
+        table.insert(cs.abandonLog, { when = date and date("%Y-%m-%d %H:%M:%S") or "?", q = q, title = name, why = why })
         while #cs.abandonLog > 50 do table.remove(cs.abandonLog, 1) end
-        RX:Print(string.format(T("Abandonei |cffffff00%s|r. Ela não vai mais aparecer no guia.", "Abandoned |cffffff00%s|r. It won't show in the guide anymore."), title(q)))
+        RX:Print(string.format(T("Abandonei |cffffff00%s|r. Ela não vai mais aparecer no guia (desfazer: Opções > Voltar quests puladas).",
+            "Abandoned |cffffff00%s|r. It won't show in the guide anymore (undo: Options > Restore skipped quests)."), name))
         RX:Update(true)
-    else
-        RX:Print(string.format(T("Não consegui abandonar \"%s\": abandone pelo log de quests (L).", "Couldn't abandon \"%s\": abandon it from the quest log (L)."), title(q)))
+        return true
     end
+    RX:Print(string.format(T("Não consegui abandonar \"%s\": abandone pelo log de quests (L).", "Couldn't abandon \"%s\": abandon it from the quest log (L)."), name))
+    return false
+end
+
+-- pergunta antes (botão da lista)
+function AB:Confirm(q)
+    if not (q and RX.Q:InLog(q)) then return end
+    if StaticPopup_Show then
+        StaticPopup_Show("ROTAXP_ABANDON", title(q), nil, q)
+    else
+        self:AbandonNow(q, T("manual", "manual"))
+    end
+end
+
+if StaticPopupDialogs then
+    StaticPopupDialogs["ROTAXP_ABANDON"] = {
+        text = "Abandonar a quest\n|cffffff00%s|r?", button1 = YES or "Sim", button2 = NO or "Não",
+        timeout = 0, whileDead = true, hideOnEscape = true, showAlert = true,
+        OnShow = function(self) if RX.db and RX.db.lang ~= "pt" and self.text then self.text:SetText(string.format("Abandon the quest\n|cffffff00%s|r?", self.data and title(self.data) or "")) end end,
+        OnAccept = function(_, q) AB:AbandonNow(q, T("manual", "manual")) end,
+    }
 end
 
 function AB:OnAccepted(q)

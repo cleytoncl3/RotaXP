@@ -139,8 +139,8 @@ end
 
 local TYPE_ICON = {
     k = "Interface\\CURSOR\\Attack",                  -- espada: só matar mobs
-    d = "Interface\\Buttons\\Button-Backpack-Up",     -- saquinho: coletar item que cai de mob
-    i = "Interface\\Buttons\\Button-Backpack-Up",     -- saquinho: coletar itens
+    d = "Interface\\Icons\\INV_Misc_Bag_10_Green",   -- saco verde: coletar item que cai de mob
+    i = "Interface\\Icons\\INV_Misc_Bag_10_Green",   -- saco verde: coletar itens
     g = "Interface\\CURSOR\\Interact",                -- engrenagem: pegar no chão / clicar em objeto
     o = "Interface\\CURSOR\\Interact",                -- engrenagem: interagir com objeto
     e = "Interface\\GossipFrame\\GossipGossipIcon",   -- balão com 3 pontinhos: só falar com NPC e entregar
@@ -688,6 +688,23 @@ function UI:GetLine(i)
     end)
     cb:SetScript("OnLeave", function() GameTooltip:Hide() end)
     l.check = cb
+    -- botão para abandonar a quest (só aparece se ela estiver no seu log)
+    local ab = CreateFrame("Button", nil, l)
+    ab:SetSize(14, 14)
+    ab:SetPoint("TOP", cb, "BOTTOM", 0, 1)
+    ab:SetNormalTexture("Interface\\Buttons\\UI-GroupLoot-Pass-Up")
+    ab:SetHighlightTexture("Interface\\Buttons\\UI-GroupLoot-Pass-Highlight", "ADD")
+    ab:SetPushedTexture("Interface\\Buttons\\UI-GroupLoot-Pass-Down")
+    ab:SetScript("OnClick", function() local s = l.step; if s and s.q and RX.Abandon then RX.Abandon:Confirm(s.q) end end)
+    ab:SetScript("OnEnter", function(self)
+        GameTooltip:SetOwner(self, "ANCHOR_LEFT")
+        GameTooltip:AddLine(T("Abandonar a quest", "Abandon the quest"), 1, 0.3, 0.3)
+        GameTooltip:AddLine(T("Tira a quest do seu log e do guia (pede confirmação).", "Removes the quest from your log and the guide (asks first)."), 0.8, 0.8, 0.8, true)
+        GameTooltip:Show()
+    end)
+    ab:SetScript("OnLeave", function() GameTooltip:Hide() end)
+    ab:Hide()
+    l.abandon = ab
     l.icon = l:CreateTexture(nil, "ARTWORK")
     l.icon:SetSize(16, 16)
     l.icon:SetPoint("TOPLEFT", 18, -1)
@@ -897,25 +914,29 @@ function UI:Refresh()
         l.step = s
         local isz = RX.db.iconSize or 16
         l.icon:SetSize(isz, isz)
-        l.typeIcon:SetSize(isz - 2, isz - 2)
+        l.typeIcon:SetSize(isz, isz)
         l.icon:SetTexture(self:StepIcon(s))
         l.icon:SetDesaturated(s.t == "C")
         local ti = self:QuestTypeIcon(s)
         l.text:ClearAllPoints()
         if ti then
             l.typeIcon:SetTexture(ti); l.typeIcon:Show()
+            -- ícones de item têm borda: corta a borda para o desenho ficar maior
+            if ti:find("Icons", 1, true) then l.typeIcon:SetTexCoord(0.08, 0.92, 0.08, 0.92) else l.typeIcon:SetTexCoord(0, 1, 0, 1) end
             l.text:SetPoint("TOPLEFT", l.typeIcon, "TOPRIGHT", 3, 0)
         else
             l.typeIcon:Hide()
             l.text:SetPoint("TOPLEFT", l.icon, "TOPRIGHT", 4, 0)
         end
-        l.text:SetWidth(ti and (textW - isz - 1) - (isz - 16) or textW - (isz - 16))
+        l.text:SetWidth(ti and (textW - isz - 3) - (isz - 16) or textW - (isz - 16))
         l.sub:SetWidth(textW - 4)
         local txt, sub = self:StepText(s)
         l.text:SetText(txt)
         l.sub:SetText(sub or "")
         local h = l.text:GetStringHeight() + (sub and (l.sub:GetStringHeight() + 6) or 0) + 6
         h = math.max(h, isz + 4)
+        local canAbandon = s.q and not s.turnin and RX.Q:InLog(s.q) and (s.t == "C" or s.t == "T" or s.t == "A")
+        if canAbandon then l.abandon:Show(); h = math.max(h, 34) else l.abandon:Hide() end
         if s.q and s.q == self.selectedQuest then l.hl:SetColorTexture(0.2, 0.6, 1, 0.18); l.hl:Show()
         elseif i == 1 then l.hl:SetColorTexture(1, 0.5, 0, 0.12); l.hl:Show()
         else l.hl:Hide() end
@@ -933,6 +954,7 @@ function UI:Refresh()
         local l = self:GetLine(1)
         l.step = nil
         l.check:Hide()
+        l.abandon:Hide()
         l.icon:SetTexture("Interface\\RaidFrame\\ReadyCheck-Ready"); l.icon:SetDesaturated(false); l.typeIcon:Hide()
         l.text:ClearAllPoints(); l.text:SetPoint("TOPLEFT", l.icon, "TOPRIGHT", 4, 0)
         local n = RX:NextGuide(g)
