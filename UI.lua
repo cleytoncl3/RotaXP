@@ -1386,6 +1386,8 @@ function UI:ShowPanel(which, sub)
         check("smartOrder", T("Rota inteligente (pegar tudo no mesmo lugar)", "Smart route (grab everything at the same spot)"), T("Reorganiza os próximos passos pelo caminho mais curto e puxa as quests da mesma cidade/base.", "Reorders the next steps by the shortest path and pulls in quests at the same town/hub."))
         check("suggestZone", T("Sugerir o guia da zona ao entrar nela", "Suggest the zone guide when entering it"), nil)
         check("questItems", T("Janela de itens da quest (clicar para usar)", "Quest item window (click to use)"), T("Botões para usar os itens que as quests dão. Atalho: Opções > Atalhos > AddOns > RotaXP.", "Buttons to use quest items. Hotkey: Options > Keybindings > AddOns > RotaXP."), function() RX.QuestItems:Refresh() end)
+        check("autoAbandon", T("Abandonar sozinho quests que demoram demais", "Auto-abandon quests that take too long"), T("Escolta, muitos drops, entrega em outra zona. Avisa antes; /rota manter cancela.", "Escorts, many drops, far turn-ins. Warns first; /rota keep cancels."))
+        check("shopWindow", T("Lista de compras do leilão ao escolher guia", "AH shopping list when choosing a guide"), T("Itens das quests do guia que dá para comprar em vez de dropar. /rota compras reabre.", "Guide quest items you can buy instead of farming. /rota shop reopens."))
 
         -- 3) Navegação
         section(T("Navegação", "Navigation"))

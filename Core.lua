@@ -5,7 +5,7 @@ _G.RotaXP = RX
 RX.guides = {}
 RX.guideOrder = {}
 RX.questMeta = {}
-RX.version = "0.19.0"
+RX.version = "0.20.0"
 
 local defaults = {
     style = "speedrun",
@@ -31,6 +31,8 @@ local defaults = {
     autoTurnIn = true,
     partyShare = true,
     questItems = true,
+    autoAbandon = true,    -- abandona sozinho quests que demoram demais
+    shopWindow = true,     -- janela de compras no leilão ao escolher um guia
     useTomTom = true,
     showArrow = true,
     langMode = "auto",     -- "auto" = idioma do cliente; "pt" ou "en"
@@ -696,7 +698,7 @@ end
 function RX:PLAYER_ENTERING_WORLD() self:Update() end
 function RX:CHAT_MSG_COMBAT_XP_GAIN(msg) if self.Timer then self.Timer:OnXPMessage(msg) end end
 function RX:QUEST_LOG_UPDATE() self:Update() end
-function RX:QUEST_ACCEPTED(q) pcall(self.OnQuestAccepted, self, q); self:Update() end
+function RX:QUEST_ACCEPTED(q) pcall(self.OnQuestAccepted, self, q); if self.Abandon then pcall(self.Abandon.OnAccepted, self.Abandon, q) end; self:Update() end
 function RX:QUEST_REMOVED() self:Update() end
 function RX:QUEST_TURNED_IN(q)
     if q then self.Q.completedCache[q] = true end
@@ -926,6 +928,8 @@ SlashCmdList.ROTAXP = function(msg)
     elseif msg == "agora" or msg == "now" then UI:ShowPanel("now")
     elseif msg == "pular" or msg == "skip" then UI:SkipCurrent()
     elseif msg == "itens" or msg == "items" then RX.QuestItems:Toggle()
+    elseif msg == "compras" or msg == "comprar" or msg == "shop" then RX.Market:ToggleWindow()
+    elseif msg == "manter" or msg == "keep" then RX.Abandon:Keep()
     elseif msg == "leilao" or msg == "leilão" or msg == "ah" then RX.Market:Offer()
     elseif msg:match("^bloqueio") or msg:match("^blocked") then RX.BlockLog:Command(msg:match("^%S+%s+(.*)$"))
     elseif msg == "atualizar" or msg == "update" then
