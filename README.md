@@ -18,6 +18,7 @@ Addon de leveling no estilo Zygor / RestedXP para o **WoW: Forever** (Horda, ní
 - **Lista de compras do guia**: ao escolher um guia, abre uma janela com todos os itens das quests dele que dá para comprar, quantidade e preço, e um botão para buscar no Auctionator (`/rota compras`). Ao abrir a Casa de Leilões, oferece buscar o que falta das quests do log (`/rota leilao`).
 - **Abandono automático (opcional)**: Opções > Automação. Abandona sozinho, com aviso de 8 segundos, quests que não valem a pena: lentas (escolta, 8+ drops, outra zona, profissão), de pouco XP (cinzas ou < 1,5% do nível) ou fora do guia. Cada critério liga/desliga. `/rota manter` cancela. Nunca abandona quest que abre corrente do guia, que começou com item, ou lenta cujo item está à venda no leilão.
 - **Opções em abas**: Guia, Automação, Qualidade de vida, Leilão, Navegação e Aparência.
+- **Farm de ouro**: cada local mostra os drops que mais rendem (chance por abate e preço do leilão/vendedor) e os raros vendáveis. Dados do cmangos classic-db.
 - **Auto aceitar pelo ID da quest**: aceita só as quests do guia, decidindo pelo ID (funciona em qualquer idioma). `/rota aceite` mostra as últimas decisões e o motivo.
 - **Ícone do tipo de quest** ao lado do ! / ?: saquinho (coletar/drop), espada (matar), engrenagem (pegar no chão/interagir), balão com 3 pontinhos (só falar com o NPC).
 - **Log de ações bloqueadas**: `/rota bloqueios`.

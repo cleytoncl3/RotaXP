@@ -453,6 +453,39 @@ local function killsPerHour(classFile, lvl, aoe, mode)
     return 55
 end
 
+-- drops mais valiosos do local (Data/GoldDrops.lua): nome no idioma do jogo com a cor da qualidade,
+-- chance por abate e preço (leilão pelo Auctionator, senão vendedor)
+local QCOLOR = { [0] = "ff9d9d9d", [1] = "ffffffff", [2] = "ff1eff00", [3] = "ff0070dd", [4] = "ffa335ee" }
+local function coin(c)
+    if RX.Market and RX.Market.Money then return RX.Market.Money(c) end
+    return string.format("%.2fg", c / 10000)
+end
+local function dropLine(d)
+    local id, chance, sell, q, en = d[1], d[2], d[3], d[4], d[5]
+    local name = (C_Item and C_Item.GetItemNameByID and C_Item.GetItemNameByID(id)) or (GetItemInfo and (GetItemInfo(id)))
+    if not name and C_Item and C_Item.RequestLoadItemDataByID then pcall(C_Item.RequestLoadItemDataByID, id) end
+    local ah = RX.Market and RX.Market:Price(id)
+    local price = ah and (T("leilão ", "AH ") .. coin(ah)) or (T("vende ", "sells ") .. coin(sell))
+    local pct = chance >= 1 and string.format("%.0f%%", chance) or (chance >= 0.1 and string.format("%.1f%%", chance) or string.format("%.2f%%", chance))
+    return string.format("|c%s%s|r |cffaaaaaa%s · %s|r", QCOLOR[q] or QCOLOR[1], name or en, pct, price)
+end
+function FM:DropLines(e)
+    local d = RX.GoldDrops and RX.GoldDrops[e.map .. ":" .. e.mob]
+    if not d then return nil end
+    local lines = {}
+    if d.top and #d.top > 0 then
+        local p = {}
+        for _, x in ipairs(d.top) do p[#p + 1] = dropLine(x) end
+        lines[#lines + 1] = "|cffffd100" .. T("Drops que mais rendem: ", "Best-paying drops: ") .. "|r" .. table.concat(p, ", ")
+    end
+    if d.rare and #d.rare > 0 then
+        local p = {}
+        for _, x in ipairs(d.rare) do p[#p + 1] = dropLine(x) end
+        lines[#lines + 1] = "|cffffd100" .. T("Raros (vendem bem): ", "Rare (sell well): ") .. "|r" .. table.concat(p, ", ")
+    end
+    return #lines > 0 and table.concat(lines, "\n") or nil
+end
+
 function FM:GoldItems(mode)
     local LV = RX.Leveling
     local _, classFile = UnitClass("player")
@@ -539,6 +572,7 @@ function FM:GoldItems(mode)
                         T("Mobs: ", "Mobs: ") .. table.concat(comp, " · "),
                         "|cffd0d0d0" .. table.concat(names, ", ") .. "|r",
                         T("Drop: ", "Loot: ") .. table.concat(drops, " · "),
+                        FM:DropLines(e) or "",
                         "|cffc8c8c8" .. ((RX:IsPT() and e.pt) or e.en) .. "|r",
                         "|cff80c0ff" .. howHere(classFile, e, pl, mode) .. "|r",
                         dist and string.format(T("~%.0f m de você", "~%.0f m from you"), dist * 0.9144) or (best and ("|cffff9050" .. T("outro continente", "other continent") .. "|r") or ""),
