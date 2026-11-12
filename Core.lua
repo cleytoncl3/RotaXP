@@ -5,7 +5,7 @@ _G.RotaXP = RX
 RX.guides = {}
 RX.guideOrder = {}
 RX.questMeta = {}
-RX.version = "0.22.0"
+RX.version = "0.22.1"
 
 local defaults = {
     style = "speedrun",
@@ -42,6 +42,7 @@ local defaults = {
     showArrow = true,
     langMode = "auto",     -- "auto" = idioma do cliente; "pt" ou "en"
     fontSize = 12,
+    iconSize = 16,         -- ícones (! ? e tipo) na lista de quests
     width = 380,
     height = 260,
     scale = 1,

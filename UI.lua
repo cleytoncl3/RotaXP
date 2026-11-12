@@ -887,6 +887,9 @@ function UI:Refresh()
         local s = steps[i]
         local l = self:GetLine(i)
         l.step = s
+        local isz = RX.db.iconSize or 16
+        l.icon:SetSize(isz, isz)
+        l.typeIcon:SetSize(isz - 2, isz - 2)
         l.icon:SetTexture(self:StepIcon(s))
         l.icon:SetDesaturated(s.t == "C")
         local ti = self:QuestTypeIcon(s)
@@ -898,12 +901,13 @@ function UI:Refresh()
             l.typeIcon:Hide()
             l.text:SetPoint("TOPLEFT", l.icon, "TOPRIGHT", 4, 0)
         end
-        l.text:SetWidth(ti and (textW - 17) or textW)
+        l.text:SetWidth(ti and (textW - isz - 1) - (isz - 16) or textW - (isz - 16))
         l.sub:SetWidth(textW - 4)
         local txt, sub = self:StepText(s)
         l.text:SetText(txt)
         l.sub:SetText(sub or "")
         local h = l.text:GetStringHeight() + (sub and (l.sub:GetStringHeight() + 6) or 0) + 6
+        h = math.max(h, isz + 4)
         if s.q and s.q == self.selectedQuest then l.hl:SetColorTexture(0.2, 0.6, 1, 0.18); l.hl:Show()
         elseif i == 1 then l.hl:SetColorTexture(1, 0.5, 0, 0.12); l.hl:Show()
         else l.hl:Hide() end
@@ -1510,6 +1514,7 @@ function UI:ShowPanel(which, sub)
             section(T("Tamanhos", "Sizes"))
             stepper(T("Tamanho da letra da lista", "List font size"), function() return RX.db.fontSize end, function(v) RX.db.fontSize = v; UI:ApplyFonts(); RX:Update(true) end, 8, 22, 1)
             stepper(T("Escala da janela", "Window scale"), function() return RX.db.scale end, function(v) RX.db.scale = math.floor(v * 10 + 0.5) / 10; UI.frame:SetScale(RX.db.scale) end, 0.6, 1.6, 0.1)
+            stepper(T("Tamanho dos ícones da lista", "List icon size"), function() return RX.db.iconSize or 16 end, function(v) RX.db.iconSize = v; RX:Update(true) end, 12, 32, 2)
             stepper(T("Tamanho da seta", "Arrow size"), function() return RX.db.arrowScale or 1 end, function(v) RX.db.arrowScale = math.floor(v * 10 + 0.5) / 10; RX.Arrow:ApplySize() end, 0.5, 2.5, 0.1)
             stepper(T("Texto da seta (distância e destino)", "Arrow text (distance and target)"), function() return RX.db.arrowFont or 11 end, function(v) RX.db.arrowFont = v; RX.Arrow:ApplySize() end, 8, 24, 1)
             section(T("Idioma", "Language"), T("interface e nomes das quests", "interface and quest names"))
