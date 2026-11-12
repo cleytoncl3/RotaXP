@@ -5,7 +5,7 @@ _G.RotaXP = RX
 RX.guides = {}
 RX.guideOrder = {}
 RX.questMeta = {}
-RX.version = "0.17.0"
+RX.version = "0.18.0"
 
 local defaults = {
     style = "speedrun",
@@ -252,11 +252,16 @@ function RX:StepFilteredByOptions(s, o)
     if f.elite and not (o.showElite or o.groupMode) then return "elite" end
     if f.group and not o.groupMode then return "grupo" end
     if f.dungeon and not o.showDungeon then return "masmorra" end
+    if f.pvp then return "pvp" end
     return nil
 end
 
 local function anyDone(Q, list)
     for _, p in ipairs(list) do if Q:IsCompleted(p) or Q:InLog(p) then return true end end
+    return false
+end
+local function anyCompleted(Q, list)
+    for _, p in ipairs(list) do if Q:IsCompleted(p) then return true end end
     return false
 end
 local function allDone(Q, list)
@@ -273,10 +278,20 @@ function RX:QuestUnavailable(s)
         local orig = s
         s = setmetatable({}, { __index = function(_, k) local v = orig[k]; if v == nil then v = meta[k] end; return v end })
     end
-    if s.pre and not anyDone(Q, s.pre) then return "pré-requisito" end
+    -- pré-requisito só vale ENTREGUE (o NPC só oferece a próxima depois da entrega; estar no log não basta)
+    if s.pre and not anyCompleted(Q, s.pre) then return "pré-requisito" end
     if s.preAll and not allDone(Q, s.preAll) then return "pré-requisito" end
     if s.ex and anyDone(Q, s.ex) then return "exclusiva" end
     if s.req and s.req > level then return "nível " .. s.req end
+    -- começa com um item: só aparece quando o item está na bolsa
+    local si = s.q and self.QuestStart and self.QuestStart[s.q]
+    if s.t == "A" and si then
+        if si == 0 and s.approx then return "início desconhecido" end
+        if si > 0 then
+            local n = (C_Item and C_Item.GetItemCount and C_Item.GetItemCount(si)) or (GetItemCount and GetItemCount(si)) or 0
+            if n <= 0 then return "começa com item" end
+        end
+    end
     if self.db.speedrun and s.lvl and level - s.lvl >= 7 then return "cinza" end
     return nil
 end
@@ -673,19 +688,15 @@ function RX:PLAYER_LOGIN()
     end
     self:Print("v" .. self.version .. RX.T(" carregado. |cff00ff00/rota|r abre/fecha, |cff00ff00/rota ajuda|r mostra os comandos.", " loaded. |cff00ff00/rota|r shows/hides, |cff00ff00/rota help|r lists the commands."))
     -- outro addon aceitando TODAS as quests atrapalha o guia (só o RotaXP deve escolher)
-    local loaded = C_AddOns and C_AddOns.IsAddOnLoaded or IsAddOnLoaded
-    if loaded and loaded("EllesmereUIQuestTracker") and (self.db.euiWarned or 0) < 3 then
-        self.db.euiWarned = (self.db.euiWarned or 0) + 1
-        self:Print(RX.T("|cffff6060Atenção:|r o EllesmereUI (Rastreador de Quests) também aceita/entrega quests sozinho e pega TODAS. Desligue lá: /eqt > 'Aceitar missões automaticamente' e 'Entregar missões automaticamente'. O RotaXP aceita só as quests do guia.",
-            "|cffff6060Warning:|r EllesmereUI (Quest Tracker) also auto accepts/turns in and takes EVERY quest. Turn it off there: /eqt > 'Auto Accept Quests' and 'Auto Turn In Quests'. RotaXP only accepts guide quests."))
-    end
+    -- outro addon aceitando quests sozinho pega quests fora do guia: avisa toda vez que entrar (até ser desligado)
+    if C_Timer then C_Timer.After(4, function() RX:WarnConflicts() end) else self:WarnConflicts() end
     self:Update(true)
 end
 
 function RX:PLAYER_ENTERING_WORLD() self:Update() end
 function RX:CHAT_MSG_COMBAT_XP_GAIN(msg) if self.Timer then self.Timer:OnXPMessage(msg) end end
 function RX:QUEST_LOG_UPDATE() self:Update() end
-function RX:QUEST_ACCEPTED() self:Update() end
+function RX:QUEST_ACCEPTED(q) pcall(self.OnQuestAccepted, self, q); self:Update() end
 function RX:QUEST_REMOVED() self:Update() end
 function RX:QUEST_TURNED_IN(q)
     if q then self.Q.completedCache[q] = true end
@@ -710,6 +721,7 @@ function RX:QUEST_DETAIL()
     if not self.db.autoAccept or autoOff() then return end
     local q = GetQuestID and GetQuestID()
     if q and q > 0 and self:GuideWantsQuest(q) then
+        self.autoAccepting = q
         if QuestGetAutoAccept and QuestGetAutoAccept() then
             if AcknowledgeAutoAcceptQuest then AcknowledgeAutoAcceptQuest() end
         else
@@ -737,49 +749,152 @@ function RX:QUEST_COMPLETE()
     end
 end
 
-function RX:GOSSIP_SHOW()
-    if autoOff() then return end
-    if C_GossipInfo and C_GossipInfo.GetActiveQuests then
-        if self.db.autoTurnIn then
-            for _, info in ipairs(C_GossipInfo.GetActiveQuests() or {}) do
-                if info.isComplete and self:GuideWantsQuest(info.questID, "T") then
-                    C_GossipInfo.SelectActiveQuest(info.questID); return
-                end
-            end
-        end
-        if self.db.autoAccept then
-            for _, info in ipairs(C_GossipInfo.GetAvailableQuests() or {}) do
-                if self:GuideWantsQuest(info.questID, "A") then
-                    C_GossipInfo.SelectAvailableQuest(info.questID); return
-                end
+-- ordem da quest na lista que você está vendo (o NPC com várias quests: pega primeiro a que o guia mostra primeiro)
+function RX:StepRank()
+    local rank = {}
+    local ok, steps = pcall(self.VisibleSteps, self, 60)
+    if ok and steps then
+        for i, s in ipairs(steps) do
+            if s.q then
+                local k = s.q .. s.t
+                if not rank[k] then rank[k] = i end
             end
         end
     end
+    return rank
 end
 
+-- escolhe, entre as opções do NPC, a quest que o guia quer e que aparece mais cedo na lista
+local function pick(self, options, kind)
+    local rank = self:StepRank()
+    local best, bestR
+    for _, o in ipairs(options) do
+        if o.q and self:GuideWantsQuest(o.q, kind) then
+            local r = rank[o.q .. kind] or 1000
+            if not bestR or r < bestR then best, bestR = o, r end
+        end
+    end
+    return best
+end
+
+function RX:GOSSIP_SHOW()
+    if autoOff() then return end
+    if not (C_GossipInfo and C_GossipInfo.GetActiveQuests) then return end
+    if self.db.autoTurnIn then
+        local opts = {}
+        for _, info in ipairs(C_GossipInfo.GetActiveQuests() or {}) do
+            if info.isComplete then opts[#opts + 1] = { q = info.questID } end
+        end
+        local o = pick(self, opts, "T")
+        if o then C_GossipInfo.SelectActiveQuest(o.q); return end
+    end
+    if self.db.autoAccept then
+        local opts = {}
+        for _, info in ipairs(C_GossipInfo.GetAvailableQuests() or {}) do opts[#opts + 1] = { q = info.questID } end
+        local o = pick(self, opts, "A")
+        if o then self.autoAccepting = o.q; C_GossipInfo.SelectAvailableQuest(o.q); return end
+    end
+end
+
+-- tela de saudação (placas "PROCURA-SE", NPCs sem conversa): usa o ID da quest quando o jogo informa,
+-- senão o título no idioma do cliente; sempre respeitando os filtros do estilo (GuideWantsQuest)
 function RX:QUEST_GREETING()
     if autoOff() then return end
     local g = self:CurrentGuide()
     if not g then return end
-    local wantT, wantA = {}, {}
-    local blocked = self:BuildQuestFilter(g)
+    local byTitle = {}
     for _, s in ipairs(g.steps) do
-        if s.q and not blocked[s.q] and s.n then
-            local names = { s.n, s.pn }
-            for _, nm in ipairs(names) do
-                if s.t == "T" then wantT[nm] = true elseif s.t == "A" then wantA[nm] = true end
-            end
+        if s.q and (s.t == "A" or s.t == "T") then
+            local titles = { s.n, s.pn }
+            if C_QuestLog and C_QuestLog.GetTitleForQuestID then titles[#titles + 1] = C_QuestLog.GetTitleForQuestID(s.q) end
+            for _, t in pairs(titles) do if t and t ~= "" then byTitle[s.t .. t] = s.q end end
         end
     end
     if self.db.autoTurnIn then
+        local opts = {}
         for i = 1, (GetNumActiveQuests() or 0) do
             local title, complete = GetActiveTitle(i)
-            if wantT[title] and complete then SelectActiveQuest(i); return end
+            local q = (GetActiveQuestID and GetActiveQuestID(i)) or byTitle["T" .. (title or "")]
+            if complete and q then opts[#opts + 1] = { q = q, i = i } end
         end
+        local o = pick(self, opts, "T")
+        if o then SelectActiveQuest(o.i); return end
     end
     if self.db.autoAccept then
+        local opts = {}
         for i = 1, (GetNumAvailableQuests() or 0) do
-            if wantA[GetAvailableTitle(i)] then SelectAvailableQuest(i); return end
+            local q
+            if GetAvailableQuestInfo then q = select(5, GetAvailableQuestInfo(i)) end
+            q = q or byTitle["A" .. (GetAvailableTitle(i) or "")]
+            if q then opts[#opts + 1] = { q = q, i = i } end
+        end
+        local o = pick(self, opts, "A")
+        if o then self.autoAccepting = o.q; SelectAvailableQuest(o.i); return end
+    end
+end
+
+-- Outros addons que aceitam quests sozinhos (pegam quests fora do guia)
+function RX:Conflicts()
+    local out = {}
+    local eqt = _G.EllesmereUIQuestTracker
+    if eqt and eqt.Cfg then
+        local ok, v = pcall(eqt.Cfg, "autoAccept")
+        if ok and v then out[#out + 1] = RX.T("EllesmereUI Quest Tracker: digite /eqt e desmarque 'Aceitar missões automaticamente' e 'Entregar missões automaticamente'",
+            "EllesmereUI Quest Tracker: type /eqt and untick 'Auto Accept Quests' and 'Auto Turn In Quests'") end
+    end
+    local AA = LibStub and LibStub("AceAddon-3.0", true)
+    if AA then
+        local ok, rxp = pcall(AA.GetAddon, AA, "RXPGuides", true)
+        local p = ok and rxp and rxp.settings and rxp.settings.profile
+        if p and p.enableQuestAutomation then out[#out + 1] = RX.T("RestedXP: nas opções do RestedXP desmarque a automação de quests (ou desative o RestedXP enquanto usa o RotaXP)",
+            "RestedXP: untick quest automation in the RestedXP options (or disable RestedXP while using RotaXP)") end
+    end
+    return out
+end
+
+function RX:WarnConflicts()
+    if not self.db.autoAccept then return end
+    local c = self:Conflicts()
+    if #c == 0 then return end
+    self:Print(RX.T("|cffff6060Atenção:|r outro addon também aceita quests sozinho e pega quests que NÃO são do guia:",
+        "|cffff6060Warning:|r another addon also auto-accepts quests and takes quests that are NOT in the guide:"))
+    for _, l in ipairs(c) do self:Print("  - " .. l) end
+end
+
+-- Toda quest aceita fica registrada (para conferir depois) e avisa se ela não é do guia
+function RX:OnQuestAccepted(q)
+    if not q then return end
+    local cs = self:CharState()
+    local byUs = self.autoAccepting == q
+    self.autoAccepting = nil
+    local g = self:CurrentGuide()
+    local inGuide = self:GuideWantsQuest(q, "A") or self:GuideWantsQuest(q)
+    local title = (C_QuestLog and C_QuestLog.GetTitleForQuestID and C_QuestLog.GetTitleForQuestID(q)) or self.Q:Title(q) or ("#" .. q)
+    cs.acceptLog = cs.acceptLog or {}
+    table.insert(cs.acceptLog, { when = date and date("%Y-%m-%d %H:%M:%S") or "?", q = q, title = title, guide = g and g.id, inGuide = inGuide and true or false, byRotaXP = byUs })
+    while #cs.acceptLog > 80 do table.remove(cs.acceptLog, 1) end
+    if g and not inGuide then
+        local c = self:Conflicts()
+        self:Print(string.format(RX.T("|cffffd040Você aceitou \"%s\", que não faz parte deste guia%s.|r", "|cffffd040You accepted \"%s\", which is not part of this guide%s.|r"), title,
+            (#c > 0) and RX.T(" (outro addon aceitou sozinho: veja o aviso)", " (another addon auto-accepted it: see the warning)") or ""))
+        if #c > 0 then self:WarnConflicts() end
+    end
+    -- mesmo NPC com mais quests do guia: o jogo fecha a janela depois de aceitar, então avisa para falar de novo
+    if g then
+        local src
+        for _, s in ipairs(g.steps) do if s.q == q and s.t == "A" then src = s break end end
+        if src and src.npc then
+            local more = {}
+            for _, s in ipairs(g.steps) do
+                if s.t == "A" and s.q ~= q and s.npc == src.npc and not self.Q:InLog(s.q) and not self.Q:IsCompleted(s.q)
+                    and self:GuideWantsQuest(s.q, "A") and not self:QuestUnavailable(s) then
+                    more[#more + 1] = self:QName(s) or s.n
+                end
+            end
+            if #more > 0 then
+                self:Print(string.format(RX.T("Fale de novo com |cffffff00%s|r: ainda tem %d quest(s) do guia: %s", "Talk to |cffffff00%s|r again: %d more guide quest(s): %s"),
+                    self:NpcName(src) or src.npc, #more, table.concat(more, ", ")))
+            end
         end
     end
 end

@@ -65,6 +65,12 @@ function QI:Collect()
             if not seen[id] then seen[id] = true; list[#list + 1] = { id = id, q = q } end
         end
     end
+    -- itens que COMEÇAM uma quest do guia (ex.: um relatório que caiu de um mob)
+    for q, id in pairs(RX.QuestStart or {}) do
+        if id > 0 and not seen[id] and itemCount(id) > 0 and not RX.Q:InLog(q) and not RX.Q:IsCompleted(q) then
+            seen[id] = true; list[#list + 1] = { id = id, q = q, starts = true }
+        end
+    end
     for _, id in ipairs(bagQuestItems()) do
         if not seen[id] then seen[id] = true; list[#list + 1] = { id = id } end
     end

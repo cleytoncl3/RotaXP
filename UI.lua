@@ -252,13 +252,17 @@ function UI:StepText(s)
                 key and string.format(T(" (ou tecla %s)", " (or key %s)"), key) or ""))
         end
     end
+    if t == "A" and s.startItem then
+        local nm = (C_Item and C_Item.GetItemNameByID and C_Item.GetItemNameByID(s.startItem)) or (GetItemInfo and (GetItemInfo(s.startItem))) or T("o item", "the item")
+        add("|cffffb040", string.format(T("Esta quest começa com o item %s, que está na sua bolsa: clique com o botão direito nele (ou no ícone da janela Itens da quest).", "This quest starts from the item %s in your bags: right-click it (or click it in the Quest items window)."), nm))
+    end
     if t == "A" then
         local pv = UI:QuestPreview(s)
         if pv then add("|cffffe0a0", pv) end
     end
     if npc and (t == "A" or t == "T") then
         add("|cffb0b0b0", npc .. (s.approx and ("  ·  " .. T("local aproximado: procure o \"!\" na base", "approximate spot: look for the \"!\" at the hub")) or ""))
-    elseif s.approx then
+    elseif s.approx and not s.startItem then
         add("|cffb0b0b0", T("Local aproximado: procure o \"!\" na base", "Approximate spot: look for the \"!\" at the hub"))
     end
     if t == "C" and s.q then

@@ -144,8 +144,8 @@ function Arrow:FinalTarget(steps)
         self.manual = nil
     end
     for _, s in ipairs(steps) do
-        if s.m and s.x then return s end
-        if s.q or s.t == "G" then return nil end -- não aponta além de um passo de quest sem coordenada
+        if s.m and s.x and not s.noNav then return s end
+        if not s.noNav and (s.q or s.t == "G") then return nil end -- não aponta além de um passo de quest sem coordenada
     end
     return nil
 end

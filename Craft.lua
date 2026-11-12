@@ -70,6 +70,11 @@ function RX:RegisterGuide(g, ...)
     local r = origRegister(self, g, ...)
     for _, s in ipairs(g.steps or {}) do
         if s.q and s.flags and RX.QuestCraft and RX.QuestCraft[s.q] then s.flags.craft = true end
+        if s.q and s.flags and RX.QuestPvP and RX.QuestPvP[s.q] then s.flags.pvp = true end
+        -- quest que começa com item: não há NPC para onde ir
+        local si = s.q and RX.QuestStart and RX.QuestStart[s.q]
+        if s.t == "A" and si and si > 0 then s.startItem = si; s.noNav = true end
+        if s.n == "undefined" then s.n = "Quest " .. s.q end
     end
     return r
 end
