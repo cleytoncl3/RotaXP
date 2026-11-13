@@ -28,10 +28,13 @@
 
 ## Install
 
-1. Download **RouteXP-x.y.z-github.zip** from the [latest release](https://github.com/cleytoncl3/RouteXP/releases/latest). It already contains a folder named **`RouteXP`**. (If you use **Code → Download ZIP** instead, the folder comes as `RouteXP-main` and you **must rename it to `RouteXP`**, or the game won't load it.)
-2. Extract it.
-3. Put the `RouteXP` folder in `World of Warcraft\_forever_\Interface\AddOns\`, so you end up with `Interface\AddOns\RouteXP\RouteXP.toc`.
-4. In game, type `/rota` or `/routexp`.
+1. **Download: [RouteXP.zip](https://github.com/cleytoncl3/RouteXP/releases/latest/download/RouteXP.zip)** (always the latest version).
+2. **Double-click** `RouteXP.zip` to open it. Inside there is only one folder: **`RouteXP`**.
+3. **Drag that `RouteXP` folder** into `World of Warcraft\_forever_\Interface\AddOns\`.
+4. Check: you must end up with `Interface\AddOns\RouteXP\RouteXP.toc`. In game, type `/rota`.
+
+> Do **not** use the green **Code → Download ZIP** button: it gives a `RouteXP-main` folder that the game won't load.
+> If you used Windows **Extract All**, it adds an extra outer folder named after the zip: open it and move only the inner **`RouteXP`** folder (the one that has `RouteXP.toc` inside).
 
 ## Update
 

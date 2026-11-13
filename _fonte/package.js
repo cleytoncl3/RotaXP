@@ -5,7 +5,7 @@
 //  node _fonte/package.js <saída>            -> CurseForge: sem nada de GitHub nem do .bat
 //      fora: _fonte/, *.bat, README.md, RotaXP.toc + Legacy.lua, arquivos do git
 //      Dist.lua vira RX.DIST = "curseforge"; o RouteXP.toc perde a linha X-Website
-//  node _fonte/package.js <saída> --github   -> zip para a página de Releases do GitHub
+//  node _fonte/package.js <saída> --github   -> RouteXP.zip para a página de Releases do GitHub
 //      leva o README e o Atualizar-RouteXP.bat; fora: _fonte/, RotaXP.toc + Legacy.lua
 // Uso: na pasta do addon.
 const fs = require('fs'), path = require('path'), { execSync } = require('child_process');
@@ -42,7 +42,7 @@ if (!GITHUB) for (const f of files) {
   if (/github|Atualizar-RouteXP|\.bat\b/i.test(fs.readFileSync(p, 'utf8'))) bad.push(f);
 }
 // zip com "/" nos caminhos e a pasta RouteXP na raiz
-const zip = path.join(OUT, `RouteXP-${version}${GITHUB ? '-github' : ''}.zip`);
+const zip = path.join(OUT, GITHUB ? 'RouteXP.zip' : `RouteXP-${version}.zip`);   // GitHub: sempre RouteXP.zip (link direto ./releases/latest/download/RouteXP.zip)
 fs.rmSync(zip, { force: true });
 const ps1 = path.join(OUT, 'make-zip.ps1');
 fs.writeFileSync(ps1, [
