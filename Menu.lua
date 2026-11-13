@@ -233,8 +233,7 @@ function M:GuideItems(lo, hi)
                     pct > 0 and string.format(T(" · %.0f%% feito", " · %.0f%% done"), pct) or ""),
                 selected = (cur == g),
                 tip = LF(g, "desc"),
-                onClick = function() RX:SetGuide(g.id) end,
-                children = function() return M:VariantItems(g) end,
+                onClick = function() RX:SetGuide(g.id); M:Refresh() end,
             })
         end
     end
@@ -307,7 +306,7 @@ function M:RootItems()
     table.insert(list, {
         text = T("Aqui: ", "Here: ") .. "|cff80c0ff" .. (zoneName or "?") .. "|r",
         sub = zg and string.format(T("%s · níveis %d-%d", "%s · levels %d-%d"), RX:GuideName(zg), zg.min, zg.max) or T("sem guia para esta zona", "no guide for this zone"),
-        children = zg and function() return M:VariantItems(zg) end or nil,
+        onClick = zg and function() RX:SetGuide(zg.id); M:Refresh() end or nil,
     })
     -- faixas
     table.insert(list, { header = true, text = T("Guias por nível", "Guides by level") })
@@ -322,32 +321,8 @@ function M:RootItems()
             children = function() return M:GuideItems(lo, hi) end,
         })
     end
-    -- ajustes rápidos
-    table.insert(list, { header = true, text = T("Ajustes", "Settings") })
-    table.insert(list, { text = T("Rota: ", "Route: ") .. "|cffffffff" .. LF(RX:CurrentRoute(), "name") .. "|r", children = function() return M:RouteItems() end })
-    table.insert(list, { text = T("Estilo: ", "Style: ") .. "|cffffffff" .. styleName(RX.db.style) .. "|r", children = function() return M:StyleItems() end })
-    local rc, rxp = RX.Turnin:Count()
-    table.insert(list, {
-        text = (RX.db.turninMode and T("Sair do Modo Entregas", "Leave Turn-in mode") or string.format(T("Modo Entregas (%d · +%s xp)", "Turn-in mode (%d · +%s xp)"), rc, fmtXP(rxp))),
-        onClick = function() RX.Turnin:Toggle() end,
-    })
-    table.insert(list, {
-        text = RX.db.nearbyMode and T("Sair do Perto de mim", "Leave Nearby") or T("Perto de mim", "Nearby"),
-        onClick = function() RX.Nearby:Toggle() end,
-    })
-    if RX:CurrentGuide() then
-        table.insert(list, {
-            text = RX:ShowAllHere() and T("Voltar este guia ao meu estilo", "Back to my style for this guide") or T("Mostrar quests escondidas deste guia", "Show hidden quests of this guide"),
-            sub = RX:ShowAllHere() and T("esconde de novo as lentas e cinzas", "hides slow and grey quests again")
-                or T("mostra as lentas, de coleta e cinzas só neste guia (bom para pegar o que ficou para trás)", "shows slow, collecting and grey quests only in this guide (good for leftovers)"),
-            onClick = function() RX:ToggleShowAll(); M:Refresh() end,
-        })
-        table.insert(list, {
-            text = "|cffff8080" .. T("Limpar guia atual", "Clear current guide") .. "|r",
-            sub = T("esvazia a lista para escolher outro guia (não abandona suas quests)", "empties the list so you can pick another guide (does not abandon your quests)"),
-            onClick = function() RX:ClearGuide(); M:Refresh() end,
-        })
-    end
+    -- (estilo, rota, coleta, modos e "limpar guia" ficam em Opções > Guia e estilo)
+    table.insert(list, { header = true, text = T("Grupo", "Group") })
     -- grupo: share de guia/progresso com quem usa o RotaXP
     if RX.Party then
         local n = RX.Party:Count()

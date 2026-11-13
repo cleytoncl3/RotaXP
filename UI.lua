@@ -1624,7 +1624,7 @@ function UI:ShowPanel(which, sub)
 
         -- abas: cada assunto no seu lugar
         local TABS = {
-            { "guia", T("Estilo e rota", "Style & route") }, { "auto", T("Automação", "Automation") }, { "qol", T("Qualidade de vida", "Quality of life") },
+            { "guia", T("Guia e estilo", "Guide & style") }, { "auto", T("Automação", "Automation") }, { "qol", T("Qualidade de vida", "Quality of life") },
             { "leilao", T("Leilão", "Auction House") }, { "nav", T("Navegação", "Navigation") }, { "visual", T("Aparência", "Appearance") },
         }
         local tab = UI.optTab or "guia"
@@ -1635,29 +1635,59 @@ function UI:ShowPanel(which, sub)
         buttonRow(tabDefs)
 
         if tab == "guia" then
-            section(T("Estilo de leveling", "Leveling style"), T("atalhos prontos; depois ajuste abaixo", "ready presets; then fine-tune below"))
+            -- 1) guia atual
+            local g = RX:CurrentGuide()
+            section(T("Guia atual", "Current guide"), g and RX:GuideName(g) or T("nenhum", "none"))
+            buttonRow({
+                { text = T("Escolher guia", "Pick a guide"), onClick = function() UI:ToggleMenu() end },
+                { text = RX:ShowAllHere() and T("Voltar ao meu estilo", "Back to my style") or T("Mostrar quests escondidas", "Show hidden quests"),
+                  tip = T("Só neste guia: mostra também as lentas, de coleta e cinzas (bom para pegar o que ficou para trás).", "This guide only: also shows slow, collecting and grey quests (good for leftovers)."),
+                  onClick = function() RX:ToggleShowAll(); UI:ShowPanel("options") end },
+                { text = "|cffff8080" .. T("Limpar guia atual", "Clear current guide") .. "|r", tip = T("Esvazia a lista para escolher outro guia. Não abandona nenhuma quest do jogo.", "Empties the list so you can pick another guide. Does not abandon any in-game quest."),
+                  onClick = function() RX:ClearGuide(); UI:ShowPanel("options") end },
+            })
+            buttonRow({
+                { text = RX.db.turninMode and T("Sair do Modo Entregas", "Leave Turn-in mode") or T("Modo Entregas", "Turn-in mode"), selected = RX.db.turninMode,
+                  tip = T("Lista só as quests prontas, em rota.", "Lists only ready quests, routed."), onClick = function() RX.Turnin:Toggle(); UI:ShowPanel("options") end },
+                { text = RX.db.nearbyMode and T("Sair do Perto de mim", "Leave Nearby") or T("Perto de mim", "Nearby"), selected = RX.db.nearbyMode,
+                  tip = T("Quests mais próximas de todos os guias.", "Closest quests from every guide."), onClick = function() RX.Nearby:Toggle(); UI:ShowPanel("options") end },
+            })
+
+            -- 2) quests de coleta: uma escolha só
+            section(T("Quests de coleta", "Collecting quests"), T("itens que caem de mobs", "items dropped by mobs"))
+            local lim = RX.db.collectMax
+            if (lim == nil or lim == false) and RX.db.skipCollect then lim = 4 end
+            local function setLim(v) RX.db.collectMax = v; RX.db.skipCollect = false; custom(); RX:Update(true); UI:ShowPanel("options") end
+            buttonRow({
+                { text = T("Aceitar todas", "Accept all"), selected = not lim, onClick = function() setLim(false) end },
+                { text = T("Não aceitar mais de 10", "Skip more than 10"), selected = lim == 10, onClick = function() setLim(10) end },
+                { text = T("Não aceitar mais de 5", "Skip more than 5"), selected = lim == 5, onClick = function() setLim(5) end },
+                { text = T("Não aceitar coleta", "Skip collecting"), selected = lim == 2, onClick = function() setLim(2) end },
+            })
+
+            -- 3) outras quests que o guia mostra ou pula
+            section(T("Outras quests", "Other quests"))
+            check("speedrun", T("Pular quests lentas", "Skip slow quests"), T("Escoltas, entregas em outra zona, pouco XP e quests cinzas.", "Escorts, deliveries to another zone, low XP and grey quests."), custom)
+            check("showElite", T("Mostrar quests de elite", "Show elite quests"), T("Mobs fortes: melhor em duo/grupo.", "Strong mobs: better in a duo/group."), custom)
+            check("showDungeon", T("Mostrar quests de masmorra", "Show dungeon quests"), T("Uldaman, ZF, Maraudon, ST, BRD...", "Uldaman, ZF, Maraudon, ST, BRD..."), custom)
+            check("groupMode", T("Estou em duo / grupo", "I'm in a duo / group"), T("Pula quests de muito drop (cada um precisa do seu) e mostra elites.", "Skips heavy-drop quests (everyone needs their own) and shows elites."), custom)
+
+            -- 4) estilo pronto e rota (atalhos que ligam as opções acima de uma vez)
+            section(T("Atalhos de estilo", "Style presets"), T("ligam várias opções acima de uma vez", "set several options above at once"))
             local presets = {}
             for _, st in ipairs(RX.Styles) do
                 table.insert(presets, { text = LF(st, "name"), selected = (st.id == RX.db.style), tip = LF(st, "desc"),
                     onClick = function() RX:ApplyStyle(st.id); UI:ShowPanel("options") end })
             end
             buttonRow(presets)
-            section(T("Quais quests o guia mostra", "Which quests the guide shows"))
-            check("speedrun", T("Pular quests lentas", "Skip slow quests"), T("Escoltas, entregas em outra zona, pouco XP e quests cinzas.", "Escorts, deliveries to another zone, low XP and grey quests."), custom)
-            check("showDungeon", T("Mostrar quests de masmorra", "Show dungeon quests"), T("Uldaman, ZF, Maraudon, ST, BRD...", "Uldaman, ZF, Maraudon, ST, BRD..."), custom)
-            check("showElite", T("Mostrar quests de elite", "Show elite quests"), T("Mobs fortes: melhor em duo/grupo.", "Strong mobs: better in a duo/group."), custom)
-            check("groupMode", T("Duo / grupo", "Duo / group"), T("Pula quests de 10+ itens de drop e mostra elites.", "Skips 10+ dropped-item quests and shows elites."), custom)
-            y = self:AddText(T("Quests de coletar itens que caem de mobs:", "Quests collecting items dropped by mobs:"), y - 2, "GameFontNormal")
-            local lim = RX.db.collectMax
-            local function setLim(v) RX.db.collectMax = v; RX.db.skipCollect = false; custom(); RX:Update(true); UI:ShowPanel("options") end
-            buttonRow({
-                { text = T("Sem limite", "No limit"), selected = (not lim) and not RX.db.skipCollect, onClick = function() setLim(false) end },
-                { text = T("Até 10 itens", "Up to 10"), selected = lim == 10, onClick = function() setLim(10) end },
-                { text = T("Até 5 itens", "Up to 5"), selected = lim == 5, onClick = function() setLim(5) end },
-                { text = T("Sem coleta (1-2)", "No collecting (1-2)"), selected = lim == 2, onClick = function() setLim(2) end },
-            })
-            section(T("Ordem da rota", "Route order"))
-            check("smartOrder", T("Rota inteligente (pegar tudo no mesmo lugar)", "Smart route (grab everything at the same spot)"), T("Reorganiza os próximos passos pelo caminho mais curto, faz o que está perto antes de voltar para entregar.", "Reorders the next steps by the shortest path and does nearby objectives before going back to turn in."))
+            section(T("Rota até o 60", "Route to 60"), T("ordem das zonas", "zone order"))
+            local routes = {}
+            for _, r in ipairs(RX.Routes) do
+                table.insert(routes, { text = LF(r, "name"), selected = (r.id == RX.db.route), tip = LF(r, "desc"),
+                    onClick = function() RX:SetRoute(r.id); UI:ShowPanel("options") end })
+            end
+            buttonRow(routes)
+            check("smartOrder", T("Rota inteligente (pegar tudo no mesmo lugar)", "Smart route (grab everything at the same spot)"), T("Faz o que está perto antes de voltar para entregar.", "Does nearby objectives before going back to turn in."))
             check("suggestZone", T("Sugerir o guia da zona ao entrar nela", "Suggest the zone guide when entering it"), nil)
 
         elseif tab == "auto" then
@@ -1681,10 +1711,9 @@ function UI:ShowPanel(which, sub)
             check("questItems", T("Janela de itens da quest (clicar para usar)", "Quest item window (click to use)"), T("Botões para usar os itens que as quests dão. Atalho: Opções > Atalhos > AddOns > RouteXP.", "Buttons to use quest items. Hotkey: Options > Keybindings > AddOns > RouteXP."), function() RX.QuestItems:Refresh() end)
             section(T("Duo / grupo", "Duo / group"))
             check("partyShare", T("Compartilhar com quem usa RouteXP no grupo", "Share with RouteXP users in your group"), T("Mesmo guia, progresso do parceiro em cada quest e pontos de farm.", "Same guide, partner progress on each quest and farm spots."))
-            section(T("Quests puladas e guia", "Skipped quests and guide"))
+            section(T("Quests puladas", "Skipped quests"))
             buttonRow({
                 { text = T("Voltar quests puladas", "Restore skipped quests"), onClick = function() RX:UnskipAll(); RX:Print(T("Todas as quests puladas voltaram para a rota.", "All skipped quests are back on the route.")) end },
-                { text = "|cffff8080" .. T("Limpar guia atual", "Clear current guide") .. "|r", tip = T("Esvazia a lista do guia para você escolher outro. Não abandona nenhuma quest do jogo.", "Empties the guide list so you can pick another. Does not abandon any in-game quest."), onClick = function() RX:ClearGuide(); UI:ShowPanel("options") end },
             })
 
         elseif tab == "leilao" then

@@ -5,7 +5,7 @@ _G.RotaXP = RX
 RX.guides = {}
 RX.guideOrder = {}
 RX.questMeta = {}
-RX.version = "0.25.0"
+RX.version = "0.25.1"
 RX.NAME = "RouteXP"
 RX.ICON = "Interface\\AddOns\\RotaXP\\Media\\icon"
 
