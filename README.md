@@ -28,14 +28,16 @@
 
 ## Install
 
-1. Download the ZIP: **Code → Download ZIP**.
-2. Extract it and rename the folder to **`RouteXP`**.
-3. Put the folder in `World of Warcraft\_forever_\Interface\AddOns\RouteXP`.
+1. Download **RouteXP-x.y.z-github.zip** from the [latest release](https://github.com/cleytoncl3/RouteXP/releases/latest). It already contains a folder named **`RouteXP`**. (If you use **Code → Download ZIP** instead, the folder comes as `RouteXP-main` and you **must rename it to `RouteXP`**, or the game won't load it.)
+2. Extract it.
+3. Put the `RouteXP` folder in `World of Warcraft\_forever_\Interface\AddOns\`, so you end up with `Interface\AddOns\RouteXP\RouteXP.toc`.
 4. In game, type `/rota` or `/routexp`.
 
 ## Update
 
-With the game closed (or at the character screen), double-click **`Atualizar-RouteXP.bat`** inside the addon folder. It downloads the newest version and replaces the files. Your settings live in the `WTF` folder and are kept. Then log in or type `/reload`.
+With the game closed, double-click **`Atualizar-RouteXP.bat`** inside the addon folder. It downloads the newest version into `Interface\AddOns\RouteXP` and replaces the files. Your settings live in the `WTF` folder and are kept. Then log in.
+
+**Coming from the old name (RotaXP)?** Close the game and run `Atualizar-RouteXP.bat` from the old `RotaXP` folder: it installs RouteXP in the right folder, copies your RotaXP settings and progress, and deletes the old folder.
 
 If WoW is installed in *Program Files* and you get a permission error, right-click the `.bat` and choose **Run as administrator**.
 

@@ -3,7 +3,7 @@
 ## Notes: O RotaXP mudou de nome para RouteXP. Este arquivo só guarda suas configurações antigas até o RouteXP copiá-las.
 ## Notes-ptBR: O RotaXP mudou de nome para RouteXP. Este arquivo só guarda suas configurações antigas até o RouteXP copiá-las.
 ## Author: cleytoncl3
-## Version: 0.26.2
+## Version: 0.26.3
 ## SavedVariables: RotaXPDB
 ## SavedVariablesPerCharacter: RotaXPCharDB
 ## IconTexture: Interface\AddOns\RotaXP\Media\icon

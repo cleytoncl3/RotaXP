@@ -1,14 +1,19 @@
-// Monta o pacote do CurseForge: <saida>/RouteXP/ + <saida>/RouteXP-<versão>.zip
-// Sem nada de GitHub nem do atualizador .bat (no CurseForge o app atualiza sozinho):
-//  - fora: _fonte/, *.bat, README.md, RotaXP.toc + Legacy.lua (aviso do nome antigo), arquivos do git
-//  - Dist.lua vira RX.DIST = "curseforge" (mensagens de atualização falam só do app)
-//  - o RouteXP.toc perde a linha X-Website
-// Uso (na pasta do addon): node _fonte/package.js <pasta de saída>
+// Monta o pacote do addon: <saida>/RouteXP/ + <saida>/RouteXP-<versão>[-github].zip
+// O zip tem sempre a pasta RouteXP na raiz (o jogo exige que a pasta tenha o nome do .toc)
+// e caminhos com "/" (o Compress-Archive do Windows grava "\", que outros programas leem errado).
+//
+//  node _fonte/package.js <saída>            -> CurseForge: sem nada de GitHub nem do .bat
+//      fora: _fonte/, *.bat, README.md, RotaXP.toc + Legacy.lua, arquivos do git
+//      Dist.lua vira RX.DIST = "curseforge"; o RouteXP.toc perde a linha X-Website
+//  node _fonte/package.js <saída> --github   -> zip para a página de Releases do GitHub
+//      leva o README e o Atualizar-RouteXP.bat; fora: _fonte/, RotaXP.toc + Legacy.lua
+// Uso: na pasta do addon.
 const fs = require('fs'), path = require('path'), { execSync } = require('child_process');
 const OUT = path.resolve(process.argv[2] || 'dist');
+const GITHUB = process.argv.includes('--github');
 const files = execSync('git ls-files', { encoding: 'utf8' }).split(/\r?\n/).filter(Boolean)
-  .filter(f => !/^_fonte\//.test(f) && !/\.bat$/i.test(f) && !/^\.git/.test(f)
-    && !['README.md', 'RotaXP.toc', 'Legacy.lua'].includes(f));
+  .filter(f => !/^_fonte\//.test(f) && !/^\.git/.test(f) && !['RotaXP.toc', 'Legacy.lua'].includes(f))
+  .filter(f => GITHUB || (!/\.bat$/i.test(f) && f !== 'README.md'));
 const dest = path.join(OUT, 'RouteXP');
 fs.rmSync(dest, { recursive: true, force: true });
 for (const f of files) {
@@ -16,26 +21,40 @@ for (const f of files) {
   fs.mkdirSync(path.dirname(to), { recursive: true });
   fs.copyFileSync(f, to);
 }
-fs.writeFileSync(path.join(dest, 'Dist.lua'), [
-  'local _, RX = ...',
-  'RX.DIST = "curseforge"',
-  'function RX:UpdateHow()',
-  '    return RX.T("As atualizações chegam pelo app do CurseForge.", "Updates come through the CurseForge app.")',
-  'end', ''].join('\n'));
 const tocPath = path.join(dest, 'RouteXP.toc');
-let toc = fs.readFileSync(tocPath, 'utf8').split(/\r?\n/).filter(l => !/^## X-Website:/.test(l)).join('\r\n');
-fs.writeFileSync(tocPath, toc);
+let toc = fs.readFileSync(tocPath, 'utf8');
+if (!GITHUB) {
+  fs.writeFileSync(path.join(dest, 'Dist.lua'), [
+    'local _, RX = ...',
+    'RX.DIST = "curseforge"',
+    'function RX:UpdateHow()',
+    '    return RX.T("As atualizações chegam pelo app do CurseForge.", "Updates come through the CurseForge app.")',
+    'end', ''].join('\n'));
+  toc = toc.split(/\r?\n/).filter(l => !/^## X-Website:/.test(l)).join('\r\n');
+  fs.writeFileSync(tocPath, toc);
+}
 const version = (toc.match(/## Version: (\S+)/) || [])[1] || 'dev';
-// nada de GitHub nem .bat no pacote
+// CurseForge: nada de GitHub nem .bat no pacote
 const bad = [];
-for (const f of files) {
+if (!GITHUB) for (const f of files) {
   const p = path.join(dest, f);
   if (!fs.existsSync(p) || /\.(tga|png|blp)$/i.test(f)) continue;
-  const txt = fs.readFileSync(p, 'utf8');
-  if (/github|Atualizar-RouteXP|\.bat\b/i.test(txt)) bad.push(f);
+  if (/github|Atualizar-RouteXP|\.bat\b/i.test(fs.readFileSync(p, 'utf8'))) bad.push(f);
 }
-const zip = path.join(OUT, `RouteXP-${version}.zip`);
+// zip com "/" nos caminhos e a pasta RouteXP na raiz
+const zip = path.join(OUT, `RouteXP-${version}${GITHUB ? '-github' : ''}.zip`);
 fs.rmSync(zip, { force: true });
-execSync(`powershell -NoProfile -Command "Compress-Archive -Path '${dest}' -DestinationPath '${zip}'"`);
+const ps1 = path.join(OUT, 'make-zip.ps1');
+fs.writeFileSync(ps1, [
+  'param([string]$src, [string]$out)',
+  'Add-Type -AssemblyName System.IO.Compression, System.IO.Compression.FileSystem',
+  "$zip = [System.IO.Compression.ZipFile]::Open($out, 'Create')",
+  'Get-ChildItem -LiteralPath $src -Recurse -File | ForEach-Object {',
+  "  $rel = 'RouteXP/' + $_.FullName.Substring($src.Length + 1).Replace([string][char]92, '/')",
+  '  [void][System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile($zip, $_.FullName, $rel)',
+  '}',
+  '$zip.Dispose()', ''].join('\r\n'));
+execSync(`powershell -NoProfile -ExecutionPolicy Bypass -File "${ps1}" -src "${dest}" -out "${zip}"`);
+fs.rmSync(ps1, { force: true });
 console.log(`${files.length} arquivos · ${zip}`);
-if (bad.length) console.log('ATENÇÃO, citam GitHub/.bat fora do ramo do GitHub: ' + bad.join(', '));
+if (bad.length) console.log('ATENÇÃO, citam GitHub/.bat: ' + bad.join(', '));
