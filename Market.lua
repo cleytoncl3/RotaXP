@@ -6,7 +6,7 @@ local _, RX = ...
 local MK = {}
 RX.Market = MK
 local T = RX.T
-local CALLER = "RotaXP"
+local CALLER = "RouteXP"
 
 local function api() return Auctionator and Auctionator.API and Auctionator.API.v1 end
 

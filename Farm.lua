@@ -171,7 +171,7 @@ end
 function FM:CustomGearItems(classFile, picks, facts)
     local build = self.Build[classFile]
     local list = { { header = true, text = T("Equipamento para farm", "Farming gear") .. ": " .. (RX:IsPT() and build.pt or build.en),
-        sub = T("Pontuação do RotaXP lendo os stats do GearQuest: ", "RotaXP scoring from GearQuest stats: ") ..
+        sub = T("Pontuação do RouteXP lendo os stats do GearQuest: ", "RouteXP scoring from GearQuest stats: ") ..
             (classFile == "PALADIN" and T("Vigor, Armadura, Bloqueio, Defesa, Dano mágico/sagrado (Consagração) e Reflexo de dano.",
                 "Stamina, Armor, Block, Defense, Spell/Holy damage (Consecration) and damage reflect.")
             or T("Dano mágico/de gelo, Intelecto, Vigor e Espírito.", "Spell/Frost damage, Intellect, Stamina and Spirit.")) } }
@@ -611,16 +611,22 @@ function FM:Items()
     local LV = RX.Leveling
     local pl = UnitLevel("player")
     return {
-        { header = true, text = T("Grind & Masmorras", "Grind & Dungeons"),
+        { header = true, text = T("Masmorras", "Dungeons"),
           sub = string.format(T("Mobs nível %d ou menos são cinzas para você (0 XP).", "Mobs level %d or lower are grey for you (0 XP)."), LV.GreyLevel(pl)) },
-        { text = T("Farm Solo", "Solo farming"), sub = T("pontos de grind, masmorras para solar, equipamento", "grind spots, dungeons to solo, gear"), children = function() return FM:SoloItems() end },
-        { text = T("Farm Duo", "Duo farming"), sub = T("pontos para AoE, masmorras para o duo", "AoE spots, dungeons for the duo"), children = function() return FM:DuoItems() end },
-        { text = T("Farm de ouro + XP (solo)", "Gold + XP farming (solo)"), sub = T("locais com muito mob e bom drop para a sua classe", "spots with many mobs and good loot for your class"), children = function() return FM:GoldItems("solo") end },
-        { text = T("Farm de ouro + XP (duo)", "Gold + XP farming (duo)"), sub = T("locais com grupos de mobs para AoE", "spots with packs for AoE"), children = function() return FM:GoldItems("duo") end },
         { text = T("Masmorras do seu nível", "Dungeons for your level"), sub = T("grupo / duo / solo com XP por hora", "group / duo / solo with XP per hour"),
           children = function() return dungeonItems("all", T("Masmorras (melhor XP/h primeiro)", "Dungeons (best XP/h first)")) end },
         { text = T("Equipamento para farm", "Farming gear"), sub = T("itens do GearQuest para a build de farm da sua classe", "GearQuest items for your class farming build"), children = function() return FM:GearItems() end },
         { text = T("Talentos (Talents Forever)", "Talents (Talents Forever)"), sub = T("qual build #n usar para quests, grind, duo e masmorra", "which #n build to use for questing, grind, duo and dungeons"), children = function() return RX.Talents:Items() end },
-        { text = T("Cronômetro de XP", "XP Timer"), sub = T("mede o XP/hora real de um spot ou masmorra", "measures the real XP/hour of a spot or dungeon"), onClick = function() RX.Timer:ToggleWindow() end },
+    }
+end
+
+-- Grind no mundo aberto: farm de ouro + XP solo e duo
+function FM:OpenWorldItems()
+    local pl = UnitLevel("player")
+    return {
+        { header = true, text = T("Grind no mundo aberto", "Open-world grinding"),
+          sub = string.format(T("Mobs nível %d ou menos são cinzas para você (0 XP). Meça o XP/h com o botão Cronômetro.", "Mobs level %d or lower are grey for you (0 XP). Measure XP/h with the Timer button."), RX.Leveling.GreyLevel(pl)) },
+        { text = T("Farm de ouro + XP (solo)", "Gold + XP farming (solo)"), sub = T("locais com muito mob e bom drop para a sua classe", "spots with many mobs and good loot for your class"), children = function() return FM:GoldItems("solo") end },
+        { text = T("Farm de ouro + XP (duo)", "Gold + XP farming (duo)"), sub = T("locais com grupos de mobs para AoE", "spots with packs for AoE"), children = function() return FM:GoldItems("duo") end },
     }
 end

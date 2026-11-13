@@ -7,7 +7,7 @@ RX.QuestItems = QI
 local T = RX.T
 local MAX, SIZE, GAP = 6, 34, 5
 
-BINDING_HEADER_ROTAXP = "RotaXP"
+BINDING_HEADER_ROTAXP = "RouteXP"
 _G["BINDING_NAME_CLICK RotaXPQuestItem1:LeftButton"] = "Usar o item da quest atual / Use current quest item"
 
 local function inCombat() return InCombatLockdown and InCombatLockdown() end
@@ -150,7 +150,7 @@ function QI:Create()
             GameTooltip:AddLine(T("Clique para usar (no alvo/local certo).", "Click to use (on the right target/spot)."), 0.5, 0.8, 1)
             if i == 1 then
                 local key = GetBindingKey and GetBindingKey("CLICK RotaXPQuestItem1:LeftButton")
-                GameTooltip:AddLine(key and (T("Atalho: ", "Hotkey: ") .. key) or T("Dá para pôr uma tecla em Opções > Atalhos > AddOns > RotaXP.", "You can bind a key in Options > Keybindings > AddOns > RotaXP."), 0.7, 0.7, 0.7)
+                GameTooltip:AddLine(key and (T("Atalho: ", "Hotkey: ") .. key) or T("Dá para pôr uma tecla em Opções > Atalhos > AddOns > RouteXP.", "You can bind a key in Options > Keybindings > AddOns > RouteXP."), 0.7, 0.7, 0.7)
             end
             GameTooltip:Show()
         end)

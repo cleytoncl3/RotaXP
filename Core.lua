@@ -5,7 +5,9 @@ _G.RotaXP = RX
 RX.guides = {}
 RX.guideOrder = {}
 RX.questMeta = {}
-RX.version = "0.23.0"
+RX.version = "0.24.0"
+RX.NAME = "RouteXP"
+RX.ICON = "Interface\\AddOns\\RotaXP\\Media\\icon"
 
 local defaults = {
     style = "speedrun",
@@ -922,8 +924,8 @@ function RX:Conflicts()
     if AA then
         local ok, rxp = pcall(AA.GetAddon, AA, "RXPGuides", true)
         local p = ok and rxp and rxp.settings and rxp.settings.profile
-        if p and p.enableQuestAutomation then out[#out + 1] = RX.T("RestedXP: nas opções do RestedXP desmarque a automação de quests (ou desative o RestedXP enquanto usa o RotaXP)",
-            "RestedXP: untick quest automation in the RestedXP options (or disable RestedXP while using RotaXP)") end
+        if p and p.enableQuestAutomation then out[#out + 1] = RX.T("RestedXP: nas opções do RestedXP desmarque a automação de quests (ou desative o RestedXP enquanto usa o RouteXP)",
+            "RestedXP: untick quest automation in the RestedXP options (or disable RestedXP while using RouteXP)") end
     end
     return out
 end
@@ -981,6 +983,8 @@ end
 ----------------------------------------------------------------------
 SLASH_ROTAXP1 = "/rota"
 SLASH_ROTAXP2 = "/rotaxp"
+SLASH_ROTAXP3 = "/routexp"
+SLASH_ROTAXP4 = "/rxp"
 SlashCmdList.ROTAXP = function(msg)
     msg = (msg or ""):lower():gsub("^%s+", ""):gsub("%s+$", "")
     local UI = RX.UI

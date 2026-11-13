@@ -396,9 +396,7 @@ local BAR = {
     { key = "guides", pt = "Guias", en = "Guides", tipPT = "Escolher rota, estilo de leveling e guia por nível", tipEN = "Pick route, leveling style and guide by level", click = function() UI:ToggleMenu() end },
     { key = "turnin", pt = "Entregas", en = "Turn-ins", tipPT = "Modo Entregas: lista só as quests prontas e monta a melhor rota para entregar todas (libera a bolsa). Clique de novo para voltar ao guia.",
       tipEN = "Turn-in mode: lists only ready quests and builds the best route to turn them all in (frees bag space). Click again to go back to the guide.", click = function() RX.Turnin:Toggle() end },
-    { key = "nearby", pt = "Perto de mim", en = "Nearby", tipPT = "Mostra as quests mais próximas de você, juntando todos os guias (aceitar, fazer e entregar). Clique de novo para voltar ao guia.",
-      tipEN = "Shows the quests closest to you from every guide (accept, complete, turn in). Click again to go back to the guide.", click = function() RX.Nearby:Toggle() end },
-    { key = "now", pt = "Agora", en = "Now", tipPT = "Conselhos para onde você está e o seu nível", tipEN = "Advice for where you are and your level", click = function() UI:ShowPanel("now") end },
+    { key = "timer", pt = "Cronômetro", en = "Timer", tipPT = "Cronômetro de XP: mede quanto XP por hora você ganha num local ou masmorra.", tipEN = "XP timer: measures how much XP per hour you get at a spot or dungeon.", click = function() RX.Timer:ToggleWindow() end },
     { key = "options", pt = "Opções", en = "Options", tipPT = "Estilo, fonte, idioma, auto aceitar...", tipEN = "Style, font, language, auto accept...", click = function() UI:ShowPanel("options") end },
 }
 
@@ -442,7 +440,7 @@ function UI:Create()
     -- botão do menu de guias (título)
     local gb = CreateFrame("Button", nil, f)
     gb:SetPoint("TOPLEFT", 8, -6)
-    gb:SetPoint("TOPRIGHT", -26, -6)
+    gb:SetPoint("TOPRIGHT", -48, -6)
     gb:SetHeight(18)
     local arrowTex = gb:CreateTexture(nil, "ARTWORK")
     arrowTex:SetSize(16, 16)
@@ -462,6 +460,15 @@ function UI:Create()
     local close = CreateFrame("Button", nil, f, "UIPanelCloseButton")
     close:SetPoint("TOPRIGHT", 2, 2)
     close:SetScript("OnClick", function() UI:Toggle() end)
+    -- minimizar: vira uma bolinha com o ícone num canto da tela
+    local mini = CreateFrame("Button", nil, f)
+    mini:SetSize(24, 24)
+    mini:SetPoint("RIGHT", close, "LEFT", 6, 0)
+    mini:SetNormalTexture("Interface\\Buttons\\UI-Panel-SmallerButton-Up")
+    mini:SetPushedTexture("Interface\\Buttons\\UI-Panel-SmallerButton-Down")
+    mini:SetHighlightTexture("Interface\\Buttons\\UI-Panel-MinimizeButton-Highlight", "ADD")
+    mini:SetScript("OnClick", function() UI:Minimize() end)
+    tip(mini, function() return T("Minimizar: o guia vira uma bolinha com o ícone (clique nela para voltar).", "Minimize: the guide becomes a small icon button (click it to come back).") end)
 
     local xp = f:CreateFontString(nil, "OVERLAY")
     xp:SetFontObject(self.fontSmall)
@@ -565,7 +572,73 @@ function UI:Create()
 
     self:Relocalize()
     self:CreateMinimapButton()
-    if RotaXPCharDB.hidden then f:Hide() end
+    if RotaXPCharDB.hidden or RotaXPCharDB.minimized then f:Hide() end
+    if RotaXPCharDB.minimized then self:ShowBall() end
+end
+
+----------------------------------------------------------------------
+-- Bolinha (addon minimizado)
+----------------------------------------------------------------------
+function UI:CreateBall()
+    if self.ball then return self.ball end
+    local b = CreateFrame("Button", "RotaXPBall", UIParent)
+    b:SetSize(40, 40)
+    b:SetFrameStrata("MEDIUM")
+    b:SetClampedToScreen(true)
+    b:SetMovable(true)
+    b:EnableMouse(true)
+    b:RegisterForClicks("LeftButtonUp", "RightButtonUp")
+    b:RegisterForDrag("LeftButton")
+    local ic = b:CreateTexture(nil, "ARTWORK")
+    ic:SetAllPoints()
+    ic:SetTexture(RX.ICON)
+    local hl = b:CreateTexture(nil, "HIGHLIGHT")
+    hl:SetAllPoints()
+    hl:SetTexture(RX.ICON)
+    hl:SetBlendMode("ADD")
+    hl:SetAlpha(0.35)
+    b:SetScript("OnDragStart", function(self) self.moved = true; self:StartMoving() end)
+    b:SetScript("OnDragStop", function(self)
+        self:StopMovingOrSizing()
+        local p, _, rp, x, y = self:GetPoint()
+        RX.db.ballPos = { p, rp, x, y }
+    end)
+    b:SetScript("OnClick", function(self, button)
+        if button == "RightButton" then UI:ToggleMenu() else UI:Restore() end
+    end)
+    b:SetScript("OnEnter", function(self)
+        GameTooltip:SetOwner(self, "ANCHOR_LEFT")
+        GameTooltip:AddLine(ORANGE .. RX.NAME .. "|r")
+        GameTooltip:AddLine(T("Clique: abrir o guia", "Click: open the guide"), 1, 1, 1)
+        GameTooltip:AddLine(T("Botão direito: menu de guias", "Right-click: guide menu"), 1, 1, 1)
+        GameTooltip:AddLine(T("Arraste para mover", "Drag to move"), 0.7, 0.7, 0.7)
+        GameTooltip:Show()
+    end)
+    b:SetScript("OnLeave", function() GameTooltip:Hide() end)
+    local p = RX.db.ballPos
+    if p then b:SetPoint(p[1], UIParent, p[2], p[3], p[4]) else b:SetPoint("RIGHT", UIParent, "RIGHT", -40, 160) end
+    b:Hide()
+    self.ball = b
+    return b
+end
+
+function UI:ShowBall() self:CreateBall():Show() end
+function UI:HideBall() if self.ball then self.ball:Hide() end end
+
+function UI:Minimize()
+    self.frame:Hide()
+    if self.menu then self.menu:Hide() end
+    RotaXPCharDB.minimized = true
+    RotaXPCharDB.hidden = false
+    self:ShowBall()
+end
+
+function UI:Restore()
+    self:HideBall()
+    RotaXPCharDB.minimized = false
+    RotaXPCharDB.hidden = false
+    self.frame:Show()
+    RX:Update(true)
 end
 
 -- Atualiza textos fixos quando o idioma muda
@@ -586,7 +659,7 @@ function UI:LayoutBar()
     -- grade uniforme: todos os botões com a mesma largura e altura (3 por linha; 5 se a janela for larga)
     local avail = (self.frame:GetWidth() or 300) - 34
     local n = #self.barButtons
-    local cols = (avail >= 460) and n or 3
+    local cols = (avail >= 360) and n or 2
     local bw = math.floor((avail - (cols - 1) * BTN_GAP) / cols)
     local bh = 34
     local rows = math.ceil(n / cols)
@@ -594,6 +667,13 @@ function UI:LayoutBar()
         local col = (i - 1) % cols
         local row = math.floor((i - 1) / cols)
         b:SetSize(bw, bh)
+        -- letra pequena; quebra em até 2 linhas para caber no botão em qualquer idioma
+        if b.SetNormalFontObject then b:SetNormalFontObject("GameFontNormalSmall"); b:SetHighlightFontObject("GameFontHighlightSmall") end
+        local fs = b:GetFontString()
+        if fs then
+            fs:ClearAllPoints(); fs:SetPoint("LEFT", 4, 0); fs:SetPoint("RIGHT", -4, 0)
+            fs:SetWordWrap(true); if fs.SetMaxLines then fs:SetMaxLines(2) end; fs:SetJustifyH("CENTER")
+        end
         b:ClearAllPoints()
         -- última fileira incompleta fica centralizada
         local inRow = math.min(cols, n - row * cols)
@@ -607,11 +687,11 @@ end
 
 function UI:Toggle()
     if self.frame:IsShown() then
-        self.frame:Hide(); RotaXPCharDB.hidden = true
+        self.frame:Hide(); RotaXPCharDB.hidden = true; RotaXPCharDB.minimized = false
+        self:HideBall()
         if self.menu then self.menu:Hide() end
     else
-        self.frame:Show(); RotaXPCharDB.hidden = false
-        RX:Update(true)
+        self:Restore()
     end
 end
 
@@ -1196,8 +1276,7 @@ end
 -- Painel (log / zonas / dicas / opções)
 ----------------------------------------------------------------------
 local TABS = {
-    { "now", "Agora", "Now" }, { "log", "Meu log", "My log" }, { "zones", "Onde upar", "Where to level" },
-    { "tips", "Dicas", "Tips" }, { "options", "Opções", "Options" },
+    { "zones", "Onde upar", "Where to level" }, { "tips", "Dicas", "Tips" }, { "options", "Opções", "Options" },
 }
 
 function UI:CreatePanel()
@@ -1222,9 +1301,6 @@ function UI:CreatePanel()
         UI.ForwardDrag(b, p)
         table.insert(p.tabs, b)
     end
-    local gbtn = smallButton(p, "", 80, function() UI:ToggleMenu() end, function() return T("Menu de rotas, estilos e guias", "Routes, styles and guides menu") end)
-    gbtn.def = { "menu", "Guias...", "Guides..." }
-    table.insert(p.tabs, gbtn)
 
     local sf = CreateFrame("ScrollFrame", "RotaXPPanelScroll", p, "UIPanelScrollFrameTemplate")
     sf:SetPoint("TOPLEFT", 12, -66)
@@ -1239,13 +1315,19 @@ function UI:CreatePanel()
 end
 
 function UI:LayoutTabs()
-    local x = 12
+    -- abas do mesmo tamanho (a maior manda), com a letra cabendo em qualquer idioma
+    local w = 90
     for _, b in ipairs(self.panel.tabs) do
         b:SetText(T(b.def[2], b.def[3]))
         fitButton(b, 70)
+        w = math.max(w, b:GetWidth())
+    end
+    local x = 12
+    for _, b in ipairs(self.panel.tabs) do
+        b:SetWidth(w)
         b:ClearAllPoints()
         b:SetPoint("TOPLEFT", self.panel, "TOPLEFT", x, -36)
-        x = x + b:GetWidth() + BTN_GAP
+        x = x + w + BTN_GAP
     end
 end
 
@@ -1331,7 +1413,24 @@ function UI:ShowPanel(which, sub)
     p.hint:SetText("|cff909090" .. T("arraste para mover", "drag to move") .. "|r")
     p:Show()
     local y = -4
-    if which == "now" then
+    if which == "now" then which = "zones" end
+    if which == "zones" then
+        -- Onde upar: primeiro onde você está agora e o que fazer, depois as sugestões por nível
+        p.title:SetText(ORANGE .. T("Onde upar", "Where to level") .. "|r")
+        y = self:AddText("|cffff7f00" .. T("AGORA: ONDE VOCÊ ESTÁ", "NOW: WHERE YOU ARE") .. "|r", y, "GameFontNormal")
+        y = self:AddText(RX.Advisor:Text(), y - 2)
+        local hb = CreateFrame("Frame", nil, p.child); hb:SetSize(500, 26); hb:SetPoint("TOPLEFT", 4, y - 4)
+        table.insert(p.widgets, hb)
+        local b1 = smallButton(hb, T("Usar o guia desta zona", "Use this zone's guide"), 150, function() RX.Advisor:UseHere(); UI:ShowPanel("zones") end)
+        fitButton(b1, 150); b1:SetPoint("LEFT")
+        local b2 = smallButton(hb, T("Modo Entregas", "Turn-in mode"), 120, function() RX.Turnin:Toggle(true) end)
+        fitButton(b2, 120); b2:SetPoint("LEFT", b1, "RIGHT", BTN_GAP, 0)
+        local b3 = smallButton(hb, T("Atualizar", "Refresh"), 90, function() UI:ShowPanel("zones") end)
+        fitButton(b3, 90); b3:SetPoint("LEFT", b2, "RIGHT", BTN_GAP, 0)
+        y = y - 40
+        y = self:AddText("|cffff7f00" .. T("SUGESTÕES: ONDE UPAR NO SEU NÍVEL", "SUGGESTIONS: WHERE TO LEVEL AT YOUR LEVEL") .. "|r", y, "GameFontNormal")
+        y = self:AddText(RX.ZonesText(UnitLevel("player")), y - 2)
+    elseif which == "now_old" then
         -- sub-abas: Visão geral / Solo / Duo / Masmorra
         -- Solo/Duo/Masmorra e o Cronômetro agora ficam no menu Guias > Grind & Masmorras
         sub = "overview"
@@ -1383,9 +1482,6 @@ function UI:ShowPanel(which, sub)
         local r = smallButton(p.child, T("Atualizar", "Refresh"), 90, function() RX:Update(true); UI:ShowPanel("log") end)
         fitButton(r, 90)
         r:SetPoint("TOPLEFT", 2, y - 4); table.insert(p.widgets, r); y = y - 32
-    elseif which == "zones" then
-        p.title:SetText(ORANGE .. T("Onde upar - Horda", "Where to level - Horde") .. "|r")
-        y = self:AddText(RX.ZonesText(UnitLevel("player")), y)
     elseif which == "tips" then
         p.title:SetText(ORANGE .. T("Dicas de speedrun e duo", "Speedrun and duo tips") .. "|r")
         y = self:AddText(RX.TipsText(), y)
@@ -1458,7 +1554,7 @@ function UI:ShowPanel(which, sub)
 
         -- abas: cada assunto no seu lugar
         local TABS = {
-            { "guia", T("Guia", "Guide") }, { "auto", T("Automação", "Automation") }, { "qol", T("Qualidade de vida", "Quality of life") },
+            { "guia", T("Estilo e rota", "Style & route") }, { "auto", T("Automação", "Automation") }, { "qol", T("Qualidade de vida", "Quality of life") },
             { "leilao", T("Leilão", "Auction House") }, { "nav", T("Navegação", "Navigation") }, { "visual", T("Aparência", "Appearance") },
         }
         local tab = UI.optTab or "guia"
@@ -1503,16 +1599,16 @@ function UI:ShowPanel(which, sub)
             if RX.db.autoAbandon then
                 check("abandonSlow", T("Lentas", "Slow"), T("Escolta, 8+ itens de drop, entrega em outra zona, profissão que você não tem, PvP.", "Escort, 8+ dropped items, turn-in in another zone, a profession you don't have, PvP."), nil, 24)
                 check("abandonLowXP", T("Pouco XP", "Low XP"), T("Quest cinza (6+ níveis abaixo) ou que dá menos de 1,5% do XP do seu nível.", "Grey quest (6+ levels below) or under 1.5% of your level's XP."), nil, 24)
-                check("abandonNotGuide", T("Fora do guia", "Not in the guide"), T("Nenhum guia do RotaXP usa a quest com o seu estilo atual.", "No RotaXP guide uses the quest with your current style."), nil, 24)
+                check("abandonNotGuide", T("Fora do guia", "Not in the guide"), T("Nenhum guia do RouteXP usa a quest com o seu estilo atual.", "No RouteXP guide uses the quest with your current style."), nil, 24)
                 y = self:AddText("|cffaaaaaa" .. T("Nunca abandona: quest que abre corrente do guia, que começou com item, que já está pronta, ou lenta cujo item está à venda no leilão.", "Never abandons: quests that open a guide chain, started from an item, already complete, or slow ones whose item is on the AH.") .. "|r", y - 2)
                 buttonRow({ { text = T("Ver últimas abandonadas", "Show last abandoned"), onClick = function() RX.Abandon:ShowLog() end } })
             end
 
         elseif tab == "qol" then
             section(T("Janelas e atalhos", "Windows and shortcuts"))
-            check("questItems", T("Janela de itens da quest (clicar para usar)", "Quest item window (click to use)"), T("Botões para usar os itens que as quests dão. Atalho: Opções > Atalhos > AddOns > RotaXP.", "Buttons to use quest items. Hotkey: Options > Keybindings > AddOns > RotaXP."), function() RX.QuestItems:Refresh() end)
+            check("questItems", T("Janela de itens da quest (clicar para usar)", "Quest item window (click to use)"), T("Botões para usar os itens que as quests dão. Atalho: Opções > Atalhos > AddOns > RouteXP.", "Buttons to use quest items. Hotkey: Options > Keybindings > AddOns > RouteXP."), function() RX.QuestItems:Refresh() end)
             section(T("Duo / grupo", "Duo / group"))
-            check("partyShare", T("Compartilhar com quem usa RotaXP no grupo", "Share with RotaXP users in your group"), T("Mesmo guia, progresso do parceiro em cada quest e pontos de farm.", "Same guide, partner progress on each quest and farm spots."))
+            check("partyShare", T("Compartilhar com quem usa RouteXP no grupo", "Share with RouteXP users in your group"), T("Mesmo guia, progresso do parceiro em cada quest e pontos de farm.", "Same guide, partner progress on each quest and farm spots."))
             section(T("Quests puladas", "Skipped quests"))
             buttonRow({
                 { text = T("Voltar quests puladas", "Restore skipped quests"), onClick = function() RX:UnskipAll(); RX:Print(T("Todas as quests puladas voltaram para a rota.", "All skipped quests are back on the route.")) end },
@@ -1573,7 +1669,7 @@ local function iconClick(button)
     if button == "RightButton" then UI:ToggleMenu() else UI:Toggle() end
 end
 local function iconTooltip(tt)
-    tt:AddLine(ORANGE .. "RotaXP|r")
+    tt:AddLine(ORANGE .. "RouteXP|r")
     tt:AddLine(T("Clique: mostrar/esconder o guia", "Click: show/hide the guide"), 1, 1, 1)
     tt:AddLine(T("Botão direito: menu de guias", "Right-click: guide menu"), 1, 1, 1)
 end
@@ -1592,8 +1688,8 @@ function UI:CreateMinimapButton()
     if LDB and DBI then
         local obj = LDB:NewDataObject("RotaXP", {
             type = "launcher",
-            text = "RotaXP",
-            icon = "Interface\\Icons\\INV_Misc_Map_01",
+            text = "RouteXP",
+            icon = RX.ICON,
             OnClick = function(_, button) iconClick(button) end,
             OnTooltipShow = function(tt) iconTooltip(tt) end,
         })
@@ -1618,9 +1714,9 @@ function UI:CreateMinimapButton()
     overlay:SetTexture("Interface\\Minimap\\MiniMap-TrackingBorder")
     overlay:SetPoint("TOPLEFT")
     local icon = b:CreateTexture(nil, "BACKGROUND")
-    icon:SetSize(20, 20)
-    icon:SetTexture("Interface\\Icons\\INV_Misc_Map_01")
-    icon:SetPoint("TOPLEFT", 6, -5)
+    icon:SetSize(21, 21)
+    icon:SetTexture(RX.ICON)
+    icon:SetPoint("TOPLEFT", 5, -5)
     b:SetHighlightTexture("Interface\\Minimap\\UI-Minimap-ZoomButton-Highlight")
     local function place()
         local a = math.rad(RX.db.minimap.angle or 200)
@@ -1643,7 +1739,7 @@ function UI:CreateMinimapButton()
     end)
     b:SetScript("OnEnter", function(self)
         GameTooltip:SetOwner(self, "ANCHOR_LEFT")
-        GameTooltip:AddLine(ORANGE .. "RotaXP|r")
+        GameTooltip:AddLine(ORANGE .. "RouteXP|r")
         GameTooltip:AddLine(T("Clique: mostrar/esconder o guia", "Click: show/hide the guide"), 1, 1, 1)
         GameTooltip:AddLine(T("Botão direito: menu de guias", "Right-click: guide menu"), 1, 1, 1)
         GameTooltip:Show()

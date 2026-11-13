@@ -347,9 +347,14 @@ function M:RootItems()
     -- outras formas de upar: grind, masmorras, equipamento e cronômetro
     table.insert(list, { header = true, text = T("Outras formas de upar", "Other ways to level") })
     table.insert(list, {
-        text = T("Grind & Masmorras", "Grind & Dungeons"),
-        sub = T("farm solo, farm duo, masmorras, equipamento, talentos, cronômetro", "solo farm, duo farm, dungeons, gear, talents, timer"),
+        text = T("Masmorras", "Dungeons"),
+        sub = T("masmorras do seu nível, equipamento de farm, talentos", "dungeons for your level, farming gear, talents"),
         children = function() return RX.Farm:Items() end,
+    })
+    table.insert(list, {
+        text = T("Grind no mundo aberto", "Open-world grinding"),
+        sub = T("farm de ouro + XP solo e duo, com os drops que mais rendem", "gold + XP farming solo and duo, with the best-paying drops"),
+        children = function() return RX.Farm:OpenWorldItems() end,
     })
     return list
 end

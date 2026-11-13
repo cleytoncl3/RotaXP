@@ -39,6 +39,38 @@ function TM:Create()
     if RX.db.timerPos then local p = RX.db.timerPos; f:ClearAllPoints(); f:SetPoint(p[1], UIParent, p[2], p[3], p[4]) end
     local close = CreateFrame("Button", nil, f, "UIPanelCloseButton")
     close:SetPoint("TOPRIGHT", 2, 2)
+    -- alça no canto de baixo: arraste para aumentar/diminuir a janela inteira
+    if RX.db.timerScale then f:SetScale(RX.db.timerScale) end
+    local grip = CreateFrame("Button", nil, f)
+    grip:SetSize(16, 16)
+    grip:SetPoint("BOTTOMRIGHT", -3, 3)
+    grip:SetNormalTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Up")
+    grip:SetHighlightTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Highlight")
+    grip:SetPushedTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Down")
+    grip:SetScript("OnMouseDown", function()
+        local s = f:GetScale()
+        local left, top = f:GetLeft() * s, f:GetTop() * s
+        local cx = GetCursorPosition() / UIParent:GetEffectiveScale()
+        local w = f:GetWidth() * s
+        grip:SetScript("OnUpdate", function()
+            local nx = GetCursorPosition() / UIParent:GetEffectiveScale()
+            local ns = math.max(0.6, math.min(2, s * (w + (nx - cx)) / w))
+            f:SetScale(ns)
+            f:ClearAllPoints()
+            f:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", left / ns, top / ns)
+        end)
+    end)
+    grip:SetScript("OnMouseUp", function()
+        grip:SetScript("OnUpdate", nil)
+        RX.db.timerScale = f:GetScale()
+        local p, _, rp, x, y = f:GetPoint(); RX.db.timerPos = { p, rp, x, y }
+    end)
+    grip:SetScript("OnEnter", function(self)
+        GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+        GameTooltip:AddLine(T("Arraste para mudar o tamanho", "Drag to resize"), 1, 1, 1)
+        GameTooltip:Show()
+    end)
+    grip:SetScript("OnLeave", function() GameTooltip:Hide() end)
     f.title = f:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     f.title:SetPoint("TOPLEFT", 10, -9)
 

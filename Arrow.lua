@@ -61,7 +61,7 @@ function Arrow:Create()
 
     f:SetScript("OnEnter", function(self)
         GameTooltip:SetOwner(self, "ANCHOR_BOTTOM")
-        GameTooltip:AddLine(RX.T("Seta RotaXP", "RotaXP arrow"))
+        GameTooltip:AddLine(RX.T("Seta RouteXP", "RouteXP arrow"))
         GameTooltip:AddLine(RX.T("Arraste para mover. Clique direito: pular passo.", "Drag to move. Right-click: skip step."), 1, 1, 1)
         GameTooltip:Show()
     end)
@@ -119,8 +119,8 @@ function Arrow:SetTarget(step, final)
         if final and final.m and final.x then
             if RX.db.useTomTom and TomTom and TomTom.AddWaypoint then
                 local ok, uid = pcall(TomTom.AddWaypoint, TomTom, final.m, final.x / 100, final.y / 100, {
-                    title = "RotaXP: " .. (RX:NpcName(final) or RX:QName(final) or RX.LF(final, "d") or RX.T("destino", "destination")),
-                    persistent = false, minimap = false, world = true, crazy = false, silent = true,  -- minimapa: o RotaXP desenha um anel fino
+                    title = "RouteXP: " .. (RX:NpcName(final) or RX:QName(final) or RX.LF(final, "d") or RX.T("destino", "destination")),
+                    persistent = false, minimap = false, world = true, crazy = false, silent = true,  -- minimapa: o RouteXP desenha um anel fino
                 })
                 if ok then self.tomtomUID = uid end
             end

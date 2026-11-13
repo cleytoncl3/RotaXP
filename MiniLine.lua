@@ -162,7 +162,7 @@ function MM:SetCheckpoints(dest)
         local m, x, y = worldToMap(mk.p, mk.p.m or dest.m)
         if m then
             local ok, uid = pcall(TomTom.AddWaypoint, TomTom, m, x, y, {
-                title = "RotaXP: " .. mk.name, persistent = false, minimap = false, world = true, crazy = false, silent = true, cleardistance = 25,
+                title = "RouteXP: " .. mk.name, persistent = false, minimap = false, world = true, crazy = false, silent = true, cleardistance = 25,
             })
             if ok and uid then table.insert(self.cps, uid) end
         end

@@ -1,14 +1,16 @@
 ## Interface: 16001
-## Title: |cffff7f00Rota|rXP - Guia de Leveling Horda
-## Notes: Guia de leveling Horda 30-60 para WoW: Forever. Rotas da comunidade, guias completos por zona, estilos Speedrun/Duo/Sem coleta, seta, auto aceitar/entregar, nomes em PT/EN. /rota
+## Title: |cffff7f00Route|rXP - Leveling Guide
+## Notes: Horde 30-60 leveling and questing guide for WoW: Forever. Speedrun routes, full zone guides, arrow and map route, auto accept/turn-in by quest ID, duo share, AH and gold farming. /rxp
+## Title-ptBR: |cffff7f00Route|rXP - Guia de Leveling
+## Notes-ptBR: Guia de leveling e quests Horda 30-60 para WoW: Forever. Rotas de speedrun, guias completos por zona, seta e rota no mapa, auto aceitar/entregar pelo ID da quest, share em duo, leilão e farm de ouro. /rota
 ## Author: cleytoncl3 (feito com Claude)
 ## X-Website: https://github.com/cleytoncl3/RotaXP
 ## X-License: GPL-3.0
-## Version: 0.23.0
+## Version: 0.24.0
 ## SavedVariables: RotaXPDB
 ## SavedVariablesPerCharacter: RotaXPCharDB
 ## OptionalDeps: TomTom, Questie, GearQuestForever, TalentsForeverBook
-## IconTexture: Interface\Icons\INV_Misc_Map_01
+## IconTexture: Interface\AddOns\RotaXP\Media\icon
 ## AddonCompartmentFunc: RotaXP_OnAddonCompartmentClick
 ## AddonCompartmentFuncOnEnter: RotaXP_OnAddonCompartmentEnter
 ## AddonCompartmentFuncOnLeave: RotaXP_OnAddonCompartmentLeave

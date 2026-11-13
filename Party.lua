@@ -169,8 +169,8 @@ function P:OnMessage(prefix, msg, _, sender)
         m.ver, m.lvl, m.class, m.guide, m.share = f[3], tonumber(f[4]), f[5], (f[6] ~= "-" and f[6] or nil), f[8] ~= "0"
         if m.ver and newer(m.ver, RX.version) and not self.warnedVer[m.ver] then
             self.warnedVer[m.ver] = true
-            RX:Print(string.format(T("%s usa o RotaXP |cff40ff40v%s|r (o seu é v%s). Para atualizar: feche o jogo e rode |cffffff00Atualizar-RotaXP.bat|r na pasta do addon.",
-                "%s has RotaXP |cff40ff40v%s|r (yours is v%s). To update: close the game and run |cffffff00Atualizar-RotaXP.bat|r in the addon folder."), who, m.ver, RX.version))
+            RX:Print(string.format(T("%s usa o RouteXP |cff40ff40v%s|r (o seu é v%s). Para atualizar: feche o jogo e rode |cffffff00Atualizar-RotaXP.bat|r na pasta do addon.",
+                "%s has RouteXP |cff40ff40v%s|r (yours is v%s). To update: close the game and run |cffffff00Atualizar-RotaXP.bat|r in the addon folder."), who, m.ver, RX.version))
         end
         if f[7] ~= "1" then self:Hello(true) end          -- responde quem chegou agora
         if first then self:SyncQuests(true) end            -- e manda tudo para ele
@@ -303,8 +303,8 @@ end
 function P:Items()
     local share = RX.db.partyShare ~= false
     local list = { { header = true, text = T("Grupo (share)", "Group (share)"),
-        sub = T("Quem está no grupo com o RotaXP troca o guia, o progresso das quests e locais marcados (pelo canal de addon do jogo, sem internet).",
-            "Group members with RotaXP share the guide, quest progress and marked spots (through the game's addon channel, no internet).") } }
+        sub = T("Quem está no grupo com o RouteXP troca o guia, o progresso das quests e locais marcados (pelo canal de addon do jogo, sem internet).",
+            "Group members with RouteXP share the guide, quest progress and marked spots (through the game's addon channel, no internet).") } }
     table.insert(list, { text = (share and "|cff40ff40[x]|r " or "|cff808080[ ]|r ") .. T("Compartilhar com o grupo", "Share with the group"), noMark = true, keep = true,
         sub = T("guia, progresso e locais; mostra o progresso deles embaixo de cada quest", "guide, progress and spots; shows their progress under each quest"),
         onClick = function() RX.db.partyShare = not share; if RX.db.partyShare then P:Hello(); P:SyncQuests(true) end; RX:Update(true) end })
@@ -323,7 +323,7 @@ function P:Items()
             onClick = function() P:SendSpot({ m = dest.m, x = dest.x, y = dest.y, d = RX:NpcName(dest) or RX:QName(dest) or dest.d }) end })
     end
     table.insert(list, { text = T("Sincronizar agora", "Sync now"), onClick = function() P:Send("R"); P:Hello(); P:SyncQuests(true) end })
-    table.insert(list, { header = true, text = T("Membros com RotaXP", "Members with RotaXP") })
+    table.insert(list, { header = true, text = T("Membros com RouteXP", "Members with RouteXP") })
     local any = false
     for name, m in pairs(self.members) do
         any = true
@@ -337,7 +337,7 @@ function P:Items()
         })
     end
     if not any then
-        table.insert(list, { text = "|cffaaaaaa" .. T("Ninguém do grupo com o RotaXP ainda (ou esperando resposta).", "Nobody in the group has RotaXP yet (or waiting for a reply).") .. "|r", noMark = true,
+        table.insert(list, { text = "|cffaaaaaa" .. T("Ninguém do grupo com o RouteXP ainda (ou esperando resposta).", "Nobody in the group has RouteXP yet (or waiting for a reply).") .. "|r", noMark = true,
             sub = T("Quem só usa o Questie também aparece embaixo das quests.", "Members who only use Questie still show under the quests.") })
     end
     return list
