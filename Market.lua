@@ -210,10 +210,12 @@ function MK:GuideList(g)
 end
 
 local ROWS = 14
+local W = 330          -- largura da janela
+local ROW_H = 18
 function MK:CreateWindow()
     if self.win then return self.win end
     local f = CreateFrame("Frame", "RotaXPShoppingFrame", UIParent, BackdropTemplateMixin and "BackdropTemplate")
-    f:SetSize(380, 90)
+    f:SetSize(W, 90)
     f:SetFrameStrata("DIALOG")
     f:SetClampedToScreen(true)
     f:SetMovable(true)
@@ -228,31 +230,38 @@ function MK:CreateWindow()
     if f.SetBackdrop then
         f:SetBackdrop({ bgFile = "Interface\\Tooltips\\UI-Tooltip-Background", edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
             tile = true, tileSize = 16, edgeSize = 12, insets = { left = 3, right = 3, top = 3, bottom = 3 } })
-        f:SetBackdropColor(0.05, 0.05, 0.07, 0.92)
+        f:SetBackdropColor(0.05, 0.05, 0.07, 0.94)
         f:SetBackdropBorderColor(1, 0.5, 0, 0.9)
     end
+    -- cabeçalho: ícone do leiloeiro + título; embaixo o nome do guia
+    f.icon = f:CreateTexture(nil, "ARTWORK")
+    f.icon:SetSize(16, 16)
+    f.icon:SetPoint("TOPLEFT", 10, -9)
+    f.icon:SetTexture(MK.ICON)
     f.title = f:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    f.title:SetPoint("TOPLEFT", 10, -8)
-    f.title:SetPoint("RIGHT", -28, 0)
+    f.title:SetPoint("LEFT", f.icon, "RIGHT", 5, 0)
+    f.title:SetPoint("RIGHT", f, "RIGHT", -28, 0)
     f.title:SetJustifyH("LEFT")
-    f.title:SetTextColor(1, 0.6, 0.15)
+    f.title:SetWordWrap(false)
+    f.title:SetTextColor(0.2, 0.87, 1)
     local close = CreateFrame("Button", nil, f, "UIPanelCloseButton")
-    close:SetPoint("TOPRIGHT", 0, 0)
+    close:SetPoint("TOPRIGHT", 2, 2)
+    f.guide = f:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    f.guide:SetJustifyH("LEFT"); f.guide:SetWordWrap(false)
     f.sub = f:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-    f.sub:SetPoint("TOPLEFT", 10, -26)
-    f.sub:SetPoint("RIGHT", -10, 0)
-    f.sub:SetJustifyH("LEFT")
+    f.sub:SetJustifyH("LEFT"); f.sub:SetWordWrap(true); f.sub:SetWidth(W - 20)
     f.rows = {}
     for i = 1, ROWS do
         local r = CreateFrame("Frame", nil, f)
-        r:SetSize(360, 16)
-        r:SetPoint("TOPLEFT", 10, -44 - (i - 1) * 17)
+        r:SetSize(W - 20, ROW_H)
         r:EnableMouse(true)
-        r.icon = r:CreateTexture(nil, "ARTWORK"); r.icon:SetSize(14, 14); r.icon:SetPoint("LEFT")
-        r.text = r:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-        r.text:SetPoint("LEFT", r.icon, "RIGHT", 4, 0); r.text:SetJustifyH("LEFT"); r.text:SetWidth(240)
+        r.bg = r:CreateTexture(nil, "BACKGROUND"); r.bg:SetAllPoints(); r.bg:SetColorTexture(1, 1, 1, (i % 2 == 0) and 0.04 or 0)
+        r.icon = r:CreateTexture(nil, "ARTWORK"); r.icon:SetSize(16, 16); r.icon:SetPoint("LEFT", 2, 0)
         r.price = r:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-        r.price:SetPoint("RIGHT"); r.price:SetJustifyH("RIGHT")
+        r.price:SetPoint("RIGHT", -4, 0); r.price:SetJustifyH("RIGHT")
+        r.text = r:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+        r.text:SetPoint("LEFT", r.icon, "RIGHT", 5, 0); r.text:SetPoint("RIGHT", r.price, "LEFT", -6, 0)
+        r.text:SetJustifyH("LEFT"); r.text:SetWordWrap(false)
         r:SetScript("OnEnter", function(row)
             if not row.e or not GameTooltip then return end
             GameTooltip:SetOwner(row, "ANCHOR_RIGHT")
@@ -264,10 +273,13 @@ function MK:CreateWindow()
         r:SetScript("OnLeave", function() if GameTooltip then GameTooltip:Hide() end end)
         f.rows[i] = r
     end
+    f.sep = f:CreateTexture(nil, "ARTWORK")
+    f.sep:SetColorTexture(1, 0.5, 0, 0.35)
+    f.sep:SetSize(W - 20, 1)
     f.foot = f:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-    f.foot:SetJustifyH("LEFT")
+    f.foot:SetJustifyH("LEFT"); f.foot:SetWordWrap(true)
     f.btn = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
-    f.btn:SetSize(150, 20)
+    if f.btn.SetNormalFontObject then f.btn:SetNormalFontObject("GameFontNormalSmall"); f.btn:SetHighlightFontObject("GameFontHighlightSmall") end
     f.btn:SetText(T("Buscar no Auctionator", "Search in Auctionator"))
     f.btn:SetScript("OnClick", function() MK:Search(MK.winList or {}) end)
     local p = RX.db.shopPos
@@ -283,29 +295,48 @@ function MK:RefreshWindow()
     local g = RX:CurrentGuide()
     local list, total, loading = self:GuideList(g)
     self.winList = list
-    f.title:SetText(T("Comprar no leilão: ", "Buy on the AH: ") .. (g and RX:GuideName(g) or ""))
+    f.title:SetText(T("Comprar no leilão", "Buy on the Auction House"))
+    local y = -30
+    f.guide:ClearAllPoints(); f.guide:SetPoint("TOPLEFT", 10, y); f.guide:SetPoint("RIGHT", f, "RIGHT", -10, 0)
+    f.guide:SetText("|cffaaaaaa" .. T("Guia: ", "Guide: ") .. "|r" .. (g and RX:GuideName(g) or "-"))
+    y = y - 16
+    f.sub:ClearAllPoints(); f.sub:SetPoint("TOPLEFT", 10, y)
     f.sub:SetText(#list > 0 and T("Itens das quests deste guia que dá para comprar em vez de dropar:", "Quest items for this guide you can buy instead of farming:")
         or (loading > 0 and T("Carregando itens...", "Loading items...") or T("Nenhum item deste guia pode ser comprado no leilão.", "No item for this guide can be bought on the AH.")))
+    y = y - math.max(12, f.sub:GetStringHeight() or 12) - 6
     local shown = math.min(#list, ROWS)
     for i, r in ipairs(f.rows) do
         local e = list[i]
         r.e = e
         if e then
+            r:ClearAllPoints(); r:SetPoint("TOPLEFT", 10, y - (i - 1) * ROW_H)
             r.icon:SetTexture((C_Item and C_Item.GetItemIconByID and C_Item.GetItemIconByID(e.id)) or (GetItemIcon and GetItemIcon(e.id)) or 134400)
             r.text:SetText(string.format("|cffffffff%dx|r %s", e.left, e.name))
             r.price:SetText(e.price and money(e.price * e.left) or ("|cff888888" .. T("sem preço", "no price") .. "|r"))
             r:Show()
         else r:Hide() end
     end
-    local y = -44 - shown * 17 - 6
-    f.foot:ClearAllPoints(); f.foot:SetPoint("TOPLEFT", 10, y)
-    local foot = total > 0 and string.format(T("Total com preço: %s", "Total with price: %s"), money(total)) or ""
+    y = y - shown * ROW_H - 6
+    f.sep:ClearAllPoints(); f.sep:SetPoint("TOPLEFT", 10, y)
+    y = y - 8
+    -- rodapé: total à esquerda, botão à direita (largura do texto)
+    local hasBtn = #list > 0 and api()
+    local bw = 0
+    if hasBtn then
+        local fs = f.btn:GetFontString()
+        bw = math.max(110, ((fs and fs:GetStringWidth()) or 120) + 24)
+        f.btn:SetSize(bw, 22)
+        f.btn:ClearAllPoints(); f.btn:SetPoint("TOPRIGHT", -10, y)
+        f.btn:Show()
+    else f.btn:Hide() end
+    local foot = total > 0 and (T("Total: ", "Total: ") .. "|cffffffff" .. money(total) .. "|r") or ""
     if #list > ROWS then foot = foot .. string.format(T("  (+%d itens)", "  (+%d items)"), #list - ROWS) end
     if not api() then foot = T("Instale o Auctionator para ver preços e buscar.", "Install Auctionator to see prices and search.") end
+    f.foot:ClearAllPoints(); f.foot:SetPoint("TOPLEFT", 10, y - 4)
+    f.foot:SetWidth(W - 20 - (hasBtn and (bw + 8) or 0))
     f.foot:SetText(foot)
-    f.btn:ClearAllPoints(); f.btn:SetPoint("TOPRIGHT", -10, y + 4)
-    if #list > 0 and api() then f.btn:Show() else f.btn:Hide() end
-    f:SetHeight(-y + 30)
+    local footH = math.max(hasBtn and 22 or 0, (f.foot:GetStringHeight() or 12) + 4)
+    f:SetHeight(-y + footH + 10)
 end
 
 -- abre a janela; auto = true só abre se houver algo para comprar
