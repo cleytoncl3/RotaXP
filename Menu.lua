@@ -335,6 +335,19 @@ function M:RootItems()
         text = RX.db.nearbyMode and T("Sair do Perto de mim", "Leave Nearby") or T("Perto de mim", "Nearby"),
         onClick = function() RX.Nearby:Toggle() end,
     })
+    if RX:CurrentGuide() then
+        table.insert(list, {
+            text = RX:ShowAllHere() and T("Voltar este guia ao meu estilo", "Back to my style for this guide") or T("Mostrar quests escondidas deste guia", "Show hidden quests of this guide"),
+            sub = RX:ShowAllHere() and T("esconde de novo as lentas e cinzas", "hides slow and grey quests again")
+                or T("mostra as lentas, de coleta e cinzas só neste guia (bom para pegar o que ficou para trás)", "shows slow, collecting and grey quests only in this guide (good for leftovers)"),
+            onClick = function() RX:ToggleShowAll(); M:Refresh() end,
+        })
+        table.insert(list, {
+            text = "|cffff8080" .. T("Limpar guia atual", "Clear current guide") .. "|r",
+            sub = T("esvazia a lista para escolher outro guia (não abandona suas quests)", "empties the list so you can pick another guide (does not abandon your quests)"),
+            onClick = function() RX:ClearGuide(); M:Refresh() end,
+        })
+    end
     -- grupo: share de guia/progresso com quem usa o RotaXP
     if RX.Party then
         local n = RX.Party:Count()

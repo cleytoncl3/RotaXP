@@ -5,7 +5,7 @@ _G.RotaXP = RX
 RX.guides = {}
 RX.guideOrder = {}
 RX.questMeta = {}
-RX.version = "0.24.3"
+RX.version = "0.25.0"
 RX.NAME = "RouteXP"
 RX.ICON = "Interface\\AddOns\\RotaXP\\Media\\icon"
 
@@ -33,6 +33,7 @@ local defaults = {
     autoTurnIn = true,
     partyShare = true,
     questItems = true,
+    askLowXP = true,       -- perguntar se quer abandonar quests do log que já dão pouco XP
     autoAbandon = false,   -- abandona sozinho quests que não valem a pena (opcional)
     abandonSlow = true,    --   lentas (escolta, muitos drops, outra zona)
     abandonLowXP = true,   --   pouco XP / cinzas
@@ -186,9 +187,27 @@ function RX:CurrentGuide()
     return id and self.guides[id]
 end
 
+-- Limpar o guia atual: a lista fica vazia até você escolher outro guia. NÃO abandona nada no jogo.
+function RX:ClearGuide()
+    local g = self:CurrentGuide()
+    local c = self:CharState()
+    c.guide = nil
+    c.guideCleared = true            -- não escolher um guia sozinho no próximo login
+    self.db.turninMode = false
+    self.db.nearbyMode = false
+    if self.Arrow then self.Arrow:ClearManual() end
+    self:Print(g and string.format(RX.T("Guia |cffffff00%s|r limpo. Escolha o próximo no botão Guias (suas quests do jogo continuam no log).",
+        "Guide |cffffff00%s|r cleared. Pick the next one with the Guides button (your in-game quests stay in your log)."), self:GuideName(g))
+        or RX.T("Nenhum guia selecionado.", "No guide selected."))
+    self:Update(true)
+end
+
 function RX:SetGuide(id)
     if not self.guides[id] then return end
     self:CharState().guide = id
+    self:CharState().guideCleared = nil
+    self.emptyWarned = nil
+    if self.guideHadSteps then self.guideHadSteps[id] = nil end
     if self.Arrow then self.Arrow:ClearManual() end
     self:Print(RX.T("Guia ativo: ", "Active guide: ") .. "|cffffff00" .. self:GuideName(self.guides[id]) .. "|r")
     self:Update(true)
@@ -243,7 +262,32 @@ end
 -- Filtros (estilo + disponibilidade inteligente)
 ----------------------------------------------------------------------
 -- o = opções a usar (padrão: as suas); permite calcular o XP de cada variante sem mudar nada
+-- O guia atual está em "mostrar tudo"? (só vale para as suas opções, não para as contas de outros estilos)
+function RX:ShowAllHere()
+    local g = self:CurrentGuide()
+    local sa = self:CharState().showAll
+    return g and sa and sa[g.id] and true or false
+end
+
+function RX:ToggleShowAll()
+    local g = self:CurrentGuide()
+    if not g then return end
+    local c = self:CharState()
+    c.showAll = c.showAll or {}
+    c.showAll[g.id] = not c.showAll[g.id] or nil
+    self:Print(c.showAll[g.id] and RX.T("Mostrando TODAS as quests deste guia (lentas, de coleta e cinzas também).", "Showing ALL quests of this guide (slow, collecting and grey ones too).")
+        or RX.T("Este guia voltou a seguir o seu estilo.", "This guide follows your style again."))
+    self:Update(true)
+end
+
 function RX:StepFilteredByOptions(s, o)
+    if not o and self:ShowAllHere() then
+        local f = s.flags
+        if f.craft and self.Craft and not self.Craft:HasSkill(s.q) then return "profissão" end
+        if f.dungeon and not self.db.showDungeon then return "masmorra" end
+        if f.pvp then return "pvp" end
+        return nil
+    end
     o = o or self.db
     local f = s.flags
     local lim = o.collectMax
@@ -280,7 +324,7 @@ local function allDone(Q, list)
 end
 
 -- Motivo para a quest não estar disponível agora (nil = disponível)
-function RX:QuestUnavailable(s)
+function RX:QuestUnavailable(s, o)
     local Q = self.Q
     local level = UnitLevel("player")
     local meta = s.q and self.questMeta[s.q]
@@ -302,8 +346,29 @@ function RX:QuestUnavailable(s)
             if n <= 0 then return "começa com item" end
         end
     end
-    if self.db.speedrun and s.lvl and level - s.lvl >= 7 then return "cinza" end
+    if (o or self.db).speedrun and s.lvl and level - s.lvl >= 7 and not (not o and self:ShowAllHere()) then return "cinza" end
     return nil
+end
+
+-- Por que um guia não mostra nada: conta as quests não feitas por motivo
+function RX:HiddenSummary(g)
+    local out = { estilo = 0, cinza = 0, pre = 0, outro = 0, total = 0 }
+    if not g then return out end
+    local seen = {}
+    for _, s in ipairs(g.steps) do
+        if s.t == "A" and s.q and not seen[s.q] and not self.Q:IsCompleted(s.q) and not self.Q:InLog(s.q) and not self:CharState().skipped[s.q] then
+            seen[s.q] = true
+            local why = self:StepFilteredByOptions(s) or self:QuestUnavailable(s)
+            if why then
+                out.total = out.total + 1
+                if why == "cinza" then out.cinza = out.cinza + 1
+                elseif why == "pré-requisito" then out.pre = out.pre + 1
+                elseif why == "lenta" or why == "coleta" or why == "drop" then out.estilo = out.estilo + 1
+                else out.outro = out.outro + 1 end
+            end
+        end
+    end
+    return out
 end
 
 -- Quests que saem da rota (qualquer passo filtrado, pulada manualmente ou indisponível)
@@ -408,6 +473,8 @@ function RX:VisibleSteps(maxCount)
         end
     end
     prog.index = first or (#g.steps + 1)
+    -- o guia mostrou passos para você: aí sim, quando acabar, pode ir para o próximo da rota
+    if first then self.guideHadSteps = self.guideHadSteps or {}; self.guideHadSteps[g.id] = true end
     -- "Entregar" só aparece quando dá para entregar: se a quest ainda tem um passo "Aceitar" ou
     -- "Fazer" pendente na lista (ou está no log sem estar pronta), o passo de entrega fica escondido
     -- até lá. Sem nenhum passo "Fazer" no guia ele continua aparecendo, com o aviso de não pronta.
@@ -521,14 +588,25 @@ function RX:GuideFinished()
     return self:GuideProgress(g.id).index > #g.steps
 end
 
+-- Só troca sozinho para o próximo guia quando você TERMINOU este guia jogando (ele tinha passos e acabaram).
+-- Antes, um guia escolhido sem nada para você (quests feitas/puladas/filtradas) contava como "concluído"
+-- na hora e o addon voltava para outro guia: parecia que a troca de guia não funcionava.
 function RX:CheckNextGuide()
     local g = self:CurrentGuide()
-    if g and self:GuideFinished() then
-        local n = self:NextGuide(g)
-        if n then
-            self:Print(RX.T("Guia concluído! Próximo da rota: ", "Guide complete! Next on the route: ") .. self:GuideName(n))
-            self:SetGuide(n.id)
+    if not (g and self:GuideFinished()) then return end
+    if not (self.guideHadSteps and self.guideHadSteps[g.id]) then
+        if self.emptyWarned ~= g.id then
+            self.emptyWarned = g.id
+            self:Print(string.format(RX.T("O guia |cffffff00%s|r não tem nada para você agora (quests já feitas, puladas ou que o seu estilo pula). Ele continua escolhido; troque no botão Guias se quiser.",
+                "The guide |cffffff00%s|r has nothing for you right now (quests done, skipped or skipped by your style). It stays selected; change it with the Guides button if you want."), self:GuideName(g)))
         end
+        return
+    end
+    self.guideHadSteps[g.id] = nil
+    local n = self:NextGuide(g)
+    if n then
+        self:Print(RX.T("Guia concluído! Próximo da rota: ", "Guide complete! Next on the route: ") .. self:GuideName(n))
+        self:SetGuide(n.id)
     end
 end
 
@@ -556,18 +634,11 @@ function RX:QuestXP(s)
 end
 
 -- XP das quests restantes do guia (com filtros atuais) e nível estimado ao terminar
+-- XP que ainda dá para ganhar neste guia com as suas opções (conta as continuações das correntes)
 function RX:GuideXPEstimate(g)
     g = g or self:CurrentGuide()
     if not g then return 0 end
-    local prog = self:GuideProgress(g.id)
-    local blocked = self:BuildQuestFilter(g)
-    local total = 0
-    for _, s in ipairs(g.steps) do
-        if s.t == "T" and s.q and not self:IsStepHidden(s, blocked) and not self:IsStepComplete(g, s, prog) then
-            total = total + self:QuestXP(s)
-        end
-    end
-    return total
+    return (self:GuideXPWith(g, nil))
 end
 
 -- XP (e nº de quests) que um guia ainda rende com um estilo (variante), sem mudar suas opções
@@ -576,14 +647,40 @@ function RX:GuideXPWith(g, set)
     for k, v in pairs(set or {}) do o[k] = v end
     local skipped = self:CharState().skipped
     local blocked = {}
+    local useMine = (set == nil or next(set) == nil) and g == self:CurrentGuide()   -- guia atual sem variante: exatamente o que a sua lista mostra
+    local Q = self.Q
+    local inGuide, pending = {}, {}
+    for _, s in ipairs(g.steps) do if s.q and s.t == "T" then inGuide[s.q] = true end end
     for _, s in ipairs(g.steps) do
-        if s.q and not blocked[s.q] and (skipped[s.q] or self:StepFilteredByOptions(s, o)) then blocked[s.q] = true end
+        if s.q and not blocked[s.q] then
+            if skipped[s.q] or self:StepFilteredByOptions(s, (not useMine) and o or nil) then blocked[s.q] = true
+            elseif s.t == "A" and not Q:InLog(s.q) and not Q:IsCompleted(s.q) then
+                local why = self:QuestUnavailable(s, (not useMine) and o or nil)
+                -- corrente: a quest anterior está neste guia e você vai fazê-la antes -> conta também
+                if why == "pré-requisito" then pending[s.q] = s
+                elseif why then blocked[s.q] = true end
+            end
+        end
     end
+    local function willHave(p) return Q:IsCompleted(p) or Q:InLog(p) or (inGuide[p] and not blocked[p] and not pending[p]) end
+    local changed = true
+    while changed do
+        changed = false
+        for q, s in pairs(pending) do
+            local meta = self.questMeta[q] or {}
+            local pre, preAll = s.pre or meta.pre, s.preAll or meta.preAll
+            local ok = true
+            if pre then ok = false; for _, p in ipairs(pre) do if willHave(p) then ok = true break end end end
+            if ok and preAll then for _, p in ipairs(preAll) do if not willHave(p) then ok = false break end end end
+            if ok then pending[q] = nil; changed = true end
+        end
+    end
+    for q in pairs(pending) do blocked[q] = true end
     local lvl = UnitLevel("player")
     local xp, n = 0, 0
     for _, s in ipairs(g.steps) do
         if s.t == "T" and s.q and not blocked[s.q] and not self.Q:IsCompleted(s.q)
-            and not (o.speedrun and s.lvl and lvl - s.lvl >= 7) then
+            and not (o.speedrun and s.lvl and lvl - s.lvl >= 7 and not (useMine and self:ShowAllHere())) then
             xp = xp + self:QuestXP(s); n = n + 1
         end
     end
@@ -689,7 +786,7 @@ function RX:PLAYER_LOGIN()
         self:Print(RX.T("Aviso: estes guias foram feitos para a |cffff0000Horda|r.", "Warning: these guides are made for the |cffff0000Horde|r."))
     end
     local cur = self:CurrentGuide()
-    if not cur then
+    if not cur and not self:CharState().guideCleared then
         local g = self:BestGuideForLevel(UnitLevel("player"))
         if g then
             self:CharState().guide = g.id
@@ -1009,6 +1106,9 @@ SlashCmdList.ROTAXP = function(msg)
     elseif msg == "compras" or msg == "comprar" or msg == "shop" then RX.Market:ToggleWindow()
     elseif msg == "aceite" or msg == "aceitar" or msg == "accept" then RX:ShowDecisions()
     elseif msg == "manter" or msg == "keep" then RX.Abandon:Keep()
+    elseif msg == "limpar" or msg == "clear" then RX:ClearGuide()
+    elseif msg == "revisar" or msg == "review" then RX.Abandon:ReviewLog()
+    elseif msg == "compartilhar" or msg == "share" then RX.Party:ShareGuideQuests()
     elseif msg == "leilao" or msg == "leilão" or msg == "ah" then RX.Market:Offer(true)
     elseif msg:match("^bloqueio") or msg:match("^blocked") then RX.BlockLog:Command(msg:match("^%S+%s+(.*)$"))
     elseif msg == "atualizar" or msg == "update" then

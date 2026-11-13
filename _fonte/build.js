@@ -12,7 +12,7 @@ function collectCount(q) {
   let drops = 0;
   for (const c of (o[3] || [])) { const it = d.items[c[0]]; if (it && it[2] && it[2].length && !(it[3] && it[3].length)) drops++; }
   if (!drops) return 0;
-  const nums = ((q[8] || []).join(' ').match(/d+/g) || []).map(Number).filter(n => n > 1 && n < 100);
+  const nums = ((q[8] || []).join(' ').match(/\b\d+\b/g) || []).map(Number).filter(n => n > 1 && n < 100);
   return nums.length ? nums.reduce((a, b) => a + b, 0) : drops;
 }
 const OUT = process.argv[2];

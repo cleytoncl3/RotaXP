@@ -190,6 +190,7 @@ function MK:GuideList(g)
                     local e = byItem[m.id]
                     if not e then e = { id = m.id, left = 0, quests = {} }; byItem[m.id] = e; order[#order + 1] = e end
                     e.left = e.left + m.left
+                    if RX.Q:InLog(q) then e.inLog = true end
                     e.quests[#e.quests + 1] = RX:QName(s) or s.n
                 end
             end
@@ -311,7 +312,7 @@ function MK:RefreshWindow()
         if e then
             r:ClearAllPoints(); r:SetPoint("TOPLEFT", 10, y - (i - 1) * ROW_H)
             r.icon:SetTexture((C_Item and C_Item.GetItemIconByID and C_Item.GetItemIconByID(e.id)) or (GetItemIcon and GetItemIcon(e.id)) or 134400)
-            r.text:SetText(string.format("|cffffffff%dx|r %s", e.left, e.name))
+            r.text:SetText(string.format("|cffffffff%dx|r %s%s", e.left, e.name, e.inLog and "" or (" |cff888888" .. T("(quest ainda não aceita)", "(quest not taken yet)") .. "|r")))
             r.price:SetText(e.price and money(e.price * e.left) or ("|cff888888" .. T("sem preço", "no price") .. "|r"))
             r:Show()
         else r:Hide() end

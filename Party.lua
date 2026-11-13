@@ -377,3 +377,66 @@ function RX:SetGuide(id, fromParty)
     origSetGuide(self, id)
     if not fromParty and self.guides[id] then P:SendGuide(id) end
 end
+
+----------------------------------------------------------------------
+-- Compartilhar com o grupo todas as quests do seu log que fazem parte do guia atual.
+-- Usa o "Compartilhar quest" do próprio jogo, uma quest por vez (com um intervalo).
+----------------------------------------------------------------------
+local function pushable(q, idx)
+    if C_QuestLog and C_QuestLog.IsPushableQuest then
+        local ok, v = pcall(C_QuestLog.IsPushableQuest, q); if ok then return v and true or false end
+    end
+    if GetQuestLogPushable and SelectQuestLogEntry and idx then
+        SelectQuestLogEntry(idx); return GetQuestLogPushable() and true or false
+    end
+    return true
+end
+
+local function push(q, idx)
+    if C_QuestLog and C_QuestLog.SetSelectedQuest then C_QuestLog.SetSelectedQuest(q)
+    elseif SelectQuestLogEntry and idx then SelectQuestLogEntry(idx) end
+    if QuestLogPushQuest then QuestLogPushQuest() return true end
+    return false
+end
+
+function P:ShareGuideQuests()
+    if not ((IsInGroup and IsInGroup()) or (IsInRaid and IsInRaid())) then
+        RX:Print(T("Você não está em um grupo: entre num grupo para compartilhar as quests.", "You are not in a group: join one to share quests."))
+        return
+    end
+    if self.sharing then RX:Print(T("Já estou compartilhando, aguarde.", "Already sharing, please wait.")) return end
+    local g = RX:CurrentGuide()
+    if not g then RX:Print(T("Escolha um guia primeiro.", "Pick a guide first.")) return end
+    RX.Q:Scan()
+    local inGuide = {}
+    for _, s in ipairs(g.steps) do if s.q then inGuide[s.q] = true end end
+    local list, notShareable = {}, 0
+    for q, e in pairs(RX.Q.log or {}) do
+        if inGuide[q] and not e.ready then
+            if pushable(q, e.index) then list[#list + 1] = q else notShareable = notShareable + 1 end
+        end
+    end
+    if #list == 0 then
+        RX:Print(notShareable > 0 and T("As quests do guia no seu log não podem ser compartilhadas.", "The guide quests in your log can't be shared.")
+            or T("Nenhuma quest do guia no seu log para compartilhar.", "No guide quest in your log to share."))
+        return
+    end
+    self.sharing = true
+    RX:Print(string.format(T("Compartilhando %d quest(s) do guia com o grupo...", "Sharing %d guide quest(s) with the group..."), #list))
+    local i, sent = 0, 0
+    local function step()
+        i = i + 1
+        local q = list[i]
+        if not q then
+            P.sharing = nil
+            RX:Print(string.format(T("Pronto: %d quest(s) compartilhada(s).%s", "Done: %d quest(s) shared.%s"), sent,
+                notShareable > 0 and string.format(T(" %d não podem ser compartilhadas.", " %d can't be shared."), notShareable) or ""))
+            return
+        end
+        RX.Q:Scan()
+        local e = RX.Q.log[q]
+        if e and pcall(push, q, e.index) then sent = sent + 1 end
+        if C_Timer then C_Timer.After(1.2, step) else step() end
+    end
+    step()
+end

@@ -20,6 +20,9 @@ Addon de leveling no estilo Zygor / RestedXP para o **WoW: Forever** (Horda, ní
 - **Lista de compras do guia**: ao escolher um guia, abre uma janela com todos os itens das quests dele que dá para comprar, quantidade e preço, e um botão para buscar no Auctionator (`/rota compras`). Ao abrir a Casa de Leilões, oferece buscar o que falta das quests do log (`/rota leilao`).
 - **Abandono automático (opcional)**: Opções > Automação. Abandona sozinho, com aviso de 8 segundos, quests que não valem a pena: lentas (escolta, 8+ drops, outra zona, profissão), de pouco XP (cinzas ou < 1,5% do nível) ou fora do guia. Cada critério liga/desliga. `/rota manter` cancela. Nunca abandona quest que abre corrente do guia, que começou com item, ou lenta cujo item está à venda no leilão.
 - **Opções em abas**: Guia, Automação, Qualidade de vida, Leilão, Navegação e Aparência.
+- **Compartilhar quests**: um botão na tela principal compartilha com o grupo todas as quests do seu log que estão no guia (`/rota compartilhar`).
+- **Revisão do quest log**: ao entrar, subir de nível ou abrir o leilão, pergunta (uma vez por quest) se quer abandonar quests que já dão pouco XP, inclusive de classe (`/rota revisar`).
+- **Limpar guia atual**: esvazia a lista para escolher outro guia, sem abandonar nada no jogo (`/rota limpar`).
 - **Minimizar**: o botão ao lado do X vira o guia numa bolinha com o ícone; clique nela para voltar. O mesmo ícone fica no minimapa.
 - **Cronômetro de XP** na página principal; arraste o canto da janela do cronômetro para mudar o tamanho.
 - **Farm de ouro**: cada local mostra os drops que mais rendem (chance por abate e preço do leilão/vendedor) e os raros vendáveis. Dados do cmangos classic-db.
@@ -53,7 +56,18 @@ TomTom (seta e checkpoints), Questie (dados de quest e progresso do grupo), Gear
 
 ## Créditos e licença
 
-Os dados de quests, NPCs e locais foram extraídos do [Questie](https://github.com/Questie/Questie) (GPL-3.0). Por isso este addon também é distribuído sob a **GPL-3.0** (veja `LICENSE`). As bibliotecas em `Libs/` mantêm as suas próprias licenças.
+O RouteXP é distribuído sob a **GPL-3.0** (veja `LICENSE`). Ele usa dados e código destes projetos, com o nosso agradecimento:
+
+| O quê | Fonte | Licença |
+|---|---|---|
+| Quests, NPCs, objetos, locais, pré-requisitos e nomes em português | [Questie](https://github.com/Questie/Questie) (QuestieDB) | GPL-3.0 |
+| Tabelas de loot e preço de vendedor (drops mais valiosos dos farms de ouro) | [cmangos classic-db](https://github.com/cmangos/classic-db) | GPL-2.0 |
+| Botão do minimapa | LibStub, CallbackHandler-1.0, LibDataBroker-1.1, LibDBIcon-1.0 (em `Libs/`) | licenças próprias de cada biblioteca |
+| Ordem das zonas nas rotas (só referência; os guias quest a quest foram montados por nós) | wowforeverinfo.com, warcraftmaps.com, topbuilds.gg | — |
+
+Integrações opcionais (só usadas se você tiver o addon instalado): TomTom, Questie, Auctionator, GearQuest Forever e Talents Forever.
+
+O ícone, os guias por zona, as rotas e o código do RouteXP foram feitos para este projeto.
 
 ---
 
@@ -63,4 +77,4 @@ A Zygor / RestedXP style leveling addon for **WoW: Forever** (Horde, levels 30�
 
 **Install:** download the ZIP, rename the folder to `RotaXP` and put it in `Interface\AddOns`.
 **Update:** run `Atualizar-RotaXP.bat` from the addon folder.
-**License:** GPL-3.0 (quest data derived from Questie).
+**License:** GPL-3.0. Quest data from Questie (GPL-3.0); loot data from cmangos classic-db (GPL-2.0); minimap button libraries keep their own licenses.

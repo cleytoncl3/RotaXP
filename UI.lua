@@ -65,6 +65,22 @@ local function smallButton(parent, text, w, onClick, tooltip)
 end
 
 -- largura do botão ajustada ao texto
+-- fonte dos botões da tela principal: um pouco menor que a pequena do jogo
+local btnFonts = {}
+function UI.BtnFont(hl)
+    local key = hl and "hl" or "n"
+    if btnFonts[key] then return btnFonts[key] end
+    local f = CreateFont(hl and "RotaXPBtnFontHL" or "RotaXPBtnFont")
+    local base = hl and GameFontHighlightSmall or GameFontNormalSmall
+    if base and base.GetFont then
+        local path, _, flags = base:GetFont()
+        if path then f:SetFont(path, 9.5, flags) end
+        if base.GetTextColor then f:SetTextColor(base:GetTextColor()) end
+    end
+    btnFonts[key] = f
+    return f
+end
+
 local function fitButton(b, minW)
     local fs = b.GetFontString and b:GetFontString()
     local w = fs and fs.GetStringWidth and fs:GetStringWidth() or 0
@@ -396,6 +412,7 @@ local BAR = {
     { key = "guides", pt = "Guias", en = "Guides", tipPT = "Escolher rota, estilo de leveling e guia por nível", tipEN = "Pick route, leveling style and guide by level", click = function() UI:ToggleMenu() end },
     { key = "turnin", pt = "Entregas", en = "Turn-ins", tipPT = "Modo Entregas: lista só as quests prontas e monta a melhor rota para entregar todas (libera a bolsa). Clique de novo para voltar ao guia.",
       tipEN = "Turn-in mode: lists only ready quests and builds the best route to turn them all in (frees bag space). Click again to go back to the guide.", click = function() RX.Turnin:Toggle() end },
+    { key = "share", pt = "Compartilhar quests", en = "Share quests", tipPT = "Compartilha com o seu grupo todas as quests do seu log que fazem parte do guia atual (uma por vez).", tipEN = "Shares with your group every quest in your log that belongs to the current guide (one at a time).", click = function() RX.Party:ShareGuideQuests() end },
     { key = "timer", pt = "Cronômetro", en = "Timer", tipPT = "Cronômetro de XP: mede quanto XP por hora você ganha num local ou masmorra.", tipEN = "XP timer: measures how much XP per hour you get at a spot or dungeon.", click = function() RX.Timer:ToggleWindow() end },
     { key = "options", pt = "Opções", en = "Options", tipPT = "Estilo, fonte, idioma, auto aceitar...", tipEN = "Style, font, language, auto accept...", click = function() UI:ShowPanel("options") end },
 }
@@ -673,16 +690,17 @@ function UI:LayoutBar()
     -- grade uniforme: todos os botões com a mesma largura e altura (3 por linha; 5 se a janela for larga)
     local avail = (self.frame:GetWidth() or 300) - 34
     local n = #self.barButtons
-    local cols = (avail >= 360) and n or 2
+    -- 3 por fileira (cabem 6 em 2 fileiras); janela bem larga: todos numa fileira
+    local cols = (avail >= 120 * n) and n or math.min(3, n)
     local bw = math.floor((avail - (cols - 1) * BTN_GAP) / cols)
-    local bh = 34
+    local bh = 28
     local rows = math.ceil(n / cols)
     for i, b in ipairs(self.barButtons) do
         local col = (i - 1) % cols
         local row = math.floor((i - 1) / cols)
         b:SetSize(bw, bh)
         -- letra pequena; quebra em até 2 linhas para caber no botão em qualquer idioma
-        if b.SetNormalFontObject then b:SetNormalFontObject("GameFontNormalSmall"); b:SetHighlightFontObject("GameFontHighlightSmall") end
+        if b.SetNormalFontObject then b:SetNormalFontObject(UI.BtnFont()); b:SetHighlightFontObject(UI.BtnFont(true)) end
         local fs = b:GetFontString()
         if fs then
             fs:ClearAllPoints(); fs:SetPoint("LEFT", 4, 0); fs:SetPoint("RIGHT", -4, 0)
@@ -692,9 +710,9 @@ function UI:LayoutBar()
         -- última fileira incompleta fica centralizada
         local inRow = math.min(cols, n - row * cols)
         local off = (cols - inRow) * (bw + BTN_GAP) / 2
-        b:SetPoint("BOTTOMLEFT", self.bar, "BOTTOMLEFT", off + col * (bw + BTN_GAP), (rows - 1 - row) * (bh + 4))
+        b:SetPoint("BOTTOMLEFT", self.bar, "BOTTOMLEFT", off + col * (bw + BTN_GAP), (rows - 1 - row) * (bh + 3))
     end
-    local h = rows * (bh + 4) - 4
+    local h = rows * (bh + 3) - 3
     self.bar:SetHeight(h)
     return h
 end
@@ -784,10 +802,10 @@ function UI:GetLine(i)
     l.check = cb
     -- botão "abandonar" (texto pequeno, no canto de baixo à direita, longe do quadradinho de pular)
     local ab = CreateFrame("Button", nil, l)
-    ab:SetPoint("BOTTOMRIGHT", l, "BOTTOMRIGHT", -4, 3)
+    ab:SetPoint("BOTTOMLEFT", l, "BOTTOMLEFT", 40, 3)   -- embaixo do texto, à esquerda (sempre visível, longe do quadradinho)
     local abt = ab:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-    abt:SetPoint("RIGHT")
-    abt:SetText(T("abandonar", "abandon"))
+    abt:SetPoint("LEFT")
+    abt:SetText("[" .. T("abandonar quest", "abandon quest") .. "]")
     abt:SetTextColor(1, 0.35, 0.35)
     ab:SetSize(abt:GetStringWidth() + 6, 12)
     ab:SetScript("OnClick", function() local s = l.step; if s and s.q and RX.Abandon then RX.Abandon:Confirm(s.q) end end)
@@ -831,7 +849,7 @@ function UI:GetLine(i)
     l:SetScript("OnClick", function(self, button)
         local s = self.step
         if self.wasDrag then self.wasDrag = false; return end
-        if not s then return end
+        if not s then if self.emptyAction then self.emptyAction() end return end
         if button == "RightButton" then
             if IsShiftKeyDown() and s.q then RX:SkipQuest(s.q) else RX:MarkStep(s, true) end
         else
@@ -955,7 +973,8 @@ function UI:Refresh()
     elseif nearby then
         self.title:SetText("|cff40c0ff" .. T("Perto de mim", "Nearby") .. "|r  " .. T("quests de todos os guias, mais perto primeiro", "quests from every guide, nearest first"))
     else
-        self.title:SetText((g and RX:GuideName(g) or T("Nenhum guia - clique aqui", "No guide - click here")) .. (g and g.tag == "forever" and " |cff40c0ff[Forever]|r" or ""))
+        self.title:SetText((g and RX:GuideName(g) or T("Nenhum guia - clique aqui", "No guide - click here")) .. (g and g.tag == "forever" and " |cff40c0ff[Forever]|r" or "")
+            .. (RX:ShowAllHere() and (" |cff40ff40" .. T("[tudo]", "[all]") .. "|r") or ""))
     end
     self:RefreshXP()
     -- local detectado
@@ -1024,14 +1043,15 @@ function UI:Refresh()
             l.typeIcon:Hide()
             l.text:SetPoint("TOPLEFT", l.icon, "TOPRIGHT", 4, 0)
         end
-        l.text:SetWidth(ti and (textW - isz - 3) - (isz - 16) or textW - (isz - 16))
-        l.sub:SetWidth(textW - 4)
+        local tw = ti and (textW - isz - 3) - (isz - 16) or textW - (isz - 16)
+        l.text:SetWidth(tw)
+        l.sub:SetWidth(tw - 4)   -- mesma largura do título: não passa da borda da janela
         local txt, sub = self:StepText(s)
         l.text:SetText(txt)
         l.sub:SetText(sub or "")
         local h = l.text:GetStringHeight() + (sub and (l.sub:GetStringHeight() + 6) or 0) + 6
         h = math.max(h, isz + 4)
-        local canAbandon = s.q and not s.turnin and RX.Q:InLog(s.q) and (s.t == "C" or s.t == "T" or s.t == "A")
+        local canAbandon = s.q and RX.Q:InLog(s.q) and true or false
         if canAbandon then l.abandon:Show(); h = h + 12 else l.abandon:Hide() end   -- espaço para o "abandonar" embaixo
         if s.q and s.q == self.selectedQuest then l.hl:SetColorTexture(0.2, 0.6, 1, 0.18); l.hl:Show()
         elseif i == 1 then l.hl:SetColorTexture(1, 0.5, 0, 0.12); l.hl:Show()
@@ -1046,6 +1066,21 @@ function UI:Refresh()
         shown = i
     end
     for i = shown + 1, #self.lines do self.lines[i].step = nil; self.lines[i]:Hide() end
+    for _, ln in ipairs(self.lines) do ln.emptyAction = nil end
+    if not g and #steps == 0 and not turnin and not nearby then
+        local l = self:GetLine(1)
+        l.step = nil
+        l.check:Hide()
+        l.abandon:Hide()
+        l.icon:SetTexture(RX.ICON); l.icon:SetDesaturated(false); l.typeIcon:Hide()
+        l.text:ClearAllPoints(); l.text:SetPoint("TOPLEFT", l.icon, "TOPRIGHT", 4, 0)
+        l.text:SetWidth(textW)
+        l.text:SetText("|cffffd100" .. T("Nenhum guia selecionado.", "No guide selected.") .. "|r " .. T("Clique em Guias para escolher o próximo.", "Click Guides to pick the next one."))
+        l.sub:SetText("")
+        l:ClearAllPoints(); l:SetPoint("TOPLEFT", self.content, "TOPLEFT", 4, y)
+        l:SetSize(lineW - 4, 30); l:Show()
+        y = y - 34
+    end
     if g and #steps == 0 then
         local l = self:GetLine(1)
         l.step = nil
@@ -1054,13 +1089,34 @@ function UI:Refresh()
         l.icon:SetTexture("Interface\\RaidFrame\\ReadyCheck-Ready"); l.icon:SetDesaturated(false); l.typeIcon:Hide()
         l.text:ClearAllPoints(); l.text:SetPoint("TOPLEFT", l.icon, "TOPRIGHT", 4, 0)
         local n = RX:NextGuide(g)
+        local hs = RX:HiddenSummary(g)
         l.text:SetWidth(textW)
-        l.text:SetText("|cff40ff40" .. T("Guia concluído!", "Guide complete!") .. "|r " ..
-            (n and (T("Próximo: ", "Next: ") .. RX:GuideName(n)) or T("Abra o menu de guias para escolher o próximo.", "Open the guide menu to pick the next one.")))
-        l.sub:SetText("")
-        l:ClearAllPoints(); l:SetPoint("TOPLEFT", self.content, "TOPLEFT", 4, y)
-        l:SetSize(lineW - 4, 30); l:Show()
-        y = y - 34
+        l.sub:SetWidth(textW - 4)
+        if hs.total > 0 and not turnin and not nearby then
+            -- ainda há quests não feitas, mas o estilo/nível/corrente esconde: explica e oferece mostrar
+            l.icon:SetTexture("Interface\\GossipFrame\\AvailableQuestIcon")
+            l.text:SetText("|cffffd100" .. string.format(T("Nada para você aqui com o seu estilo (%d quests escondidas).", "Nothing for you here with your style (%d hidden quests)."), hs.total) .. "|r")
+            local parts = {}
+            if hs.estilo > 0 then parts[#parts + 1] = string.format(T("%d lentas/de coleta (o estilo pula)", "%d slow/collecting (your style skips)"), hs.estilo) end
+            if hs.cinza > 0 then parts[#parts + 1] = string.format(T("%d cinzas (pouco XP)", "%d grey (little XP)"), hs.cinza) end
+            if hs.pre > 0 then parts[#parts + 1] = string.format(T("%d precisam de uma quest anterior que você não fez", "%d need an earlier quest you haven't done"), hs.pre) end
+            if hs.outro > 0 then parts[#parts + 1] = string.format(T("%d por outro motivo (nível, item, masmorra...)", "%d for another reason (level, item, dungeon...)"), hs.outro) end
+            local canShow = (hs.estilo + hs.cinza) > 0 and not RX:ShowAllHere()
+            l.sub:SetText("|cffd0d0d0" .. table.concat(parts, " · ") .. "|r" ..
+                (canShow and ("\n|cff40ff40" .. T("Clique aqui para mostrar as lentas e cinzas deste guia.", "Click here to show the slow and grey quests of this guide.") .. "|r") or ""))
+            if canShow then l.emptyAction = function() RX:ToggleShowAll() end end
+            local h = l.text:GetStringHeight() + l.sub:GetStringHeight() + 12
+            l:ClearAllPoints(); l:SetPoint("TOPLEFT", self.content, "TOPLEFT", 4, y)
+            l:SetSize(lineW - 4, h); l:Show()
+            y = y - h - 4
+        else
+            l.text:SetText("|cff40ff40" .. T("Guia concluído!", "Guide complete!") .. "|r " ..
+                (n and (T("Próximo: ", "Next: ") .. RX:GuideName(n)) or T("Abra o menu de guias para escolher o próximo.", "Open the guide menu to pick the next one.")))
+            l.sub:SetText("")
+            l:ClearAllPoints(); l:SetPoint("TOPLEFT", self.content, "TOPLEFT", 4, y)
+            l:SetSize(lineW - 4, 30); l:Show()
+            y = y - 34
+        end
     end
     self.content:SetHeight(math.max(1, -y))
     -- barra de rolagem só aparece quando há mais passos do que cabem
@@ -1609,6 +1665,8 @@ function UI:ShowPanel(which, sub)
             check("autoAccept", T("Auto aceitar quests do guia", "Auto accept guide quests"), T("Só aceita as do guia. Segure SHIFT para desativar na hora.", "Only accepts guide quests. Hold SHIFT to disable it on the spot."))
             check("autoTurnIn", T("Auto entregar quests do guia", "Auto turn in guide quests"), T("Quando há só uma recompensa. Segure SHIFT para desativar.", "When there is only one reward. Hold SHIFT to disable."))
             section(T("Abandonar quests que não valem a pena", "Abandon quests that aren't worth it"))
+            check("askLowXP", T("Perguntar sobre quests de pouco XP no log", "Ask about low-XP quests in my log"), T("Ao entrar no jogo, ao subir de nível e ao abrir o leilão: pergunta, uma por vez, se quer abandonar quests que já dão pouco XP (inclusive de classe). A resposta fica salva. |cffffff00/rota revisar|r pergunta agora.", "On login, level up and when opening the AH: asks, one at a time, whether to abandon quests that give little XP now (class quests too). Your answer is saved. |cffffff00/rota review|r asks now."))
+            buttonRow({ { text = T("Perguntar de novo sobre as mantidas", "Ask again about kept ones"), onClick = function() RX.Abandon:ResetLowXPAnswers() end } })
             check("autoAbandon", T("Abandonar automaticamente", "Abandon automatically"), T("Quando você aceita uma quest assim, avisa no chat e abandona em 8 segundos. |cffffff00/rota manter|r cancela.", "When you accept such a quest, warns in chat and abandons it in 8 seconds. |cffffff00/rota keep|r cancels."), function() UI:ShowPanel("options") end)
             if RX.db.autoAbandon then
                 check("abandonSlow", T("Lentas", "Slow"), T("Escolta, 8+ itens de drop, entrega em outra zona, profissão que você não tem, PvP.", "Escort, 8+ dropped items, turn-in in another zone, a profession you don't have, PvP."), nil, 24)
@@ -1623,9 +1681,10 @@ function UI:ShowPanel(which, sub)
             check("questItems", T("Janela de itens da quest (clicar para usar)", "Quest item window (click to use)"), T("Botões para usar os itens que as quests dão. Atalho: Opções > Atalhos > AddOns > RouteXP.", "Buttons to use quest items. Hotkey: Options > Keybindings > AddOns > RouteXP."), function() RX.QuestItems:Refresh() end)
             section(T("Duo / grupo", "Duo / group"))
             check("partyShare", T("Compartilhar com quem usa RouteXP no grupo", "Share with RouteXP users in your group"), T("Mesmo guia, progresso do parceiro em cada quest e pontos de farm.", "Same guide, partner progress on each quest and farm spots."))
-            section(T("Quests puladas", "Skipped quests"))
+            section(T("Quests puladas e guia", "Skipped quests and guide"))
             buttonRow({
                 { text = T("Voltar quests puladas", "Restore skipped quests"), onClick = function() RX:UnskipAll(); RX:Print(T("Todas as quests puladas voltaram para a rota.", "All skipped quests are back on the route.")) end },
+                { text = "|cffff8080" .. T("Limpar guia atual", "Clear current guide") .. "|r", tip = T("Esvazia a lista do guia para você escolher outro. Não abandona nenhuma quest do jogo.", "Empties the guide list so you can pick another. Does not abandon any in-game quest."), onClick = function() RX:ClearGuide(); UI:ShowPanel("options") end },
             })
 
         elseif tab == "leilao" then

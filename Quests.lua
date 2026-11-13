@@ -7,21 +7,25 @@ function Q:Scan()
     wipe(self.log)
     if C_QuestLog and C_QuestLog.GetNumQuestLogEntries and C_QuestLog.GetInfo then
         local n = C_QuestLog.GetNumQuestLogEntries()
+        local header
         for i = 1, n do
             local info = C_QuestLog.GetInfo(i)
+            if info and info.isHeader then header = info.title end
             if info and not info.isHeader and info.questID and info.questID > 0 then
                 local ready = false
                 if C_QuestLog.IsComplete then ready = C_QuestLog.IsComplete(info.questID) and true or false end
                 if not ready and C_QuestLog.ReadyForTurnIn then ready = C_QuestLog.ReadyForTurnIn(info.questID) and true or false end
-                self.log[info.questID] = { title = info.title, ready = ready, index = i }
+                self.log[info.questID] = { title = info.title, ready = ready, index = i, header = header, level = info.level }
             end
         end
     elseif GetNumQuestLogEntries then
         local n = GetNumQuestLogEntries()
+        local header
         for i = 1, n do
-            local title, _, _, isHeader, _, isComplete, _, questID = GetQuestLogTitle(i)
+            local title, level, _, isHeader, _, isComplete, _, questID = GetQuestLogTitle(i)
+            if isHeader then header = title end
             if not isHeader and questID and questID > 0 then
-                self.log[questID] = { title = title, ready = (isComplete == 1 or isComplete == true), index = i }
+                self.log[questID] = { title = title, ready = (isComplete == 1 or isComplete == true), index = i, header = header, level = level }
             end
         end
     end

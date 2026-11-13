@@ -230,3 +230,123 @@ function AB:Keep()
     RX:Print(n > 0 and T("Ok, mantive a quest.", "Ok, kept the quest.") or T("Nenhuma quest para abandonar agora.", "No quest pending abandon."))
     if n > 0 then RX:Update(true) end
 end
+
+
+----------------------------------------------------------------------
+-- Revisão do quest log: quests ativas que já dão pouco XP (cinzas ou < 1,5% do nível).
+-- Pergunta uma de cada vez se quer abandonar; a resposta fica salva e não pergunta de novo.
+-- Quest de classe também é perguntada, com o aviso de que pode valer pela recompensa.
+----------------------------------------------------------------------
+local function qlevel(q)
+    local e = RX.Q.log[q]
+    if e and type(e.level) == "number" and e.level > 0 then return e.level end
+    for _, g in pairs(RX.guides or {}) do
+        for _, s in ipairs(g.steps or {}) do if s.q == q and s.lvl then return s.lvl end end
+    end
+    return nil
+end
+
+local function qxp(q)
+    if GetQuestLogRewardXP then
+        local ok, v = pcall(GetQuestLogRewardXP, q)
+        if ok and type(v) == "number" and v > 0 then return v end
+    end
+    for _, g in pairs(RX.guides or {}) do
+        for _, s in ipairs(g.steps or {}) do if s.q == q and s.t == "T" then return math.floor(RX:QuestXP(s)) end end
+    end
+    return nil
+end
+
+function AB:IsClassQuest(q)
+    local e = RX.Q.log[q]
+    local cls = UnitClass and (UnitClass("player"))
+    return e and e.header and cls and e.header == cls or false
+end
+
+-- lista do que vale perguntar agora
+function AB:LowXPList()
+    local lvl = UnitLevel and UnitLevel("player") or 0
+    if lvl >= 60 then return {} end
+    RX.Q:Scan()
+    local asked = RX:CharState().lowXPAsked or {}
+    local max = UnitXPMax and UnitXPMax("player") or 0
+    local out = {}
+    for q, e in pairs(RX.Q.log or {}) do
+        if not asked[q] and not e.ready and not self.pending[q] then
+            local ql, xp = qlevel(q), qxp(q)
+            local grey = ql and lvl - ql >= 6
+            local low = xp and max > 0 and xp < max * 0.015
+            if grey or low then
+                out[#out + 1] = { q = q, title = e.title or ("#" .. q), level = ql, xp = xp, class = self:IsClassQuest(q), grey = grey }
+            end
+        end
+    end
+    table.sort(out, function(x, y) return (x.level or 0) < (y.level or 0) end)
+    return out
+end
+
+function AB:ReviewLog()
+    if RX.db.askLowXP == false or self.reviewing then return end
+    if InCombatLockdown and InCombatLockdown() then self.reviewAfterCombat = true return end
+    self.reviewQueue = self:LowXPList()
+    if #self.reviewQueue == 0 then return end
+    self.reviewing = true
+    self:AskNext()
+end
+
+function AB:AskNext()
+    local it = self.reviewQueue and table.remove(self.reviewQueue, 1)
+    if not it then self.reviewing = nil return end
+    if not RX.Q:InLog(it.q) then return self:AskNext() end
+    self.asking = it
+    local lines = {}
+    lines[#lines + 1] = string.format(T("Você tem a quest |cffffff00%s|r%s ativa.", "You have the quest |cffffff00%s|r%s active."),
+        it.title, it.level and string.format(T(" (nível %d)", " (level %d)"), it.level) or "")
+    lines[#lines + 1] = it.xp and string.format(T("Ela dá só ~%d de XP para o seu nível%s.", "It only gives ~%d XP at your level%s."), it.xp, it.grey and T(" (já está cinza)", " (it is grey already)") or "")
+        or T("Ela já está cinza: dá pouco XP para o seu nível.", "It is grey already: little XP at your level.")
+    if it.class then
+        lines[#lines + 1] = "|cffff9050" .. T("É uma quest de CLASSE: pode valer a pena fazer pela recompensa (habilidade/item).", "It is a CLASS quest: it may be worth doing for the reward (skill/item).") .. "|r"
+    end
+    lines[#lines + 1] = T("Quer abandonar?", "Do you want to abandon it?")
+    if StaticPopup_Show then StaticPopup_Show("ROTAXP_LOWXP", table.concat(lines, "\n"), nil, it.q) end
+end
+
+function AB:Answer(q, abandonIt)
+    local c = RX:CharState()
+    c.lowXPAsked = c.lowXPAsked or {}
+    c.lowXPAsked[q] = abandonIt and "abandon" or "keep"
+    if abandonIt then self:AbandonNow(q, T("pouco XP (revisão do log)", "low XP (log review)")) end
+    if C_Timer then C_Timer.After(0.3, function() AB:AskNext() end) else self:AskNext() end
+end
+
+function AB:ResetLowXPAnswers()
+    RX:CharState().lowXPAsked = {}
+    RX:Print(T("Ok: vou perguntar de novo sobre as quests de pouco XP que você manteve.", "Ok: I will ask again about the low-XP quests you kept."))
+end
+
+if StaticPopupDialogs then
+    StaticPopupDialogs["ROTAXP_LOWXP"] = {
+        text = "%s", button1 = T("Abandonar", "Abandon"), button2 = T("Manter", "Keep"),
+        timeout = 0, whileDead = true, hideOnEscape = true,
+        OnAccept = function(_, q) AB:Answer(q, true) end,
+        OnCancel = function(_, q) AB:Answer(q, false) end,
+    }
+end
+
+local rev = CreateFrame("Frame")
+rev:RegisterEvent("PLAYER_LOGIN")
+rev:SetScript("OnEvent", function(_, event)
+    if event == "PLAYER_LOGIN" then
+        pcall(rev.RegisterEvent, rev, "PLAYER_LEVEL_UP")
+        pcall(rev.RegisterEvent, rev, "PLAYER_REGEN_ENABLED")
+        pcall(rev.RegisterEvent, rev, "AUCTION_HOUSE_SHOW")
+        if C_Timer then C_Timer.After(15, function() AB:ReviewLog() end) end
+    elseif event == "PLAYER_LEVEL_UP" then
+        if C_Timer then C_Timer.After(4, function() AB:ReviewLog() end) end
+    elseif event == "AUCTION_HOUSE_SHOW" then
+        AB:ReviewLog()
+    elseif event == "PLAYER_REGEN_ENABLED" and AB.reviewAfterCombat then
+        AB.reviewAfterCombat = nil
+        if C_Timer then C_Timer.After(2, function() AB:ReviewLog() end) end
+    end
+end)
