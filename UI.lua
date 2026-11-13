@@ -244,10 +244,11 @@ end
 
 -- etiqueta no título quando dá para comprar o item da quest no leilão
 function UI:MarketTag(s)
-    if not (s.q and RX.Market and RX.db.marketHint ~= false) then return "" end
-    if s.t == "A" and RX.Q:InLog(s.q) then return "" end
-    if not RX.Market:Buyable(s.q) then return "" end
-    return " |T" .. RX.Market.ICON .. ":14|t|cff33ddff" .. T("leilão", "AH") .. "|r"
+    local tag = s.chain and (" |cff40c0ff" .. T("[pré-quest]", "[prerequisite]") .. "|r") or ""
+    if not (s.q and RX.Market and RX.db.marketHint ~= false) then return tag end
+    if s.t == "A" and RX.Q:InLog(s.q) then return tag end
+    if not RX.Market:Buyable(s.q) then return tag end
+    return tag .. " |T" .. RX.Market.ICON .. ":14|t|cff33ddff" .. T("leilão", "AH") .. "|r"
 end
 
 function UI:StepText(s)
@@ -291,6 +292,12 @@ function UI:StepText(s)
     local function add(color, text) table.insert(hints, color .. text .. "|r") end
     if s.nearby and RX.db.nearbyMode and s.nearNote then add("|cff40c0ff", s.nearNote) end
     if s.fromLog and s.logNote and not RX.db.nearbyMode then add("|cff40c0ff", s.logNote) end
+    -- pré-quest de uma cadeia: diz qual quest ela libera
+    if s.chainFor then add("|cff40c0ff", T("Pré-quest para liberar: ", "Prerequisite to unlock: ") .. "|cffffff00" .. (RX:QName(s.chainFor) or "?") .. "|r") end
+    if s.chainNoLoc then add("|cffff9050", T("Sem local de início conhecido: veja no mapa do jogo / Questie ou pergunte a um amigo.", "No known start location: check the game map / Questie or ask a friend.")) end
+    if s.t == "A" and s.q and RX.notOffered and RX.notOffered[s.q] then
+        add("|cffff6060", T("Este NPC não ofereceu a quest: falta uma pré-quest que o guia não conhece (siga a linha de quests do NPC no jogo).", "This NPC did not offer the quest: a prerequisite quest is missing that the guide doesn't know (follow the NPC's quest line in game)."))
+    end
     -- progresso de quem está no seu grupo (RouteXP ou Questie)
     if s.q and (t == "A" or t == "C" or t == "T") and RX.Party then
         local pl = RX.Party:LinesFor(s)
@@ -326,7 +333,7 @@ function UI:StepText(s)
         add("|cffffb040", string.format(T("Esta quest começa com o item %s, que está na sua bolsa: clique com o botão direito nele (ou no ícone da janela Itens da quest).", "This quest starts from the item %s in your bags: right-click it (or click it in the Quest items window)."), nm))
     end
     if t == "A" then
-        local pv = UI:QuestPreview(s)
+        local pv = (not s.chain) and UI:QuestPreview(s) or nil
         if pv then add("|cffffe0a0", pv) end
     end
     if npc and (t == "A" or t == "T") then

@@ -6,7 +6,7 @@
 ## Author: cleytoncl3 (feito com Claude)
 ## X-Website: https://github.com/cleytoncl3/RouteXP
 ## X-License: GPL-3.0
-## Version: 0.26.3
+## Version: 0.27.0
 ## SavedVariables: RouteXPDB
 ## SavedVariablesPerCharacter: RouteXPCharDB
 ## OptionalDeps: TomTom, Questie, GearQuestForever, TalentsForeverBook
@@ -30,6 +30,7 @@ Arrow.lua
 TravelPlan.lua
 Optimize.lua
 Nearby.lua
+Chain.lua
 MapLine.lua
 MiniLine.lua
 Turnin.lua
@@ -57,6 +58,7 @@ Data\Crafted.lua
 Data\QuestFix.lua
 Data\QuestNeeds.lua
 Data\QuestItemSource.lua
+Data\QuestChains.lua
 Guides\z_arathi.lua
 Guides\z_azshara.lua
 Guides\z_badlands.lua

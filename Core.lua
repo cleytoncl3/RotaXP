@@ -5,7 +5,7 @@ _G.RouteXP = RX
 RX.guides = {}
 RX.guideOrder = {}
 RX.questMeta = {}
-RX.version = "0.26.3"
+RX.version = "0.27.0"
 RX.NAME = "RouteXP"
 RX.ICON = "Interface\\AddOns\\RouteXP\\Media\\icon"
 
@@ -434,6 +434,15 @@ function RX:StepsWithTravel(maxCount)
     return steps, final, nil, g
 end
 
+-- passo "Aceitar" bloqueado SÓ por pré-requisito (nível, estilo e item estão ok): vira os passos das pré-quests
+local function prereqBlocked(self, s)
+    if s.t ~= "A" or not s.q or self.Q:InLog(s.q) or self.Q:IsCompleted(s.q) or self:CharState().skipped[s.q] then return false end
+    if self:StepFilteredByOptions(s) then return false end
+    if self:QuestUnavailable(s) ~= "pré-requisito" then return false end
+    local s2 = setmetatable({ pre = false, preAll = false }, { __index = s })
+    return self:QuestUnavailable(s2) == nil
+end
+
 function RX:VisibleSteps(maxCount)
     if self.db.nearbyMode and self.Nearby then
         return self.Nearby:List(maxCount), self:CurrentGuide()
@@ -467,10 +476,29 @@ function RX:VisibleSteps(maxCount)
     for i = 1, #g.steps do
         local s = g.steps[i]
         local passed = i < lastAuto and not s.q and s.t ~= "L"
-        if not passed and not self:IsStepHidden(s, blocked) and not self:IsStepComplete(g, s, prog) then
+        if self.Chain and prereqBlocked(self, s) then
+            table.insert(list, { _chainPlaceholder = true, forStep = s, idx = i })
+        elseif not passed and not self:IsStepHidden(s, blocked) and not self:IsStepComplete(g, s, prog) then
             first = first or i
             table.insert(list, s)
         end
+    end
+    -- pré-quests que faltam (e que o guia não tem) entram no lugar da quest bloqueada
+    if self.Chain then
+        self.Chain:Reset()
+        local have = {}
+        for _, s in ipairs(list) do if s.q and not s._chainPlaceholder then have[s.q] = true end end
+        local resolved = {}
+        for _, s in ipairs(list) do
+            if s._chainPlaceholder then
+                local steps = self.Chain:StepsFor(s.forStep, have)
+                for _, c in ipairs(steps) do resolved[#resolved + 1] = c end
+                if #steps > 0 and (not first or s.idx < first) then first = s.idx end
+            else
+                resolved[#resolved + 1] = s
+            end
+        end
+        list = resolved
     end
     prog.index = first or (#g.steps + 1)
     -- o guia mostrou passos para você: aí sim, quando acabar, pode ir para o próximo da rota
@@ -490,6 +518,9 @@ function RX:VisibleSteps(maxCount)
             if s.t == "T" and s.q and pending[s.q] then
                 local inLog = self.Q:InLog(s.q)
                 hide = (not inLog) or not self.Q:IsReady(s.q)
+            elseif s.t == "T" and s.q and not self.Q:InLog(s.q) then
+                -- não dá para entregar quest que você não pegou
+                hide = true
             elseif s.t == "T" and s.q and self.Q:InLog(s.q) and not self.Q:IsReady(s.q) then
                 -- quest no log, ainda não pronta e o guia não tem o passo "Fazer": cria um (local vem do jogo)
                 local c = self.synthC[s.q]
@@ -511,6 +542,12 @@ function RX:VisibleSteps(maxCount)
     if self.Nearby and self.Nearby.LogExtras then
         local ok, extra = pcall(self.Nearby.LogExtras, self.Nearby, list)
         if ok and extra then for _, s in ipairs(extra) do list[#list + 1] = s end end
+    end
+    -- pré-quests já aceitas (fora do guia): Fazer/Entregar delas
+    if self.Chain then
+        local have = {}
+        for _, s in ipairs(list) do if s.q then have[s.q] = true end end
+        for _, s in ipairs(self.Chain:LogSteps(have)) do list[#list + 1] = s end
     end
     -- rota inteligente: pega/entrega o que está no mesmo lugar e segue pelo caminho mais curto
     if self.db.smartOrder ~= false and self.Optimize then
@@ -849,6 +886,7 @@ function RX:AcceptDecision(q)
             why = why or f
         end
     end
+    if self.Chain and self.Chain:IsWanted(q) then return true, RX.T("pré-quest que libera uma quest do guia", "prerequisite that unlocks a guide quest") end
     if not found then return false, RX.T("não está no guia", "not in the guide") end
     return false, RX.T("o seu estilo pula: ", "your style skips it: ") .. tostring(why)
 end
@@ -861,6 +899,7 @@ function RX:TurnInDecision(q)
     local g = self:CurrentGuide()
     if not g then return false, "sem guia" end
     for _, s in ipairs(g.steps) do if s.q == q then return true, "no guia" end end
+    if self.Chain and self.Chain:IsWanted(q) then return true, "pré-quest" end
     return false, "fora do guia"
 end
 
@@ -955,7 +994,32 @@ local function pick(self, options, kind)
     return best
 end
 
+-- conversa com um NPC do guia que NÃO oferece a quest esperada: marca (falta uma pré-quest que o banco não tem)
+local function checkOffered(self)
+    local g = self:CurrentGuide()
+    local npc = UnitName and UnitName("npc")
+    if not (g and npc and C_GossipInfo and C_GossipInfo.GetAvailableQuests) then return end
+    local offered = {}
+    for _, info in ipairs(C_GossipInfo.GetAvailableQuests() or {}) do offered[info.questID] = true end
+    for _, info in ipairs((C_GossipInfo.GetActiveQuests and C_GossipInfo.GetActiveQuests()) or {}) do offered[info.questID] = true end
+    self.notOffered = self.notOffered or {}
+    local changed = false
+    for _, s in ipairs(g.steps) do
+        if s.t == "A" and s.q and (s.npc == npc or s.pnpc == npc) then
+            local was = self.notOffered[s.q]
+            if offered[s.q] or self.Q:InLog(s.q) or self.Q:IsCompleted(s.q) then
+                self.notOffered[s.q] = nil
+            elseif not self:CharState().skipped[s.q] and not self:StepFilteredByOptions(s) and not self:QuestUnavailable(s) then
+                self.notOffered[s.q] = true
+            end
+            if was ~= self.notOffered[s.q] then changed = true end
+        end
+    end
+    if changed then self:Update(true) end
+end
+
 function RX:GOSSIP_SHOW()
+    pcall(checkOffered, self)
     if autoOff() then return end
     if not (C_GossipInfo and C_GossipInfo.GetActiveQuests) then return end
     if self.db.autoTurnIn then
@@ -1052,6 +1116,7 @@ function RX:OnQuestAccepted(q)
     local g = self:CurrentGuide()
     local inGuide = false
     if g then for _, s in ipairs(g.steps) do if s.q == q then inGuide = true break end end end
+    if self.Chain and self.Chain:IsWanted(q) then inGuide = true end
     local title = (C_QuestLog and C_QuestLog.GetTitleForQuestID and C_QuestLog.GetTitleForQuestID(q)) or self.Q:Title(q) or ("#" .. q)
     cs.acceptLog = cs.acceptLog or {}
     table.insert(cs.acceptLog, { when = date and date("%Y-%m-%d %H:%M:%S") or "?", q = q, title = title, guide = g and g.id, inGuide = inGuide and true or false, byRouteXP = byUs })

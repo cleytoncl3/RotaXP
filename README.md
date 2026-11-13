@@ -12,6 +12,7 @@
 - **Smart route**: does what is close to you before sending you back to town to turn in, and adds the quests from your log that belong to other zones.
 - **Auto accept / turn in by quest ID**: only quests that belong to your guide (hold **Shift** to turn it off on the spot). `/rota accept` shows the last decisions and why.
 - **Quest icons**: the ! / ? shows the quest status, and a second icon shows the type (sword = kill, bag = collect drops, gear = pick up / interact, speech bubble = talk only). A preview shows what the quest asks before you accept it.
+- **Prerequisite chains**: when a quest of the guide needs earlier quests that are not in the guide (e.g. the quest line that unlocks an NPC), the guide shows those prerequisite quests in its place, marked `[prerequisite]`, with where to pick them up and which quest they unlock. It never lists a turn-in for a quest you have not taken, and it warns when an NPC does not offer a quest the guide expected.
 - **Turn-in mode** and **Nearby mode** (closest quests from every guide).
 - **Where to level**: advice for your current zone and level, and zone suggestions.
 - **Dungeons and open-world grinding**: dungeons for your level with XP per hour, **gold + XP farming spots** (solo and duo) with estimated XP/h and gold/h and the best-paying drops, farming gear (GearQuest) and talents (Talents Forever).
