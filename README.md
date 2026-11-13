@@ -45,7 +45,7 @@ No jogo, `/rota atualizar` mostra a versão instalada. Se alguém do seu grupo t
 
 ## Comandos
 
-`/rota` (ou `/rxp`) abre/fecha · `/rota ajuda` lista os comandos · `/rota opcoes` · `/rota entregas` · `/rota perto` · `/rota farm` · `/rota timer` · `/rota itens` · `/rota compras` · `/rota manter` · `/rota aceite` · `/rota bloqueios` · `/rota atualizar`
+`/rota` (ou `/routexp`) abre/fecha · `/rota ajuda` lista os comandos · `/rota opcoes` · `/rota entregas` · `/rota perto` · `/rota farm` · `/rota timer` · `/rota itens` · `/rota compras` · `/rota manter` · `/rota aceite` · `/rota bloqueios` · `/rota atualizar`
 
 ## Addons opcionais
 

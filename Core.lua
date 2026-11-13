@@ -5,7 +5,7 @@ _G.RotaXP = RX
 RX.guides = {}
 RX.guideOrder = {}
 RX.questMeta = {}
-RX.version = "0.24.1"
+RX.version = "0.24.2"
 RX.NAME = "RouteXP"
 RX.ICON = "Interface\\AddOns\\RotaXP\\Media\\icon"
 
@@ -984,7 +984,6 @@ end
 SLASH_ROTAXP1 = "/rota"
 SLASH_ROTAXP2 = "/rotaxp"
 SLASH_ROTAXP3 = "/routexp"
-SLASH_ROTAXP4 = "/rxp"
 SlashCmdList.ROTAXP = function(msg)
     msg = (msg or ""):lower():gsub("^%s+", ""):gsub("%s+$", "")
     local UI = RX.UI

@@ -1,12 +1,12 @@
 ## Interface: 16001
 ## Title: |cffff7f00Route|rXP - Leveling Guide
-## Notes: Horde 30-60 leveling and questing guide for WoW: Forever. Speedrun routes, full zone guides, arrow and map route, auto accept/turn-in by quest ID, duo share, AH and gold farming. /rxp
+## Notes: Horde 30-60 leveling and questing guide for WoW: Forever. Speedrun routes, full zone guides, arrow and map route, auto accept/turn-in by quest ID, duo share, AH and gold farming. /routexp
 ## Title-ptBR: |cffff7f00Route|rXP - Guia de Leveling
 ## Notes-ptBR: Guia de leveling e quests Horda 30-60 para WoW: Forever. Rotas de speedrun, guias completos por zona, seta e rota no mapa, auto aceitar/entregar pelo ID da quest, share em duo, leilão e farm de ouro. /rota
 ## Author: cleytoncl3 (feito com Claude)
 ## X-Website: https://github.com/cleytoncl3/RotaXP
 ## X-License: GPL-3.0
-## Version: 0.24.1
+## Version: 0.24.2
 ## SavedVariables: RotaXPDB
 ## SavedVariablesPerCharacter: RotaXPCharDB
 ## OptionalDeps: TomTom, Questie, GearQuestForever, TalentsForeverBook
