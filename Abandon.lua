@@ -175,14 +175,14 @@ end
 function AB:Confirm(q)
     if not (q and RX.Q:InLog(q)) then return end
     if StaticPopup_Show then
-        StaticPopup_Show("ROTAXP_ABANDON", title(q), nil, q)
+        StaticPopup_Show("ROUTEXP_ABANDON", title(q), nil, q)
     else
         self:AbandonNow(q, T("manual", "manual"))
     end
 end
 
 if StaticPopupDialogs then
-    StaticPopupDialogs["ROTAXP_ABANDON"] = {
+    StaticPopupDialogs["ROUTEXP_ABANDON"] = {
         text = "Abandonar a quest\n|cffffff00%s|r?", button1 = YES or "Sim", button2 = NO or "Não",
         timeout = 0, whileDead = true, hideOnEscape = true, showAlert = true,
         OnShow = function(self) if RX.db and RX.db.lang ~= "pt" and self.text then self.text:SetText(string.format("Abandon the quest\n|cffffff00%s|r?", self.data and title(self.data) or "")) end end,
@@ -308,7 +308,7 @@ function AB:AskNext()
         lines[#lines + 1] = "|cffff9050" .. T("É uma quest de CLASSE: pode valer a pena fazer pela recompensa (habilidade/item).", "It is a CLASS quest: it may be worth doing for the reward (skill/item).") .. "|r"
     end
     lines[#lines + 1] = T("Quer abandonar?", "Do you want to abandon it?")
-    if StaticPopup_Show then StaticPopup_Show("ROTAXP_LOWXP", table.concat(lines, "\n"), nil, it.q) end
+    if StaticPopup_Show then StaticPopup_Show("ROUTEXP_LOWXP", table.concat(lines, "\n"), nil, it.q) end
 end
 
 function AB:Answer(q, abandonIt)
@@ -325,7 +325,7 @@ function AB:ResetLowXPAnswers()
 end
 
 if StaticPopupDialogs then
-    StaticPopupDialogs["ROTAXP_LOWXP"] = {
+    StaticPopupDialogs["ROUTEXP_LOWXP"] = {
         text = "%s", button1 = T("Abandonar", "Abandon"), button2 = T("Manter", "Keep"),
         timeout = 0, whileDead = true, hideOnEscape = true,
         OnAccept = function(_, q) AB:Answer(q, true) end,

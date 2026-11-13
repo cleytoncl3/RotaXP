@@ -156,14 +156,14 @@ function MK:Offer(force)
     for i, it in ipairs(list) do
         if i <= 8 then lines[#lines + 1] = string.format("%dx %s (%s)", it.left, it.name, money(it.price)) end
     end
-    local text = string.format(T("|cffff7f00RotaXP|r\nItens das suas quests à venda (~%s no total):\n\n%s\n\nBuscar no Auctionator?", "|cffff7f00RotaXP|r\nItems for your quests on sale (~%s total):\n\n%s\n\nSearch them in Auctionator?"),
+    local text = string.format(T("|cffff7f00RouteXP|r\nItens das suas quests à venda (~%s no total):\n\n%s\n\nBuscar no Auctionator?", "|cffff7f00RouteXP|r\nItems for your quests on sale (~%s total):\n\n%s\n\nSearch them in Auctionator?"),
         money(total), table.concat(lines, "\n"))
     self.pending = list
-    if StaticPopup_Show then StaticPopup_Show("ROTAXP_MARKET", text) end
+    if StaticPopup_Show then StaticPopup_Show("ROUTEXP_MARKET", text) end
 end
 
 if StaticPopupDialogs then
-    StaticPopupDialogs["ROTAXP_MARKET"] = {
+    StaticPopupDialogs["ROUTEXP_MARKET"] = {
         text = "%s", button1 = YES or "Sim", button2 = NO or "Não", timeout = 0, whileDead = true, hideOnEscape = true,
         OnAccept = function() if MK.pending then MK:Search(MK.pending) end end,
     }
@@ -215,7 +215,7 @@ local W = 330          -- largura da janela
 local ROW_H = 18
 function MK:CreateWindow()
     if self.win then return self.win end
-    local f = CreateFrame("Frame", "RotaXPShoppingFrame", UIParent, BackdropTemplateMixin and "BackdropTemplate")
+    local f = CreateFrame("Frame", "RouteXPShoppingFrame", UIParent, BackdropTemplateMixin and "BackdropTemplate")
     f:SetSize(W, 90)
     f:SetFrameStrata("DIALOG")
     f:SetClampedToScreen(true)

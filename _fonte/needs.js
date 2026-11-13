@@ -1,5 +1,5 @@
 // Gera Data/QuestNeeds.lua: itens que cada quest dos guias pede (objetivos de item), com a quantidade.
-// Uso: node needs.js <pasta RotaXP> <db.json>
+// Uso: node needs.js <pasta RouteXP> <db.json>
 const fs = require('fs'), path = require('path');
 const RX = process.argv[2], DB = require(path.resolve(process.argv[3]));
 const used = new Set();

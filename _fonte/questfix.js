@@ -1,7 +1,7 @@
 // Gera Data/QuestFix.lua a partir do banco do Questie (db.json):
 // - RX.QuestStart[q] = itemID (quest começa com um item) ou 0 (início desconhecido no banco: não mandar para um ponto falso)
 // - RX.QuestPvP[q]  = true (quests de campo de batalha: não são de leveling)
-// Uso: node questfix.js <pasta RotaXP> <db.json>
+// Uso: node questfix.js <pasta RouteXP> <db.json>
 const fs = require('fs'), path = require('path');
 const RX = process.argv[2], DB = require(path.resolve(process.argv[3]));
 const BG = new Set([3358, 3277, 2597, 3820]); // Bacia Arathi, Ravina Brado Guerreiro, Vale Alterac, Olho da Tormenta

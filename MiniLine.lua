@@ -22,7 +22,7 @@ end
 
 function MM:Init()
     if self.overlay or not Minimap then return end
-    local o = CreateFrame("Frame", "RotaXPMiniOverlay", Minimap)
+    local o = CreateFrame("Frame", "RouteXPMiniOverlay", Minimap)
     o:SetAllPoints(Minimap)
     o:SetFrameLevel((Minimap:GetFrameLevel() or 1) + 5)
     self.overlay = o

@@ -1,4 +1,4 @@
 <Bindings>
-    <Binding name="CLICK RotaXPQuestItem1:LeftButton" header="ROTAXP" category="ADDONS">
+    <Binding name="CLICK RouteXPQuestItem1:LeftButton" header="ROUTEXP" category="ADDONS">
     </Binding>
 </Bindings>

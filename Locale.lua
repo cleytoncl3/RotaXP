@@ -1,4 +1,4 @@
--- Idioma do RotaXP: segue o idioma do cliente (ptBR/ptPT = português, resto = inglês),
+-- Idioma do RouteXP: segue o idioma do cliente (ptBR/ptPT = português, resto = inglês),
 -- mas pode ser trocado nas Opções. Só existem Português e English.
 local _, RX = ...
 

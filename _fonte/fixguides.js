@@ -1,7 +1,7 @@
 // Correções cirúrgicas nos guias de rota (Guides/h*.lua), sem reconstruir:
 //  1) cc = total de itens de DROP que a quest pede (o build antigo contava só os TIPOS de item, por um erro de regex)
 //  2) ordem: o "Aceitar" de uma continuação vai para logo depois do "Entregar" da quest anterior
-// Uso: node fixguides.js <pasta RotaXP> <db.json>
+// Uso: node fixguides.js <pasta RouteXP> <db.json>
 const fs = require('fs'), path = require('path');
 const RX = process.argv[2], d = require(path.resolve(process.argv[3]));
 

@@ -1,6 +1,6 @@
 // Gera Data/GoldDrops.lua: os drops mais valiosos dos mobs de cada local de farm de ouro (Data/GoldSpots.lua).
 // Fonte: banco cmangos classic-db (creature_loot_template, reference_loot_template, item_template).
-// Uso: node golddrops.js <pasta RotaXP> <classicdb.sql>
+// Uso: node golddrops.js <pasta RouteXP> <classicdb.sql>
 const fs = require('fs'), path = require('path');
 const RX = process.argv[2], SQL = process.argv[3];
 const sql = fs.readFileSync(SQL, 'utf8');

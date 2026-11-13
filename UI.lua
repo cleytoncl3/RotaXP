@@ -1,4 +1,4 @@
--- Interface do RotaXP
+-- Interface do RouteXP
 local _, RX = ...
 local UI = {}
 RX.UI = UI
@@ -70,7 +70,7 @@ local btnFonts = {}
 function UI.BtnFont(hl)
     local key = hl and "hl" or "n"
     if btnFonts[key] then return btnFonts[key] end
-    local f = CreateFont(hl and "RotaXPBtnFontHL" or "RotaXPBtnFont")
+    local f = CreateFont(hl and "RouteXPBtnFontHL" or "RouteXPBtnFont")
     local base = hl and GameFontHighlightSmall or GameFontNormalSmall
     if base and base.GetFont then
         local path, _, flags = base:GetFont()
@@ -100,9 +100,9 @@ function UI:ApplyFonts()
     file = file or "Fonts\\FRIZQT__.TTF"
     local size = RX.db.fontSize or 12
     if not self.fontNormal then
-        self.fontNormal = CreateFont("RotaXPFontNormal")
-        self.fontSmall = CreateFont("RotaXPFontSmall")
-        self.fontTitle = CreateFont("RotaXPFontTitle")
+        self.fontNormal = CreateFont("RouteXPFontNormal")
+        self.fontSmall = CreateFont("RouteXPFontSmall")
+        self.fontTitle = CreateFont("RouteXPFontTitle")
     end
     self.fontNormal:SetFont(file, size, flags or "")
     self.fontNormal:SetTextColor(1, 1, 1)
@@ -291,7 +291,7 @@ function UI:StepText(s)
     local function add(color, text) table.insert(hints, color .. text .. "|r") end
     if s.nearby and RX.db.nearbyMode and s.nearNote then add("|cff40c0ff", s.nearNote) end
     if s.fromLog and s.logNote and not RX.db.nearbyMode then add("|cff40c0ff", s.logNote) end
-    -- progresso de quem está no seu grupo (RotaXP ou Questie)
+    -- progresso de quem está no seu grupo (RouteXP ou Questie)
     if s.q and (t == "A" or t == "C" or t == "T") and RX.Party then
         local pl = RX.Party:LinesFor(s)
         if pl then for _, l in ipairs(pl) do add("|cffffffff", l) end end
@@ -316,7 +316,7 @@ function UI:StepText(s)
         if iid then
             local icon = (C_Item and C_Item.GetItemIconByID and C_Item.GetItemIconByID(iid)) or (GetItemIcon and GetItemIcon(iid)) or 134400
             local nm = (C_Item and C_Item.GetItemNameByID and C_Item.GetItemNameByID(iid)) or (GetItemInfo and (GetItemInfo(iid))) or T("item da quest", "quest item")
-            local key = GetBindingKey and GetBindingKey("CLICK RotaXPQuestItem1:LeftButton")
+            local key = GetBindingKey and GetBindingKey("CLICK RouteXPQuestItem1:LeftButton")
             add("|cffffb040", "|T" .. icon .. ":16|t " .. string.format(T("Use o item %s: clique no ícone dele na janela Itens da quest%s", "Use the item %s: click its icon in the Quest items window%s"), nm,
                 key and string.format(T(" (ou tecla %s)", " (or key %s)"), key) or ""))
         end
@@ -430,7 +430,7 @@ end
 
 function UI:Create()
     self:ApplyFonts()
-    local f = CreateFrame("Frame", "RotaXPFrame", UIParent, BackdropTemplateMixin and "BackdropTemplate")
+    local f = CreateFrame("Frame", "RouteXPFrame", UIParent, BackdropTemplateMixin and "BackdropTemplate")
     backdrop(f)
     f:SetSize(RX.db.width, RX.db.height)
     f:SetPoint("RIGHT", UIParent, "RIGHT", -60, 80)
@@ -535,7 +535,7 @@ function UI:Create()
 
     self.lines = {}
     -- lista de passos com rolagem (barra, roda do mouse ou clicar e arrastar)
-    local scroll = CreateFrame("ScrollFrame", "RotaXPStepScroll", f, "UIPanelScrollFrameTemplate")
+    local scroll = CreateFrame("ScrollFrame", "RouteXPStepScroll", f, "UIPanelScrollFrameTemplate")
     scroll:SetPoint("TOPLEFT", f, "TOPLEFT", 6, -48)
     scroll:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -28, 70)
     scroll:EnableMouseWheel(true)
@@ -543,7 +543,7 @@ function UI:Create()
     content:SetSize(300, 10)
     scroll:SetScrollChild(content)
     self.scroll, self.content = scroll, content
-    self.scrollBar = _G["RotaXPStepScrollScrollBar"]
+    self.scrollBar = _G["RouteXPStepScrollScrollBar"]
 
     -- barra inferior (layout em fluxo, com espaçamento; quebra linha se a janela for estreita)
     local bar = CreateFrame("Frame", nil, f)
@@ -602,8 +602,8 @@ function UI:Create()
 
     self:Relocalize()
     self:CreateMinimapButton()
-    if RotaXPCharDB.hidden or RotaXPCharDB.minimized then f:Hide() end
-    if RotaXPCharDB.minimized then self:ShowBall() end
+    if RouteXPCharDB.hidden or RouteXPCharDB.minimized then f:Hide() end
+    if RouteXPCharDB.minimized then self:ShowBall() end
 end
 
 ----------------------------------------------------------------------
@@ -611,7 +611,7 @@ end
 ----------------------------------------------------------------------
 function UI:CreateBall()
     if self.ball then return self.ball end
-    local b = CreateFrame("Button", "RotaXPBall", UIParent)
+    local b = CreateFrame("Button", "RouteXPBall", UIParent)
     b:SetSize(40, 40)
     b:SetFrameStrata("MEDIUM")
     b:SetClampedToScreen(true)
@@ -658,15 +658,15 @@ function UI:HideBall() if self.ball then self.ball:Hide() end end
 function UI:Minimize()
     self.frame:Hide()
     if self.menu then self.menu:Hide() end
-    RotaXPCharDB.minimized = true
-    RotaXPCharDB.hidden = false
+    RouteXPCharDB.minimized = true
+    RouteXPCharDB.hidden = false
     self:ShowBall()
 end
 
 function UI:Restore()
     self:HideBall()
-    RotaXPCharDB.minimized = false
-    RotaXPCharDB.hidden = false
+    RouteXPCharDB.minimized = false
+    RouteXPCharDB.hidden = false
     self.frame:Show()
     RX:Update(true)
 end
@@ -719,7 +719,7 @@ end
 
 function UI:Toggle()
     if self.frame:IsShown() then
-        self.frame:Hide(); RotaXPCharDB.hidden = true; RotaXPCharDB.minimized = false
+        self.frame:Hide(); RouteXPCharDB.hidden = true; RouteXPCharDB.minimized = false
         self:HideBall()
         if self.menu then self.menu:Hide() end
     else
@@ -808,15 +808,29 @@ function UI:GetLine(i)
     abt:SetText("[" .. T("abandonar quest", "abandon quest") .. "]")
     abt:SetTextColor(1, 0.35, 0.35)
     ab:SetSize(abt:GetStringWidth() + 6, 12)
-    ab:SetScript("OnClick", function() local s = l.step; if s and s.q and RX.Abandon then RX.Abandon:Confirm(s.q) end end)
+    -- em toda quest da lista: vermelho = está no seu log (abandona); cinza = você ainda não pegou
+    function ab:Paint(hover)
+        if self.inLog then abt:SetTextColor(1, hover and 0.6 or 0.35, hover and 0.6 or 0.35) else abt:SetTextColor(0.5, 0.5, 0.5) end
+    end
+    ab:SetScript("OnClick", function()
+        local s = l.step
+        if not (s and s.q) then return end
+        if ab.inLog and RX.Abandon then RX.Abandon:Confirm(s.q)
+        else RX:Print(T("Você ainda não pegou esta quest, então não tem o que abandonar. Para tirar ela da lista, marque o quadradinho.",
+            "You haven't taken this quest yet, so there is nothing to abandon. To remove it from the list, tick the checkbox.")) end
+    end)
     ab:SetScript("OnEnter", function(self)
-        abt:SetTextColor(1, 0.6, 0.6)
+        self:Paint(true)
         GameTooltip:SetOwner(self, "ANCHOR_LEFT")
         GameTooltip:AddLine(T("Abandonar a quest", "Abandon the quest"), 1, 0.3, 0.3)
-        GameTooltip:AddLine(T("Tira a quest do seu log e do guia (pede confirmação).", "Removes the quest from your log and the guide (asks first)."), 0.8, 0.8, 0.8, true)
+        if self.inLog then
+            GameTooltip:AddLine(T("Tira a quest do seu log e do guia (pede confirmação).", "Removes the quest from your log and the guide (asks first)."), 0.8, 0.8, 0.8, true)
+        else
+            GameTooltip:AddLine(T("Você ainda não pegou esta quest. Para tirar da lista, use o quadradinho.", "You haven't taken this quest yet. To remove it from the list, use the checkbox."), 0.8, 0.8, 0.8, true)
+        end
         GameTooltip:Show()
     end)
-    ab:SetScript("OnLeave", function() abt:SetTextColor(1, 0.35, 0.35); GameTooltip:Hide() end)
+    ab:SetScript("OnLeave", function(self) self:Paint(false); GameTooltip:Hide() end)
     ab:Hide()
     l.abandon = ab
     l.icon = l:CreateTexture(nil, "ARTWORK")
@@ -1051,8 +1065,12 @@ function UI:Refresh()
         l.sub:SetText(sub or "")
         local h = l.text:GetStringHeight() + (sub and (l.sub:GetStringHeight() + 6) or 0) + 6
         h = math.max(h, isz + 4)
-        local canAbandon = s.q and RX.Q:InLog(s.q) and true or false
-        if canAbandon then l.abandon:Show(); h = h + 12 else l.abandon:Hide() end   -- espaço para o "abandonar" embaixo
+        -- "[abandonar quest]" em toda quest da lista (igual ao quadradinho); só abandona se estiver no seu log
+        if s.q then
+            l.abandon.inLog = RX.Q:InLog(s.q) and true or false
+            l.abandon:Paint(false)
+            l.abandon:Show(); h = h + 12
+        else l.abandon:Hide() end
         if s.q and s.q == self.selectedQuest then l.hl:SetColorTexture(0.2, 0.6, 1, 0.18); l.hl:Show()
         elseif i == 1 then l.hl:SetColorTexture(1, 0.5, 0, 0.12); l.hl:Show()
         else l.hl:Hide() end
@@ -1199,17 +1217,17 @@ end
 
 function UI:BuildMenu()
     if not self.menu then
-        local m = CreateFrame("Frame", "RotaXPMenu", UIParent, BackdropTemplateMixin and "BackdropTemplate")
+        local m = CreateFrame("Frame", "RouteXPMenu", UIParent, BackdropTemplateMixin and "BackdropTemplate")
         backdrop(m, 0.97)
         m:SetFrameStrata("DIALOG")
         m:SetSize(420, 520)
         m:SetClampedToScreen(true)
         m:EnableMouse(true)
         UI:MakeDraggable(m)
-        tinsert(UISpecialFrames, "RotaXPMenu")
+        tinsert(UISpecialFrames, "RouteXPMenu")
         local close = CreateFrame("Button", nil, m, "UIPanelCloseButton")
         close:SetPoint("TOPRIGHT", 2, 2)
-        local sf = CreateFrame("ScrollFrame", "RotaXPMenuScroll", m, "UIPanelScrollFrameTemplate")
+        local sf = CreateFrame("ScrollFrame", "RouteXPMenuScroll", m, "UIPanelScrollFrameTemplate")
         sf:SetPoint("TOPLEFT", 8, -24)
         sf:SetPoint("BOTTOMRIGHT", -28, 8)
         local child = CreateFrame("Frame", nil, sf)
@@ -1350,7 +1368,7 @@ local TABS = {
 }
 
 function UI:CreatePanel()
-    local p = CreateFrame("Frame", "RotaXPPanel", UIParent, BackdropTemplateMixin and "BackdropTemplate")
+    local p = CreateFrame("Frame", "RouteXPPanel", UIParent, BackdropTemplateMixin and "BackdropTemplate")
     backdrop(p, 0.95)
     p:SetSize(560, 490)
     p:SetPoint("CENTER")
@@ -1359,7 +1377,7 @@ function UI:CreatePanel()
     p.hint = p:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     p.hint:SetPoint("TOPRIGHT", -30, -14)
     p:SetClampedToScreen(true)
-    tinsert(UISpecialFrames, "RotaXPPanel")
+    tinsert(UISpecialFrames, "RouteXPPanel")
     local close = CreateFrame("Button", nil, p, "UIPanelCloseButton")
     close:SetPoint("TOPRIGHT", 2, 2)
     p.title = p:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
@@ -1372,7 +1390,7 @@ function UI:CreatePanel()
         table.insert(p.tabs, b)
     end
 
-    local sf = CreateFrame("ScrollFrame", "RotaXPPanelScroll", p, "UIPanelScrollFrameTemplate")
+    local sf = CreateFrame("ScrollFrame", "RouteXPPanelScroll", p, "UIPanelScrollFrameTemplate")
     sf:SetPoint("TOPLEFT", 12, -66)
     sf:SetPoint("BOTTOMRIGHT", -32, 12)
     local child = CreateFrame("Frame", nil, sf)
@@ -1777,35 +1795,35 @@ local function iconTooltip(tt)
 end
 
 -- Compartimento de addons (botão de addons do minimapa no cliente moderno)
-function RotaXP_OnAddonCompartmentClick(_, button) iconClick(button) end
-function RotaXP_OnAddonCompartmentEnter(_, frame)
+function RouteXP_OnAddonCompartmentClick(_, button) iconClick(button) end
+function RouteXP_OnAddonCompartmentEnter(_, frame)
     GameTooltip:SetOwner(frame or UIParent, "ANCHOR_LEFT"); iconTooltip(GameTooltip); GameTooltip:Show()
 end
-function RotaXP_OnAddonCompartmentLeave() GameTooltip:Hide() end
+function RouteXP_OnAddonCompartmentLeave() GameTooltip:Hide() end
 
 function UI:CreateMinimapButton()
     -- 1) LibDBIcon: ícone padrão de minimapa, que o EllesmereUI e outros coletores de botões reconhecem
     local LDB = LibStub and LibStub("LibDataBroker-1.1", true)
     local DBI = LibStub and LibStub("LibDBIcon-1.0", true)
     if LDB and DBI then
-        local obj = LDB:NewDataObject("RotaXP", {
+        local obj = LDB:NewDataObject("RouteXP", {
             type = "launcher",
             text = "RouteXP",
             icon = RX.ICON,
             OnClick = function(_, button) iconClick(button) end,
             OnTooltipShow = function(tt) iconTooltip(tt) end,
         })
-        if obj and not DBI:IsRegistered("RotaXP") then
-            local ok = pcall(DBI.Register, DBI, "RotaXP", obj, RX.db.minimap)
+        if obj and not DBI:IsRegistered("RouteXP") then
+            local ok = pcall(DBI.Register, DBI, "RouteXP", obj, RX.db.minimap)
             if ok then
-                if RX.db.minimap.hide then DBI:Hide("RotaXP") else DBI:Show("RotaXP") end
+                if RX.db.minimap.hide then DBI:Hide("RouteXP") else DBI:Show("RouteXP") end
                 self.usingDBIcon = true
                 return
             end
         end
     end
     -- 2) Reserva: botão próprio em volta do minimapa
-    local b = CreateFrame("Button", "RotaXPMinimapButton", Minimap)
+    local b = CreateFrame("Button", "RouteXPMinimapButton", Minimap)
     b:SetSize(31, 31)
     b:SetFrameStrata("MEDIUM")
     b:SetFrameLevel(8)

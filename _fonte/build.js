@@ -1,4 +1,4 @@
-// Build RotaXP guide Lua files from DSL route files, resolving quest IDs and coordinates from QuestieDB data.
+// Build RouteXP guide Lua files from DSL route files, resolving quest IDs and coordinates from QuestieDB data.
 const fs = require('fs');
 const path = require('path');
 const S = __dirname;

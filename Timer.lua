@@ -26,7 +26,7 @@ end
 
 function TM:Create()
     if self.frame then return end
-    local f = CreateFrame("Frame", "RotaXPTimerFrame", UIParent, BackdropTemplateMixin and "BackdropTemplate")
+    local f = CreateFrame("Frame", "RouteXPTimerFrame", UIParent, BackdropTemplateMixin and "BackdropTemplate")
     backdrop(f)
     f:SetSize(280, 250)
     f:SetPoint("CENTER", UIParent, "CENTER", -300, 0)

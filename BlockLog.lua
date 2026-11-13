@@ -1,6 +1,6 @@
--- Log de ações bloqueadas: quando o jogo mostra "RotaXP tentou executar uma ação que foi bloqueada",
--- grava qual função foi bloqueada, se você estava em combate e o que o RotaXP tinha acabado de fazer.
--- Fica salvo em RotaXPDB.blockLog (pasta WTF) e aparece com /rota bloqueios.
+-- Log de ações bloqueadas: quando o jogo mostra "RouteXP tentou executar uma ação que foi bloqueada",
+-- grava qual função foi bloqueada, se você estava em combate e o que o RouteXP tinha acabado de fazer.
+-- Fica salvo em RouteXPDB.blockLog (pasta WTF) e aparece com /rota bloqueios.
 local ADDON, RX = ...
 local BL = { crumbs = {} }
 RX.BlockLog = BL
@@ -9,7 +9,7 @@ local MAX_LOG, MAX_CRUMBS = 40, 12
 
 local function now() return GetTime and GetTime() or 0 end
 
--- "migalhas": as últimas coisas que o RotaXP fez (para saber o que estava rodando na hora do bloqueio)
+-- "migalhas": as últimas coisas que o RouteXP fez (para saber o que estava rodando na hora do bloqueio)
 function BL:Crumb(name)
     local c = self.crumbs
     c[#c + 1] = { t = now(), name = name, combat = InCombatLockdown and InCombatLockdown() or false }

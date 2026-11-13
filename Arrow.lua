@@ -25,7 +25,7 @@ local function playerMapPos()
 end
 
 function Arrow:Create()
-    local f = CreateFrame("Button", "RotaXPArrow", UIParent)
+    local f = CreateFrame("Button", "RouteXPArrow", UIParent)
     f:SetSize(56, 56)
     f:SetPoint("TOP", UIParent, "TOP", 0, -120)
     f:SetMovable(true)
@@ -91,8 +91,8 @@ function Arrow:ApplySize()
     local sc = RX.db.arrowScale or 1
     f:SetSize(56 * sc, 56 * sc)
     if not self.fontDist then
-        self.fontDist = CreateFont("RotaXPArrowFontDist")
-        self.fontLabel = CreateFont("RotaXPArrowFontLabel")
+        self.fontDist = CreateFont("RouteXPArrowFontDist")
+        self.fontLabel = CreateFont("RouteXPArrowFontLabel")
     end
     local file, _, flags = GameFontHighlight:GetFont()
     file = file or "Fonts\\FRIZQT__.TTF"

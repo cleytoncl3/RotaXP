@@ -1,6 +1,6 @@
 // Gera Data/QuestItemSource.lua: de onde vem cada item pedido pelas quests dos guias.
 // "m" = cai de mob, "o" = pega clicando em objeto (chão, baú, planta...), "mo" = os dois.
-// Uso: node itemsrc.js <pasta RotaXP> <db.json>
+// Uso: node itemsrc.js <pasta RouteXP> <db.json>
 const fs = require('fs'), path = require('path');
 const RX = process.argv[2], DB = require(path.resolve(process.argv[3]));
 const used = new Set();

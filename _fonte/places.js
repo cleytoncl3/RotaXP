@@ -1,5 +1,5 @@
 const fs = require('fs'), path = require('path');
-const AD = process.argv[2], RX = path.join(AD, 'RotaXP');
+const AD = process.argv[2], RX = path.join(AD, 'RouteXP');
 const ids = {};
 const gq = fs.readFileSync(path.join(AD, 'GearQuestForever/Locales/Zones.lua'), 'utf8');
 for (const m of gq.matchAll(/\["((?:[^"\\]|\\.)+)"\]\s*=\s*(-?\d+)/g)) ids[m[1]] = +m[2];

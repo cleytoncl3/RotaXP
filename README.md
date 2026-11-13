@@ -14,8 +14,8 @@ Addon de leveling no estilo Zygor / RestedXP para o **WoW: Forever** (Horda, ní
 - **Prévia da quest** antes de aceitar: matar ⚔, coletar 👜, usar objetos, com as quantidades.
 - **Modo Entregas**, **Perto de mim**, **Agora** (dicas para onde você está).
 - **Grind & Masmorras**: farm solo e duo, masmorras com XP/hora, **farm de ouro + XP** com XP/h e ouro/h estimados, equipamento do GearQuest e talentos do Talents Forever.
-- **Grupo (share)**: quem está no grupo com o RotaXP troca o guia, o progresso de cada quest (ex.: `Amigo: Basilisco 2/10`) e locais marcados. Isso usa o canal de addon do próprio jogo, sem internet. Quem só usa o Questie também aparece.
-- **Itens da quest**: janelinha com botões para usar os itens que as quests pedem (num mob, objeto ou local). O item da quest atual fica em destaque e dá para pôr uma tecla de atalho (Opções > Atalhos > AddOns > RotaXP). A lista de quests também avisa quando precisa usar o item.
+- **Grupo (share)**: quem está no grupo com o RouteXP troca o guia, o progresso de cada quest (ex.: `Amigo: Basilisco 2/10`) e locais marcados. Isso usa o canal de addon do próprio jogo, sem internet. Quem só usa o Questie também aparece.
+- **Itens da quest**: janelinha com botões para usar os itens que as quests pedem (num mob, objeto ou local). O item da quest atual fica em destaque e dá para pôr uma tecla de atalho (Opções > Atalhos > AddOns > RouteXP). A lista de quests também avisa quando precisa usar o item.
 - **Leilão (segunda via)**: em cada quest que pede itens negociáveis aparece a opção de comprar no leilão em vez de dropar, com preço do Auctionator. Itens vinculados (de quest) ficam de fora.
 - **Lista de compras do guia**: ao escolher um guia, abre uma janela com todos os itens das quests dele que dá para comprar, quantidade e preço, e um botão para buscar no Auctionator (`/rota compras`). Ao abrir a Casa de Leilões, oferece buscar o que falta das quests do log (`/rota leilao`).
 - **Abandono automático (opcional)**: Opções > Automação. Abandona sozinho, com aviso de 8 segundos, quests que não valem a pena: lentas (escolta, 8+ drops, outra zona, profissão), de pouco XP (cinzas ou < 1,5% do nível) ou fora do guia. Cada critério liga/desliga. `/rota manter` cancela. Nunca abandona quest que abre corrente do guia, que começou com item, ou lenta cujo item está à venda no leilão.
@@ -33,14 +33,14 @@ Addon de leveling no estilo Zygor / RestedXP para o **WoW: Forever** (Horda, ní
 
 ## Instalação
 
-1. Baixe o zip: **Code → Download ZIP** (ou o link `https://github.com/cleytoncl3/RotaXP/archive/refs/heads/main.zip`).
-2. Extraia e renomeie a pasta para **`RotaXP`**.
-3. Coloque a pasta em `World of Warcraft\_forever_\Interface\AddOns\RotaXP`.
+1. Baixe o zip: **Code → Download ZIP** (ou o link `https://github.com/cleytoncl3/RouteXP/archive/refs/heads/main.zip`).
+2. Extraia e renomeie a pasta para **`RouteXP`**.
+3. Coloque a pasta em `World of Warcraft\_forever_\Interface\AddOns\RouteXP`.
 4. No jogo, digite `/rota`.
 
 ## Atualizar
 
-Dê dois cliques em **`Atualizar-RotaXP.bat`**, dentro da pasta do addon, com o jogo fechado ou na tela de personagens. Ele baixa a versão mais nova daqui e substitui os arquivos. As suas configurações ficam na pasta `WTF` e não são apagadas. Depois entre no jogo ou digite `/reload`.
+Dê dois cliques em **`Atualizar-RouteXP.bat`**, dentro da pasta do addon, com o jogo fechado ou na tela de personagens. Ele baixa a versão mais nova daqui e substitui os arquivos. As suas configurações ficam na pasta `WTF` e não são apagadas. Depois entre no jogo ou digite `/reload`.
 
 Se o WoW estiver em *Arquivos de Programas* e der erro de permissão, clique com o botão direito no `.bat` e escolha **Executar como administrador**.
 
@@ -71,10 +71,10 @@ O ícone, os guias por zona, as rotas e o código do RouteXP foram feitos para e
 
 ---
 
-# RotaXP — Horde Leveling Guide (WoW: Forever)
+# RouteXP — Horde Leveling Guide (WoW: Forever)
 
 A Zygor / RestedXP style leveling addon for **WoW: Forever** (Horde, levels 30–60), in **English and Portuguese** (it follows your client language). It has leveling guides and speedrun routes, a navigation arrow with map and minimap route lines, auto accept/turn-in of guide quests only, a quest preview before accepting, turn-in and nearby modes, grind/dungeon/gold farming menus, and **group sharing**: same guide, partner quest progress and marked spots, sent over the game's addon channel.
 
-**Install:** download the ZIP, rename the folder to `RotaXP` and put it in `Interface\AddOns`.
-**Update:** run `Atualizar-RotaXP.bat` from the addon folder.
+**Install:** download the ZIP, rename the folder to `RouteXP` and put it in `Interface\AddOns`.
+**Update:** run `Atualizar-RouteXP.bat` from the addon folder.
 **License:** GPL-3.0. Quest data from Questie (GPL-3.0); loot data from cmangos classic-db (GPL-2.0); minimap button libraries keep their own licenses.

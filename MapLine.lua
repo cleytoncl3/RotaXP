@@ -17,7 +17,7 @@ function ML:Init()
     if self.overlay or not WorldMapFrame or not WorldMapFrame.GetCanvas then return end
     local canvas = WorldMapFrame:GetCanvas()
     if not canvas then return end
-    local o = CreateFrame("Frame", "RotaXPMapOverlay", canvas)
+    local o = CreateFrame("Frame", "RouteXPMapOverlay", canvas)
     o:SetAllPoints(canvas)
     o:SetFrameStrata("HIGH")
     o:SetFrameLevel((canvas:GetFrameLevel() or 1) + 50)

@@ -3,7 +3,7 @@
 // Uso: node craft.js <pasta AddOns> <db.json>
 const fs = require('fs'), path = require('path');
 const AD = process.argv[2], DB = require(path.resolve(process.argv[3]));
-const RX = path.join(AD, 'RotaXP');
+const RX = path.join(AD, 'RouteXP');
 const prof = fs.readFileSync(path.join(AD, 'AtlasLootClassic/Data/Profession.lua'), 'utf8');
 const start = prof.indexOf('PROFESSION_DATA.CLASSIC = {'), end = prof.indexOf('PROFESSION_DATA.BCC = {');
 const block = prof.slice(start, end);

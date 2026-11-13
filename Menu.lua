@@ -34,7 +34,7 @@ end
 function M:Level(n)
     local f = self.levels[n]
     if f then return f end
-    local name = "RotaXPCascade" .. n
+    local name = "RouteXPCascade" .. n
     f = CreateFrame("Frame", name, UIParent, BackdropTemplateMixin and "BackdropTemplate")
     backdrop(f)
     f:SetFrameStrata("DIALOG")
@@ -323,7 +323,7 @@ function M:RootItems()
     end
     -- (estilo, rota, coleta, modos e "limpar guia" ficam em Opções > Guia e estilo)
     table.insert(list, { header = true, text = T("Grupo", "Group") })
-    -- grupo: share de guia/progresso com quem usa o RotaXP
+    -- grupo: share de guia/progresso com quem usa o RouteXP
     if RX.Party then
         local n = RX.Party:Count()
         table.insert(list, {

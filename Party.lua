@@ -1,11 +1,11 @@
--- Share em grupo: quem estiver na party/raid com o RotaXP troca, pelo canal de addon do próprio jogo
+-- Share em grupo: quem estiver na party/raid com o RouteXP troca, pelo canal de addon do próprio jogo
 -- (sem internet), o guia escolhido, o progresso de cada quest e locais marcados.
--- Se o parceiro não tiver o RotaXP mas tiver o Questie, usamos o que o Questie recebeu dele.
+-- Se o parceiro não tiver o RouteXP mas tiver o Questie, usamos o que o Questie recebeu dele.
 local _, RX = ...
 local P = { members = {}, sent = {}, queue = {}, warnedVer = {} }
 RX.Party = P
 local T = RX.T
-local PREFIX = "RotaXP"
+local PREFIX = "RouteXP"
 local PROTO = "1"
 
 ----------------------------------------------------------------------
@@ -147,11 +147,11 @@ end
 -- NUNCA reatribuir a global StaticPopupDialogs (contamina o código da Blizzard: ESC dá "ação bloqueada");
 -- só adicionamos as nossas chaves na tabela que já existe.
 if StaticPopupDialogs then
-    StaticPopupDialogs["ROTAXP_PARTY_GUIDE"] = {
+    StaticPopupDialogs["ROUTEXP_PARTY_GUIDE"] = {
         text = "%s", button1 = YES or "Sim", button2 = NO or "Não", timeout = 60, whileDead = true, hideOnEscape = true,
         OnAccept = function(_, data) if data and RX.guides[data] then RX:SetGuide(data, true) end end,
     }
-    StaticPopupDialogs["ROTAXP_PARTY_SPOT"] = {
+    StaticPopupDialogs["ROUTEXP_PARTY_SPOT"] = {
         text = "%s", button1 = YES or "Sim", button2 = NO or "Não", timeout = 60, whileDead = true, hideOnEscape = true,
         OnAccept = function(_, data) if data and RX.Arrow then RX.Arrow:PointTo(data, true); RX:Update(true) end end,
     }
@@ -169,8 +169,8 @@ function P:OnMessage(prefix, msg, _, sender)
         m.ver, m.lvl, m.class, m.guide, m.share = f[3], tonumber(f[4]), f[5], (f[6] ~= "-" and f[6] or nil), f[8] ~= "0"
         if m.ver and newer(m.ver, RX.version) and not self.warnedVer[m.ver] then
             self.warnedVer[m.ver] = true
-            RX:Print(string.format(T("%s usa o RouteXP |cff40ff40v%s|r (o seu é v%s). Para atualizar: feche o jogo e rode |cffffff00Atualizar-RotaXP.bat|r na pasta do addon.",
-                "%s has RouteXP |cff40ff40v%s|r (yours is v%s). To update: close the game and run |cffffff00Atualizar-RotaXP.bat|r in the addon folder."), who, m.ver, RX.version))
+            RX:Print(string.format(T("%s usa o RouteXP |cff40ff40v%s|r (o seu é v%s). Para atualizar: feche o jogo e rode |cffffff00Atualizar-RouteXP.bat|r na pasta do addon.",
+                "%s has RouteXP |cff40ff40v%s|r (yours is v%s). To update: close the game and run |cffffff00Atualizar-RouteXP.bat|r in the addon folder."), who, m.ver, RX.version))
         end
         if f[7] ~= "1" then self:Hello(true) end          -- responde quem chegou agora
         if first then self:SyncQuests(true) end            -- e manda tudo para ele
@@ -189,16 +189,16 @@ function P:OnMessage(prefix, msg, _, sender)
         local g = id and RX.guides[id]
         local cur = RX:CurrentGuide()
         if g and (not cur or cur.id ~= id) and RX.db.partyShare ~= false then
-            local text = string.format(T("|cffff7f00RotaXP|r\n%s escolheu o guia:\n|cffffff00%s|r\n\nUsar o mesmo guia?", "|cffff7f00RotaXP|r\n%s picked the guide:\n|cffffff00%s|r\n\nUse the same guide?"), who, RX:GuideName(g))
-            if StaticPopup_Show then StaticPopup_Show("ROTAXP_PARTY_GUIDE", text, nil, id) end
+            local text = string.format(T("|cffff7f00RouteXP|r\n%s escolheu o guia:\n|cffffff00%s|r\n\nUsar o mesmo guia?", "|cffff7f00RouteXP|r\n%s picked the guide:\n|cffffff00%s|r\n\nUse the same guide?"), who, RX:GuideName(g))
+            if StaticPopup_Show then StaticPopup_Show("ROUTEXP_PARTY_GUIDE", text, nil, id) end
         end
     elseif kind == "S" then
         local mp, x, y = tonumber(f[2]), tonumber(f[3]), tonumber(f[4])
         if mp and x and y and RX.db.partyShare ~= false then
             local step = { t = "G", m = mp, x = x, y = y, flags = {}, external = true, d = f[5] ~= "" and f[5] or who, note = RX.MapName and RX.MapName(mp, "") }
-            local text = string.format(T("|cffff7f00RotaXP|r\n%s marcou um local:\n|cffffff00%s|r (%s %.0f, %.0f)\n\nApontar a seta para lá?", "|cffff7f00RotaXP|r\n%s marked a spot:\n|cffffff00%s|r (%s %.0f, %.0f)\n\nPoint the arrow there?"),
+            local text = string.format(T("|cffff7f00RouteXP|r\n%s marcou um local:\n|cffffff00%s|r (%s %.0f, %.0f)\n\nApontar a seta para lá?", "|cffff7f00RouteXP|r\n%s marked a spot:\n|cffffff00%s|r (%s %.0f, %.0f)\n\nPoint the arrow there?"),
                 who, step.d, step.note or "", x, y)
-            if StaticPopup_Show then StaticPopup_Show("ROTAXP_PARTY_SPOT", text, nil, step) end
+            if StaticPopup_Show then StaticPopup_Show("ROUTEXP_PARTY_SPOT", text, nil, step) end
         end
     elseif kind == "R" then
         self:Hello(true); self:SyncQuests(true)
@@ -213,7 +213,7 @@ function P:Prune()
     for name in pairs(self.members) do if not inGroup(name) then self.members[name] = nil end end
 end
 
--- Dados do Questie (parceiro sem RotaXP): remoteQuestLogs[q][nome] = objetivos {fulfilled, required}
+-- Dados do Questie (parceiro sem RouteXP): remoteQuestLogs[q][nome] = objetivos {fulfilled, required}
 local function questieFor(q)
     local QL = _G.QuestieLoader
     if not (QL and QL.ImportModule) then return nil end

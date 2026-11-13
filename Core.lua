@@ -1,13 +1,13 @@
--- RotaXP: guia de leveling Horda (WoW: Forever)
+-- RouteXP: guia de leveling Horda (WoW: Forever)
 local ADDON, RX = ...
-_G.RotaXP = RX
+_G.RouteXP = RX
 
 RX.guides = {}
 RX.guideOrder = {}
 RX.questMeta = {}
-RX.version = "0.25.1"
+RX.version = "0.26.0"
 RX.NAME = "RouteXP"
-RX.ICON = "Interface\\AddOns\\RotaXP\\Media\\icon"
+RX.ICON = "Interface\\AddOns\\RouteXP\\Media\\icon"
 
 local defaults = {
     style = "speedrun",
@@ -65,7 +65,7 @@ local function copyDefaults(src, dst)
 end
 
 function RX:Print(msg)
-    DEFAULT_CHAT_FRAME:AddMessage("|cffff7f00RotaXP|r: " .. tostring(msg))
+    DEFAULT_CHAT_FRAME:AddMessage("|cffff7f00RouteXP|r: " .. tostring(msg))
 end
 
 ----------------------------------------------------------------------
@@ -170,7 +170,7 @@ end
 -- Estado do personagem
 ----------------------------------------------------------------------
 function RX:CharState()
-    local c = RotaXPCharDB
+    local c = RouteXPCharDB
     c.progress = c.progress or {}
     c.skipped = c.skipped or {}
     return c
@@ -760,12 +760,16 @@ end)
 
 function RX:ADDON_LOADED(name)
     if name ~= ADDON then return end
-    RotaXPDB = RotaXPDB or {}
-    RotaXPCharDB = RotaXPCharDB or {}
-    copyDefaults(defaults, RotaXPDB)
-    self.db = RotaXPDB
+    -- veio do nome antigo (pasta RotaXP ainda instalada): copia as configurações e o progresso
+    local copy = CopyTable or function(t) return t end
+    if RouteXPDB == nil and type(_G.RotaXPDB) == "table" then RouteXPDB = copy(_G.RotaXPDB); RX.migrated = true end
+    if RouteXPCharDB == nil and type(_G.RotaXPCharDB) == "table" then RouteXPCharDB = copy(_G.RotaXPCharDB); RX.migrated = true end
+    RouteXPDB = RouteXPDB or {}
+    RouteXPCharDB = RouteXPCharDB or {}
+    copyDefaults(defaults, RouteXPDB)
+    self.db = RouteXPDB
     -- janela padrão antiga (340x260) era estreita demais para os botões
-    if RotaXPDB.width == 340 and RotaXPDB.height == 260 then RotaXPDB.width = 380 end
+    if RouteXPDB.width == 340 and RouteXPDB.height == 260 then RouteXPDB.width = 380 end
     self:ResolveLang()
 end
 
@@ -793,8 +797,11 @@ function RX:PLAYER_LOGIN()
             self:Print(RX.T("Escolhi o guia ", "Picked the guide ") .. "|cffffff00" .. self:GuideName(g) .. "|r (" .. RX.LF(self:CurrentRoute(), "name") .. "). " .. RX.T("Clique no nome do guia para trocar.", "Click the guide name to change it."))
         end
     end
+    if self.migrated then
+        self:Print(RX.T("Suas configurações e o progresso do RotaXP (nome antigo) foram copiados para o RouteXP.", "Your RotaXP (old name) settings and progress were copied to RouteXP."))
+    end
     self:Print("v" .. self.version .. RX.T(" carregado. |cff00ff00/rota|r abre/fecha, |cff00ff00/rota ajuda|r mostra os comandos.", " loaded. |cff00ff00/rota|r shows/hides, |cff00ff00/rota help|r lists the commands."))
-    -- outro addon aceitando TODAS as quests atrapalha o guia (só o RotaXP deve escolher)
+    -- outro addon aceitando TODAS as quests atrapalha o guia (só o RouteXP deve escolher)
     -- outro addon aceitando quests sozinho pega quests fora do guia: avisa toda vez que entrar (até ser desligado)
     if C_Timer then C_Timer.After(4, function() RX:WarnConflicts() end) else self:WarnConflicts() end
     self:Update(true)
@@ -1047,7 +1054,7 @@ function RX:OnQuestAccepted(q)
     if g then for _, s in ipairs(g.steps) do if s.q == q then inGuide = true break end end end
     local title = (C_QuestLog and C_QuestLog.GetTitleForQuestID and C_QuestLog.GetTitleForQuestID(q)) or self.Q:Title(q) or ("#" .. q)
     cs.acceptLog = cs.acceptLog or {}
-    table.insert(cs.acceptLog, { when = date and date("%Y-%m-%d %H:%M:%S") or "?", q = q, title = title, guide = g and g.id, inGuide = inGuide and true or false, byRotaXP = byUs })
+    table.insert(cs.acceptLog, { when = date and date("%Y-%m-%d %H:%M:%S") or "?", q = q, title = title, guide = g and g.id, inGuide = inGuide and true or false, byRouteXP = byUs })
     while #cs.acceptLog > 80 do table.remove(cs.acceptLog, 1) end
     if g and not inGuide then
         local c = self:Conflicts()
@@ -1078,10 +1085,10 @@ end
 ----------------------------------------------------------------------
 -- Comandos
 ----------------------------------------------------------------------
-SLASH_ROTAXP1 = "/rota"
-SLASH_ROTAXP2 = "/rotaxp"
-SLASH_ROTAXP3 = "/routexp"
-SlashCmdList.ROTAXP = function(msg)
+SLASH_ROUTEXP1 = "/rota"
+SLASH_ROUTEXP2 = "/rotaxp"
+SLASH_ROUTEXP3 = "/routexp"
+SlashCmdList.ROUTEXP = function(msg)
     msg = (msg or ""):lower():gsub("^%s+", ""):gsub("%s+$", "")
     local UI = RX.UI
     if msg == "" then UI:Toggle()
@@ -1112,8 +1119,8 @@ SlashCmdList.ROTAXP = function(msg)
     elseif msg == "leilao" or msg == "leilão" or msg == "ah" then RX.Market:Offer(true)
     elseif msg:match("^bloqueio") or msg:match("^blocked") then RX.BlockLog:Command(msg:match("^%S+%s+(.*)$"))
     elseif msg == "atualizar" or msg == "update" then
-        RX:Print(RX.T("Versão instalada: v" .. RX.version .. ". Para atualizar: feche o jogo (ou fique no menu de personagens) e dê dois cliques em |cffffff00Atualizar-RotaXP.bat|r, na pasta Interface\\AddOns\\RotaXP. Depois entre no jogo (ou /reload). Página: github.com/cleytoncl3/RotaXP",
-            "Installed version: v" .. RX.version .. ". To update: close the game (or stay at character select) and double-click |cffffff00Atualizar-RotaXP.bat|r in Interface\\AddOns\\RotaXP. Then log in (or /reload). Page: github.com/cleytoncl3/RotaXP"))
+        RX:Print(RX.T("Versão instalada: v" .. RX.version .. ". Para atualizar: feche o jogo (ou fique no menu de personagens) e dê dois cliques em |cffffff00Atualizar-RouteXP.bat|r, na pasta Interface\\AddOns\\RouteXP. Depois entre no jogo (ou /reload). Página: github.com/cleytoncl3/RouteXP",
+            "Installed version: v" .. RX.version .. ". To update: close the game (or stay at character select) and double-click |cffffff00Atualizar-RouteXP.bat|r in Interface\\AddOns\\RouteXP. Then log in (or /reload). Page: github.com/cleytoncl3/RouteXP"))
     elseif msg == "reset" then local g = RX:CurrentGuide(); if g then RX:ResetGuide(g.id); RX:Print(RX.T("Progresso do guia reiniciado.", "Guide progress reset.")) end
     elseif msg == "seta" or msg == "arrow" then RX.db.showArrow = not RX.db.showArrow; RX.Arrow:Retarget()
     else
