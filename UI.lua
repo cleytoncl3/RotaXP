@@ -440,7 +440,7 @@ function UI:Create()
     -- botão do menu de guias (título)
     local gb = CreateFrame("Button", nil, f)
     gb:SetPoint("TOPLEFT", 8, -6)
-    gb:SetPoint("TOPRIGHT", -48, -6)
+    gb:SetPoint("TOPRIGHT", -125, -6)   -- espaço para "minimizar" e o X
     gb:SetHeight(18)
     local arrowTex = gb:CreateTexture(nil, "ARTWORK")
     arrowTex:SetSize(16, 16)
@@ -461,13 +461,26 @@ function UI:Create()
     close:SetPoint("TOPRIGHT", 2, 2)
     close:SetScript("OnClick", function() UI:Toggle() end)
     -- minimizar: vira uma bolinha com o ícone num canto da tela
+    -- botão com o ícone do addon + "minimizar", afastado do X
     local mini = CreateFrame("Button", nil, f)
-    mini:SetSize(24, 24)
-    mini:SetPoint("RIGHT", close, "LEFT", 6, 0)
-    mini:SetNormalTexture("Interface\\Buttons\\UI-Panel-SmallerButton-Up")
-    mini:SetPushedTexture("Interface\\Buttons\\UI-Panel-SmallerButton-Down")
-    mini:SetHighlightTexture("Interface\\Buttons\\UI-Panel-MinimizeButton-Highlight", "ADD")
+    mini:SetHeight(18)
+    mini:SetPoint("RIGHT", close, "LEFT", -8, 0)
+    local mic = mini:CreateTexture(nil, "ARTWORK")
+    mic:SetSize(16, 16); mic:SetPoint("LEFT")
+    mic:SetTexture(RX.ICON)
+    local mtx = mini:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    mtx:SetPoint("LEFT", mic, "RIGHT", 3, 0)
+    mtx:SetTextColor(1, 0.6, 0.15)
+    mini.label = mtx
+    function mini:Relabel()
+        mtx:SetText(T("minimizar", "minimize"))
+        self:SetWidth(16 + 3 + (mtx:GetStringWidth() or 50) + 2)
+    end
+    mini:Relabel()
+    local mhl = mini:CreateTexture(nil, "HIGHLIGHT")
+    mhl:SetAllPoints(); mhl:SetColorTexture(1, 0.6, 0.15, 0.15)
     mini:SetScript("OnClick", function() UI:Minimize() end)
+    self.miniBtn = mini
     tip(mini, function() return T("Minimizar: o guia vira uma bolinha com o ícone (clique nela para voltar).", "Minimize: the guide becomes a small icon button (click it to come back).") end)
 
     local xp = f:CreateFontString(nil, "OVERLAY")
@@ -644,6 +657,7 @@ end
 -- Atualiza textos fixos quando o idioma muda
 function UI:Relocalize()
     if not self.barButtons then return end
+    if self.miniBtn then self.miniBtn:Relabel() end
     for _, b in ipairs(self.barButtons) do
         b:SetText(T(b.def.pt, b.def.en))
         fitButton(b, b.def.small and 28 or 50)
