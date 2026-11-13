@@ -5,7 +5,7 @@ _G.RouteXP = RX
 RX.guides = {}
 RX.guideOrder = {}
 RX.questMeta = {}
-RX.version = "0.26.0"
+RX.version = "0.26.1"
 RX.NAME = "RouteXP"
 RX.ICON = "Interface\\AddOns\\RouteXP\\Media\\icon"
 
@@ -1119,8 +1119,8 @@ SlashCmdList.ROUTEXP = function(msg)
     elseif msg == "leilao" or msg == "leilão" or msg == "ah" then RX.Market:Offer(true)
     elseif msg:match("^bloqueio") or msg:match("^blocked") then RX.BlockLog:Command(msg:match("^%S+%s+(.*)$"))
     elseif msg == "atualizar" or msg == "update" then
-        RX:Print(RX.T("Versão instalada: v" .. RX.version .. ". Para atualizar: feche o jogo (ou fique no menu de personagens) e dê dois cliques em |cffffff00Atualizar-RouteXP.bat|r, na pasta Interface\\AddOns\\RouteXP. Depois entre no jogo (ou /reload). Página: github.com/cleytoncl3/RouteXP",
-            "Installed version: v" .. RX.version .. ". To update: close the game (or stay at character select) and double-click |cffffff00Atualizar-RouteXP.bat|r in Interface\\AddOns\\RouteXP. Then log in (or /reload). Page: github.com/cleytoncl3/RouteXP"))
+        RX:Print(RX.T("Versão instalada: v" .. RX.version .. ". Para atualizar: pelo app do CurseForge, ou feche o jogo e dê dois cliques em |cffffff00Atualizar-RouteXP.bat|r (versão do GitHub), na pasta Interface\\AddOns\\RouteXP. Depois entre no jogo (ou /reload). Página: github.com/cleytoncl3/RouteXP",
+            "Installed version: v" .. RX.version .. ". To update: use the CurseForge app, or close the game and double-click |cffffff00Atualizar-RouteXP.bat|r (GitHub version) in Interface\\AddOns\\RouteXP. Then log in (or /reload). Page: github.com/cleytoncl3/RouteXP"))
     elseif msg == "reset" then local g = RX:CurrentGuide(); if g then RX:ResetGuide(g.id); RX:Print(RX.T("Progresso do guia reiniciado.", "Guide progress reset.")) end
     elseif msg == "seta" or msg == "arrow" then RX.db.showArrow = not RX.db.showArrow; RX.Arrow:Retarget()
     else

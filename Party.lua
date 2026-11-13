@@ -169,8 +169,8 @@ function P:OnMessage(prefix, msg, _, sender)
         m.ver, m.lvl, m.class, m.guide, m.share = f[3], tonumber(f[4]), f[5], (f[6] ~= "-" and f[6] or nil), f[8] ~= "0"
         if m.ver and newer(m.ver, RX.version) and not self.warnedVer[m.ver] then
             self.warnedVer[m.ver] = true
-            RX:Print(string.format(T("%s usa o RouteXP |cff40ff40v%s|r (o seu é v%s). Para atualizar: feche o jogo e rode |cffffff00Atualizar-RouteXP.bat|r na pasta do addon.",
-                "%s has RouteXP |cff40ff40v%s|r (yours is v%s). To update: close the game and run |cffffff00Atualizar-RouteXP.bat|r in the addon folder."), who, m.ver, RX.version))
+            RX:Print(string.format(T("%s usa o RouteXP |cff40ff40v%s|r (o seu é v%s). Atualize pelo app do CurseForge (ou pelo Atualizar-RouteXP.bat da versão do GitHub).",
+                "%s has RouteXP |cff40ff40v%s|r (yours is v%s). Update it with the CurseForge app (or Atualizar-RouteXP.bat from the GitHub version)."), who, m.ver, RX.version))
         end
         if f[7] ~= "1" then self:Hello(true) end          -- responde quem chegou agora
         if first then self:SyncQuests(true) end            -- e manda tudo para ele
