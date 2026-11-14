@@ -99,6 +99,8 @@ function ML:Draw()
     if not mapID or not w or w <= 0 then return end
     local cs = canvasScale()
     local n = 0
+    local hasRoad = false
+    for _, p in ipairs(pts) do if p.road then hasRoad = true break end end
     for i = 1, #pts - 1 do
         local x1, y1 = toMap(mapID, pts[i])
         local x2, y2 = toMap(mapID, pts[i + 1])
@@ -114,7 +116,8 @@ function ML:Draw()
             sh:SetThickness(SHADOW_PX / cs)
             sh:Show()
             -- primeiro trecho laranja forte; os seguintes mais claros
-            if n == 1 then l:SetColorTexture(1, 0.5, 0, 0.95) else l:SetColorTexture(1, 0.85, 0.3, 0.75) end
+            if hasRoad and not (pts[i].road or pts[i + 1].road) then l:SetColorTexture(1, 0.85, 0.3, 0.35)      -- reta: só direção
+            elseif n == 1 then l:SetColorTexture(1, 0.5, 0, 0.95) else l:SetColorTexture(1, 0.85, 0.3, 0.75) end
             l:Show()
         end
     end

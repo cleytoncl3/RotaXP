@@ -91,6 +91,8 @@ function MM:Draw()
     local square = GetMinimapShape and GetMinimapShape() == "SQUARE"
     local px, py = 0, 0
     local n = 0
+    local hasRoad = false
+    for _, p in ipairs(pts) do if p.road then hasRoad = true break end end
     for i = 2, #pts do
         if pts[i].cont ~= me.cont then break end
         local x, y, inside = toMini(me, pts[i], radiusYd, radiusPx, rot, square)
@@ -105,7 +107,8 @@ function MM:Draw()
         end
         l:SetStartPoint("CENTER", self.overlay, px, py)
         l:SetEndPoint("CENTER", self.overlay, ex, ey)
-        if n == 1 then l:SetColorTexture(1, 0.5, 0, 0.95) else l:SetColorTexture(1, 0.85, 0.3, 0.8) end
+        if hasRoad and not (pts[i].road or pts[i - 1].road) then l:SetColorTexture(1, 0.85, 0.3, 0.35)
+        elseif n == 1 then l:SetColorTexture(1, 0.5, 0, 0.95) else l:SetColorTexture(1, 0.85, 0.3, 0.8) end
         l:Show()
         if not inside then break end
         px, py = x, y

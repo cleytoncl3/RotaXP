@@ -5,7 +5,7 @@ _G.RouteXP = RX
 RX.guides = {}
 RX.guideOrder = {}
 RX.questMeta = {}
-RX.version = "0.27.0"
+RX.version = "0.28.0"
 RX.NAME = "RouteXP"
 RX.ICON = "Interface\\AddOns\\RouteXP\\Media\\icon"
 
@@ -33,6 +33,8 @@ local defaults = {
     autoTurnIn = true,
     partyShare = true,
     questItems = true,
+    useTrails = true,      -- rota segue as estradas aprendidas
+    learnTrails = true,    -- aprende as estradas por onde você corre
     askLowXP = true,       -- perguntar se quer abandonar quests do log que já dão pouco XP
     autoAbandon = false,   -- abandona sozinho quests que não valem a pena (opcional)
     abandonSlow = true,    --   lentas (escolta, muitos drops, outra zona)
@@ -1179,6 +1181,13 @@ SlashCmdList.ROUTEXP = function(msg)
     elseif msg == "aceite" or msg == "aceitar" or msg == "accept" then RX:ShowDecisions()
     elseif msg == "manter" or msg == "keep" then RX.Abandon:Keep()
     elseif msg == "limpar" or msg == "clear" then RX:ClearGuide()
+    elseif msg:match("^trilhas") or msg:match("^trails") then
+        if msg:find("limpar") or msg:find("clear") then RX.Trails:Clear(); RX:Print(RX.T("Trilhas aprendidas apagadas.", "Learned trails cleared."))
+        else
+            local total, lines = RX.Trails:Stats()
+            RX:Print(string.format(RX.T("Estradas aprendidas: %d pontos. A linha da rota segue elas onde existem; onde não há, fica reta (mais fraca).", "Learned roads: %d points. The route line follows them where they exist; elsewhere it stays straight (dimmer)."), total))
+            for _, l in ipairs(lines) do RX:Print(l) end
+        end
     elseif msg == "revisar" or msg == "review" then RX.Abandon:ReviewLog()
     elseif msg == "compartilhar" or msg == "share" then RX.Party:ShareGuideQuests()
     elseif msg == "leilao" or msg == "leilão" or msg == "ah" then RX.Market:Offer(true)

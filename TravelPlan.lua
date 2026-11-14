@@ -172,11 +172,14 @@ function TR:RoutePoints(dest)
     local pts = { me }
     for _, l in ipairs(legs) do
         if l.kind == "fly" or l.kind == "ship" then
-            if l.from then table.insert(pts, l.from) end
+            -- cópia marcada: o trecho que sai daqui é voo/navio (reto), não passa pelas estradas
+            if l.from then table.insert(pts, { cont = l.from.cont, wx = l.from.wx, wy = l.from.wy, m = l.from.m, x = l.from.x, y = l.from.y, noRoad = true }) end
             table.insert(pts, l.to)
         elseif l.to then
             table.insert(pts, l.to)
         end
     end
+    -- a pé: segue as estradas que o addon já aprendeu (onde não há trilha conhecida a linha continua reta)
+    if RX.Trails then pts = RX.Trails:Refine(pts) end
     return pts, to
 end
