@@ -980,6 +980,12 @@ function UI:RefreshXP()
     local rest = GetXPExhaustion and GetXPExhaustion() or 0
     local txt = string.format("%s %d  |cffaaaaaa%.0f%%|r", T("Nível", "Level"), lvl, max > 0 and (cur / max * 100) or 0)
     if rest and rest > 0 and max > 0 then txt = txt .. string.format("  |cff4080ff%s %.0f%%|r", T("descansado", "rested"), rest / max * 100) end
+    -- quests no log: verde com folga, amarelo quase cheio, vermelho cheio
+    if RX.Q and RX.Q.Count then
+        local n, qmax = RX.Q:Count(), RX.Q:Max()
+        local col = (n >= qmax and "ff4040") or (n >= qmax - 3 and "ffd100") or "40ff40"
+        txt = txt .. string.format("  |cff%s%s %d/%d|r", col, T("Quests", "Quests"), n, qmax)
+    end
     local ph, mins = RX:XPPerHour()
     if ph then txt = txt .. string.format(T("  |cff40ff40%.1fk xp/h|r ~%.0f min p/ upar", "  |cff40ff40%.1fk xp/h|r ~%.0f min to level"), ph / 1000, mins) end
     self.xp:SetText(txt)
@@ -1813,9 +1819,10 @@ function UI:ShowPanel(which, sub)
             stepper(T("Texto da seta (distância e destino)", "Arrow text (distance and target)"), function() return RX.db.arrowFont or 11 end, function(v) RX.db.arrowFont = v; RX.Arrow:ApplySize() end, 8, 24, 1)
             section(T("Idioma", "Language"), T("interface e nomes das quests", "interface and quest names"))
             buttonRow({
-                { text = T("Automático", "Automatic") .. " (" .. (RX:ClientLang() == "pt" and "Português" or "English") .. ")", selected = RX.db.langMode == "auto", onClick = function() RX:SetLang("auto"); UI:ShowPanel("options") end },
+                { text = T("Automático", "Automatic") .. " (" .. (RX:ClientLang() == "pt" and "Português" or RX:ClientLang() == "es" and "Español" or "English") .. ")", selected = RX.db.langMode == "auto", onClick = function() RX:SetLang("auto"); UI:ShowPanel("options") end },
                 { text = "Português", selected = RX.db.langMode == "pt", onClick = function() RX:SetLang("pt"); UI:ShowPanel("options") end },
                 { text = "English", selected = RX.db.langMode == "en", onClick = function() RX:SetLang("en"); UI:ShowPanel("options") end },
+                { text = "Español", selected = RX.db.langMode == "es", onClick = function() RX:SetLang("es"); UI:ShowPanel("options") end },
             })
             section(T("Janela do guia", "Guide window"))
             check("locked", T("Travar janelas", "Lock windows"), T("Impede mover/redimensionar.", "Prevents moving/resizing."))

@@ -1,10 +1,11 @@
 -- Idioma do RouteXP: segue o idioma do cliente (ptBR/ptPT = português, resto = inglês),
--- mas pode ser trocado nas Opções. Só existem Português e English.
+-- mas pode ser trocado nas Opções. Idiomas: Português, English e Español (Data/Locale_esES.lua).
 local _, RX = ...
 
 function RX:ClientLang()
     local l = GetLocale and GetLocale() or "enUS"
     if l == "ptBR" or l == "ptPT" then return "pt" end
+    if l == "esES" or l == "esMX" then return "es" end
     return "en"
 end
 
@@ -12,9 +13,15 @@ end
 function RX:ResolveLang()
     local db = self.db
     if not db then return self:ClientLang() end
-    if db.langMode ~= "pt" and db.langMode ~= "en" then db.langMode = "auto" end
+    if db.langMode ~= "pt" and db.langMode ~= "en" and db.langMode ~= "es" then db.langMode = "auto" end
     db.lang = (db.langMode == "auto") and self:ClientLang() or db.langMode
     return db.lang
+end
+
+function RX:IsES()
+    local db = self.db
+    if db and db.lang then return db.lang == "es" end
+    return self:ClientLang() == "es"
 end
 
 function RX:IsPT()
@@ -47,7 +54,8 @@ end
 function RX:Places(text)
     if type(text) ~= "string" or text == "" or not RX.PlaceIDs then return text end
     -- só faz sentido quando o texto é mostrado no idioma do cliente (o jogo dá os nomes nesse idioma)
-    if not (self:IsPT() and self:ClientLang() == "pt") then return text end
+    local lang = (self.db and self.db.lang) or self:ClientLang()
+    if lang == "en" or lang ~= self:ClientLang() then return text end
     local c = placeCache[text]
     if c then return c end
     if not placeList then
@@ -74,6 +82,10 @@ end
 -- T("texto em português", "english text")
 function RX.T(pt, en)
     if RX:IsPT() then return RX:Places(pt) end
+    if RX:IsES() and en then
+        local es = RX.ES and RX.ES[en]
+        return RX:Places(es or en)
+    end
     return en or pt
 end
 
@@ -81,5 +93,7 @@ end
 function RX.LF(t, key)
     if not t then return nil end
     if RX:IsPT() then return RX:Places(t[key]) end
-    return t[key .. "En"] or t[key]
+    local en = t[key .. "En"] or t[key]
+    if RX:IsES() and en then return RX:Places((RX.ES and RX.ES[en]) or en) end
+    return en
 end

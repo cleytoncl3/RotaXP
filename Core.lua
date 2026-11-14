@@ -5,7 +5,7 @@ _G.RouteXP = RX
 RX.guides = {}
 RX.guideOrder = {}
 RX.questMeta = {}
-RX.version = "0.30.0"
+RX.version = "0.31.0"
 RX.NAME = "RouteXP"
 RX.ICON = "Interface\\AddOns\\RouteXP\\Media\\icon"
 
@@ -245,6 +245,18 @@ function RX:QName(s)
         end
         local logT = s.q and self.Q:Title(s.q)
         if logT then return logT end
+    elseif self.db.lang == "es" then
+        -- o jogo dá o título no idioma do cliente; senão, o nome em espanhol do Questie
+        if self:ClientLang() == "es" and s.q then
+            local logT = self.Q:Title(s.q)
+            if logT then return logT end
+            if C_QuestLog and C_QuestLog.GetTitleForQuestID then
+                local t = C_QuestLog.GetTitleForQuestID(s.q)
+                if t and t ~= "" then return t end
+            end
+        end
+        local es = s.q and RX.ESQuest and RX.ESQuest[s.q]
+        if es then return es end
     end
     return s.n
 end
@@ -263,12 +275,13 @@ function RX:SetLang(mode)
     self.db.langMode = mode
     self:ResolveLang()
     if self.UI then self.UI:Relocalize() end
-    self:Print(RX.T("Idioma: Português", "Language: English") .. (mode == "auto" and RX.T(" (automático, do cliente)", " (automatic, from the game client)") or ""))
+    self:Print((RX:IsES() and "Idioma: Español" or RX.T("Idioma: Português", "Language: English")) .. (mode == "auto" and RX.T(" (automático, do cliente)", " (automatic, from the game client)") or ""))
     self:Update(true)
 end
 
 function RX:NpcName(s)
     if self.db.lang == "pt" and s.pnpc then return s.pnpc end
+    if self.db.lang == "es" and s.npc and RX.ESNpc and RX.ESNpc[s.npc] then return RX.ESNpc[s.npc] end
     return s.npc
 end
 
@@ -1217,7 +1230,7 @@ SlashCmdList.ROUTEXP = function(msg)
     elseif msg == "speed" then RX:ApplyStyle("speedrun")
     elseif msg == "semcoleta" or msg == "nocollect" then RX:ApplyStyle("semcoleta")
     elseif msg == "completo" or msg == "full" then RX:ApplyStyle("completo")
-    elseif msg == "en" or msg == "pt" or msg == "auto" then RX:SetLang(msg)
+    elseif msg == "en" or msg == "pt" or msg == "es" or msg == "auto" then RX:SetLang(msg)
     elseif msg == "entregas" or msg == "turnin" or msg == "turnins" then RX.Turnin:Toggle()
     elseif msg == "timer" or msg == "cronometro" or msg == "cronômetro" then RX.Timer:ToggleWindow()
     elseif msg == "masmorra" or msg == "dungeon" or msg == "farm" or msg == "grind" then UI:ToggleMenu()

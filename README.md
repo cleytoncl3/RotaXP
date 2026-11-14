@@ -1,6 +1,6 @@
 # RouteXP — Horde Leveling & Quest Guide (WoW: Forever)
 
-**RouteXP** is an in-game leveling and questing guide for the **Horde, levels 30–60**, made for **WoW: Forever**, in the style of Zygor and RestedXP. It tells you which quest to take, where to go and what to do next. The in-game text follows your client language (English or Brazilian Portuguese). RouteXP was formerly called RotaXP.
+**RouteXP** is an in-game leveling and questing guide for the **Horde, levels 30–60**, made for **WoW: Forever**, in the style of Zygor and RestedXP. It tells you which quest to take, where to go and what to do next. The addon is in English and follows your client language: **English**, **Portuguese** (ptBR) and **Spanish** (esES/esMX), with quest and NPC names in your language. You can switch it in Options > Appearance > Language. RouteXP was formerly called RotaXP.
 
 > **Disclaimer:** RouteXP is made **exclusively for WoW: Forever** (for now). This version of WoW has many new and changed quests, so the guide **may still have some errors** (a quest in the wrong place, a missing quest, an odd step order). It is actively being improved. Please report problems in the issues, with the quest name and zone.
 
@@ -17,6 +17,7 @@
 - **Pick a quest**: click a quest in the list to pick it: it gets a gold border, moves to the top, and the arrow and route line lead to it (on foot along the terrain, or by flight/boat when needed) until you turn it in, skip it or pick another (Ctrl+click clears the pick).
 - **Marked route for the group**: on the world map, **Ctrl + right click** marks the start and **Ctrl + left click** the destination. RouteXP draws the way in blue (on foot along the terrain and roads, plus any flight, zeppelin or boat), lists the legs in a small window, and sends it at once to everyone in your group who has RouteXP.
 - **Turn-in mode** and **Nearby mode** (closest quests from every guide).
+- **Quest log counter**: the top of the window always shows how many quests you have, e.g. *Quests 23/25* (green, yellow when almost full, red when full).
 - **Where to level**: advice for your current zone and level, and zone suggestions.
 - **Dungeons and open-world grinding**: dungeons for your level with XP per hour, **gold + XP farming spots** (solo and duo) with estimated XP/h and gold/h and the best-paying drops, farming gear (GearQuest) and talents (Talents Forever).
 - **Group sharing**: group members with RouteXP share the guide, quest progress (e.g. `Friend: Basilisk 2/10`) and marked spots through the game's own addon channel (no internet). Players who only use Questie also show up. A **Share quests** button shares every guide quest in your log with the group (`/rota share`).

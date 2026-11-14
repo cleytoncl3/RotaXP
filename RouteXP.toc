@@ -3,10 +3,14 @@
 ## Notes: Horde 30-60 leveling and questing guide for WoW: Forever. Speedrun routes, full zone guides, arrow and map route, auto accept/turn-in by quest ID, duo share, AH and gold farming. /routexp
 ## Title-ptBR: |cffff7f00Route|rXP - Guia de Leveling
 ## Notes-ptBR: Guia de leveling e quests Horda 30-60 para WoW: Forever. Rotas de speedrun, guias completos por zona, seta e rota no mapa, auto aceitar/entregar pelo ID da quest, share em duo, leilão e farm de ouro. /rota
+## Title-esES: |cffff7f00Route|rXP - Guía de subida
+## Notes-esES: Guía de subida y misiones de la Horda 30-60 para WoW: Forever. Rutas speedrun, guías completas por zona, flecha y ruta en el mapa por el terreno, aceptar/entregar automático por ID, ruta marcada para el grupo, subastas y farmeo de oro. /rota
+## Title-esMX: |cffff7f00Route|rXP - Guía de subida
+## Notes-esMX: Guía de subida y misiones de la Horda 30-60 para WoW: Forever. Rutas speedrun, guías completas por zona, flecha y ruta en el mapa por el terreno, aceptar/entregar automático por ID, ruta marcada para el grupo, subastas y farmeo de oro. /rota
 ## Author: cleytoncl3 (feito com Claude)
 ## X-Website: https://github.com/cleytoncl3/RouteXP
 ## X-License: GPL-3.0
-## Version: 0.30.0
+## Version: 0.31.0
 ## SavedVariables: RouteXPDB
 ## SavedVariablesPerCharacter: RouteXPCharDB
 ## OptionalDeps: TomTom, Questie, GearQuestForever, TalentsForeverBook
@@ -21,6 +25,8 @@ Libs\LibDataBroker-1.1\LibDataBroker-1.1.lua
 Libs\LibDBIcon-1.0\LibDBIcon-1.0.lua
 Dist.lua
 Locale.lua
+Data\Locale_esES.lua
+Data\Names_esES.lua
 Data\PlaceNames.lua
 Core.lua
 Quests.lua
