@@ -35,8 +35,9 @@ local function collect(q, out, seen, depth)
     if depth > 8 then return end
     local Q = RX.Q
     local pre, all = preOf(q)
+    local skipped = RX:CharState().skipped
     local function handle(p)
-        if seen[p] or Q:IsCompleted(p) then return end
+        if seen[p] or Q:IsCompleted(p) or skipped[p] then return end
         seen[p] = true
         if Q:InLog(p) then out[#out + 1] = { q = p, inLog = true } return end
         collect(p, out, seen, depth + 1)

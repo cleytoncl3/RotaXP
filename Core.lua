@@ -5,7 +5,7 @@ _G.RouteXP = RX
 RX.guides = {}
 RX.guideOrder = {}
 RX.questMeta = {}
-RX.version = "0.28.0"
+RX.version = "0.28.1"
 RX.NAME = "RouteXP"
 RX.ICON = "Interface\\AddOns\\RouteXP\\Media\\icon"
 
@@ -556,6 +556,26 @@ function RX:VisibleSteps(maxCount)
         local ok, res = pcall(self.Optimize.Order, self.Optimize, list)
         if ok and res then list = res end
     end
+    -- quest escolhida por você (clique na lista): sobe para o topo
+    do
+        local cs = self:CharState()
+        local pq = cs.pinned
+        if pq then
+            if self.Q:IsCompleted(pq) or cs.skipped[pq] then
+                cs.pinned = nil
+            else
+                local rank = { A = 1, C = 2, T = 3 }
+                local mine, rest = {}, {}
+                for _, s in ipairs(list) do if s.q == pq then mine[#mine + 1] = s else rest[#rest + 1] = s end end
+                if #mine > 0 then
+                    table.sort(mine, function(a, b) return (rank[a.t] or 9) < (rank[b.t] or 9) end)
+                    for _, s in ipairs(rest) do mine[#mine + 1] = s end
+                    list = mine
+                    if self.Optimize then self.Optimize.lastFirst = list[1] end
+                end
+            end
+        end
+    end
     self.visCache = { guide = g, serial = self.updateSerial, list = list }
     local out = {}
     for i = 1, math.min(maxCount, #list) do out[i] = list[i] end
@@ -597,6 +617,18 @@ function RX:MarkStep(s, value)
     if not g then return end
     local prog = self:GuideProgress(g.id)
     prog.done[s.index] = value and true or nil
+    self:Update(true)
+end
+
+-- Escolher uma quest na lista: ela vai para o topo e a seta aponta para ela, até você entregar, pular ou escolher outra
+function RX:PinQuest(q)
+    local c = self:CharState()
+    if c.pinned == q then return end
+    c.pinned = q
+    if q then
+        self:Print(string.format(RX.T("Quest escolhida: |cffffff00%s|r (fica no topo da lista). Ctrl+clique tira a escolha.", "Quest picked: |cffffff00%s|r (stays on top of the list). Ctrl+click clears it."),
+            (self.Q:Title(q)) or tostring(q)))
+    end
     self:Update(true)
 end
 

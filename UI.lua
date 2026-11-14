@@ -245,6 +245,7 @@ end
 -- etiqueta no título quando dá para comprar o item da quest no leilão
 function UI:MarketTag(s)
     local tag = s.chain and (" |cff40c0ff" .. T("[pré-quest]", "[prerequisite]") .. "|r") or ""
+    if s.q and RX:CharState().pinned == s.q then tag = tag .. " |cffffd100" .. T("[escolhida]", "[picked]") .. "|r" end
     if not (s.q and RX.Market and RX.db.marketHint ~= false) then return tag end
     if s.t == "A" and RX.Q:InLog(s.q) then return tag end
     if not RX.Market:Buyable(s.q) then return tag end
@@ -267,7 +268,7 @@ function UI:StepText(s)
     elseif t == "C" then
         txt = T("Fazer ", "Complete ") .. name .. self:MarketTag(s)
     elseif t == "T" then
-        txt = T("Entregar ", "Turn in ") .. name
+        txt = T("Entregar ", "Turn in ") .. name .. self:MarketTag(s)
     elseif t == "G" then
         txt = T("Ir para ", "Go to ") .. (s.x and string.format("|cff80ff80%.1f, %.1f|r ", s.x, s.y) or "") .. (note or "")
     elseif t == "F" then
@@ -794,6 +795,9 @@ function UI:GetLine(i)
             RX:SkipQuest(s.q)
             RX:Print(T("Pulada: ", "Skipped: ") .. (RX:QName(s) or s.q) ..
                 T("  (desfazer em Opções > Voltar quests puladas)", "  (undo in Options > Restore skipped quests)"))
+            if s.chainFor then
+                RX:Print(string.format(T("Aviso: esta era pré-quest de |cffffff00%s|r, que continua escondida enquanto você não fizer a pré-quest.", "Note: this was a prerequisite of |cffffff00%s|r, which stays hidden until you do the prerequisite."), RX:QName(s.chainFor) or "?"))
+            end
         else
             RX:MarkStep(s, true)
         end
@@ -874,8 +878,13 @@ function UI:GetLine(i)
         if button == "RightButton" then
             if IsShiftKeyDown() and s.q then RX:SkipQuest(s.q) else RX:MarkStep(s, true) end
         else
-            if s.m then RX.Arrow:PointTo(s) end
-            UI:SelectInGame(s)
+            if IsControlKeyDown and IsControlKeyDown() then
+                RX:PinQuest(nil)
+            else
+                if s.q and not s.turnin and not s.nearby then RX:PinQuest(s.q) end
+                if s.m then RX.Arrow:PointTo(s) end
+                UI:SelectInGame(s)
+            end
         end
     end)
     l:SetScript("OnEnter", function(self)
@@ -895,7 +904,8 @@ function UI:GetLine(i)
             GameTooltip:AddLine(string.format("%s %.1f, %.1f", info and info.name or "", s.x, s.y), 0.5, 1, 0.5)
         end
         GameTooltip:AddLine(" ")
-        GameTooltip:AddLine(T("Clique: apontar a seta aqui", "Click: point the arrow here"), 0.7, 0.7, 0.7)
+        GameTooltip:AddLine(T("Clique: escolher esta quest (vai para o topo) e apontar a seta", "Click: pick this quest (moves to the top) and point the arrow"), 0.7, 0.7, 0.7)
+        GameTooltip:AddLine(T("Ctrl+clique: tirar a escolha", "Ctrl+click: clear the pick"), 0.7, 0.7, 0.7)
         GameTooltip:AddLine(T("Botão direito: marcar este passo como feito", "Right-click: mark this step done"), 0.7, 0.7, 0.7)
         GameTooltip:AddLine(T("Quadradinho: pular a quest inteira", "Checkbox: skip the whole quest"), 0.7, 0.7, 0.7)
         GameTooltip:AddLine(T("Arrastar ou roda do mouse: rolar a lista", "Drag or mouse wheel: scroll the list"), 0.7, 0.7, 0.7)
