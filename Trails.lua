@@ -227,7 +227,9 @@ function TL:Refine(pts)
         out[#out + 1] = p
         local q = pts[i + 1]
         if q and not p.noRoad and p.cont == q.cont then
-            local path = self:Path(p.cont, p.wx, p.wy, q.wx, q.wy)
+            -- 1º: malha do terreno (contorna montanha/penhasco, prefere estrada); 2º: trilhas que você andou
+            local path = RX.Nav and RX.Nav:Path(p.cont, p.wx, p.wy, q.wx, q.wy)
+            if not path then path = self:Path(p.cont, p.wx, p.wy, q.wx, q.wy) end
             if path then for _, n in ipairs(path) do out[#out + 1] = n end end
         end
     end

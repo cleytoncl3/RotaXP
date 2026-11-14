@@ -6,7 +6,7 @@
 ## Author: cleytoncl3 (feito com Claude)
 ## X-Website: https://github.com/cleytoncl3/RouteXP
 ## X-License: GPL-3.0
-## Version: 0.28.1
+## Version: 0.29.0
 ## SavedVariables: RouteXPDB
 ## SavedVariablesPerCharacter: RouteXPCharDB
 ## OptionalDeps: TomTom, Questie, GearQuestForever, TalentsForeverBook
@@ -29,6 +29,9 @@ Craft.lua
 Arrow.lua
 TravelPlan.lua
 Trails.lua
+NavGrid.lua
+Data\NavGrid_kalimdor.lua
+Data\NavGrid_azeroth.lua
 Optimize.lua
 Nearby.lua
 Chain.lua

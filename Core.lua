@@ -5,7 +5,7 @@ _G.RouteXP = RX
 RX.guides = {}
 RX.guideOrder = {}
 RX.questMeta = {}
-RX.version = "0.28.1"
+RX.version = "0.29.0"
 RX.NAME = "RouteXP"
 RX.ICON = "Interface\\AddOns\\RouteXP\\Media\\icon"
 
@@ -1217,7 +1217,7 @@ SlashCmdList.ROUTEXP = function(msg)
         if msg:find("limpar") or msg:find("clear") then RX.Trails:Clear(); RX:Print(RX.T("Trilhas aprendidas apagadas.", "Learned trails cleared."))
         else
             local total, lines = RX.Trails:Stats()
-            RX:Print(string.format(RX.T("Estradas aprendidas: %d pontos. A linha da rota segue elas onde existem; onde não há, fica reta (mais fraca).", "Learned roads: %d points. The route line follows them where they exist; elsewhere it stays straight (dimmer)."), total))
+            RX:Print(string.format(RX.T("A rota segue o mapa do terreno (contorna montanhas e prefere estradas). Trilhas que você andou: %d pontos.", "The route follows the terrain map (goes around mountains and prefers roads). Trails you ran: %d points."), total))
             for _, l in ipairs(lines) do RX:Print(l) end
         end
     elseif msg == "revisar" or msg == "review" then RX.Abandon:ReviewLog()
