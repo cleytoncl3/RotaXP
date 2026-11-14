@@ -1,8 +1,10 @@
 # RouteXP — Horde Leveling & Quest Guide (WoW: Forever)
 
-**RouteXP** is an in-game leveling and questing guide for the **Horde, levels 30–60**, made for **WoW: Forever**, in the style of Zygor and RestedXP. It tells you which quest to take, where to go and what to do next. The addon is in English and follows your client language: **English**, **Portuguese** (ptBR) and **Spanish** (esES/esMX), with quest and NPC names in your language. You can switch it in Options > Appearance > Language. RouteXP was formerly called RotaXP.
+**RouteXP** is a free leveling guide for the **Horde, from level 1 to 60**, made for **WoW: Forever**. It is still being worked on: **the guides from level 30 to 60 are ready today**, and the guides for levels 1 to 30 are coming next. For now it is **Horde only**.
 
-> **Disclaimer:** RouteXP is made **exclusively for WoW: Forever** (for now). This version of WoW has many new and changed quests, so the guide **may still have some errors** (a quest in the wrong place, a missing quest, an odd step order). It is actively being improved. Please report problems in the issues, with the quest name and zone.
+RouteXP **detects your character's level in game and gives you the right guide for it**. It tells you which quest to take, where to go and what to do next, and it **draws the way on the map like a GPS** (the route a Google Maps would give you), so players who don't know the World of Warcraft map can reach every place the fastest way. Hold **Ctrl** and click on the world map to mark a route from one point to another: it is shared at once with everyone in your group who also uses RouteXP.
+
+**Languages:** English (enUS), Portuguese (ptBR) and Spanish (esES / esMX). The addon follows your game client language automatically, with quest and NPC names in your language. RouteXP was formerly called RotaXP.
 
 ## Features
 
@@ -72,3 +74,7 @@ RouteXP is released under the **GPL-3.0** (see `LICENSE`). It uses data and code
 | Zone order of the routes (reference only; the quest-by-quest guides were built for this project) | wowforeverinfo.com, warcraftmaps.com, topbuilds.gg | — |
 
 The icon, the zone guides, the routes and the RouteXP code were made for this project.
+
+---
+
+> **Disclaimer:** RouteXP is made **exclusively for WoW: Forever** (for now) and is an independent project, not affiliated with other leveling guides such as RestedXP or Zygor. This version of WoW has many new and changed quests, so the guide **may still have some errors** (a quest in the wrong place, a missing quest, an odd step order). It is actively being improved. Please report problems in the issues, with the quest name and zone.
