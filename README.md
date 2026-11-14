@@ -27,7 +27,7 @@
 - **Show hidden quests** of the current guide when your style hides everything (good for leftovers).
 - **Farm timer**: XP per hour and **gold per hour** (coins looted from mobs, your share in a group, and the vendor value of looted items, plus the Auction House value with Auctionator). The buttons always sit below the text; drag the corner to change the width, Ctrl + mouse wheel for the text size.
 - **Minimize**: the guide becomes a small round icon; click it to bring the guide back. The same icon is on the minimap.
-- **Quiet chat**: RouteXP only writes to chat when you type a  command, and TomTom / map pin waypoint notices are hidden (Options > Quality of life > Chat).
+- **Quiet chat**: RouteXP only writes to chat when you type a `/rota` command, and TomTom / map pin waypoint notices are hidden (Options > Quality of life > Chat).
 - **Tabbed options**: Guide & style, Automation, Quality of life, Auction House, Navigation and Appearance.
 - **Blocked action log**: `/rota blocked`.
 
