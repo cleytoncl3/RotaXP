@@ -113,12 +113,12 @@ function Arrow:SetTarget(step, final)
     self.finalStep = final
     if finalChanged then
         if self.tomtomUID and TomTom and TomTom.RemoveWaypoint then
-            pcall(TomTom.RemoveWaypoint, TomTom, self.tomtomUID)
+            RX:Quiet(TomTom.RemoveWaypoint, TomTom, self.tomtomUID)
             self.tomtomUID = nil
         end
         if final and final.m and final.x then
             if RX.db.useTomTom and TomTom and TomTom.AddWaypoint then
-                local ok, uid = pcall(TomTom.AddWaypoint, TomTom, final.m, final.x / 100, final.y / 100, {
+                local ok, uid = RX:Quiet(TomTom.AddWaypoint, TomTom, final.m, final.x / 100, final.y / 100, {
                     title = "RouteXP: " .. (RX:NpcName(final) or RX:QName(final) or RX.LF(final, "d") or RX.T("destino", "destination")),
                     persistent = false, minimap = false, world = true, crazy = false, silent = true,  -- minimapa: o RouteXP desenha um anel fino
                 })
@@ -142,6 +142,21 @@ function Arrow:FinalTarget(steps)
         if self.manual.external then return self.manual.step end
         for _, s in ipairs(steps) do if s == self.manual.step then return s end end
         self.manual = nil
+    end
+    -- quest escolhida por você na lista: a seta e a rota vão para ela (o passo dela que tem lugar no mapa)
+    local pq = RX:CharState().pinned
+    if pq then
+        for _, s in ipairs(steps) do
+            if s.q == pq and s.m and s.x then return s end
+        end
+        if RX.QuestLoc then
+            for _, s in ipairs(steps) do
+                if s.q == pq and s.t == "C" then
+                    pcall(RX.QuestLoc.Resolve, RX.QuestLoc, s)
+                    if s.m and s.x then return s end
+                end
+            end
+        end
     end
     for _, s in ipairs(steps) do
         if s.m and s.x and not s.noNav then return s end

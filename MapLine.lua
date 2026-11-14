@@ -60,7 +60,7 @@ function ML:Init()
 end
 
 -- espessura em pixels de TELA (o mapa amplia tudo que está no canvas; compensamos o zoom)
-local LINE_PX, SHADOW_PX = 2, 4
+local LINE_PX, EDGE_PX = 4.5, 1.5
 
 local function canvasScale()
     local s = WorldMapFrame and WorldMapFrame.GetCanvasScale and WorldMapFrame:GetCanvasScale()
@@ -68,59 +68,52 @@ local function canvasScale()
     return s
 end
 
-function ML:GetLine(i)
-    local l = self.lines[i]
-    if not l then
-        -- contorno escuro fino por baixo: dá para ver de longe sem engrossar a linha
-        local sh = self.overlay:CreateLine(nil, "ARTWORK")
-        sh:SetColorTexture(0, 0, 0, 0.45)
-        l = self.overlay:CreateLine(nil, "OVERLAY")
-        l.shadow = sh
-        self.lines[i] = l
-    end
-    return l
+function ML:HideAll()
+    if self.pool then RX.Polyline:Clear(self.pool) end
+    if self.mpool then RX.Polyline:Clear(self.mpool) end
+    if self.pin then self.pin:Hide(); self.ring:Hide(); self.label:Hide() end
+    if self.mark then for _, m in pairs(self.mark) do m:Hide() end end
 end
 
-function ML:HideAll()
-    for _, l in ipairs(self.lines) do l:Hide(); l.shadow:Hide() end
-    if self.pin then self.pin:Hide(); self.ring:Hide(); self.label:Hide() end
+-- desenha uma rota (lista de pontos do mundo) no mapa aberto; cores: principal, trecho reto (sem caminho)
+local function drawRoute(pool, pts, mapID, w, h, cs, col)
+    local PL = RX.Polyline
+    local hasRoad = false
+    for _, p in ipairs(pts) do if p.road then hasRoad = true break end end
+    local th, ed = LINE_PX / cs, EDGE_PX / cs
+    local prevOk = false
+    for i = 1, #pts - 1 do
+        local x1, y1 = toMap(mapID, pts[i])
+        local x2, y2 = toMap(mapID, pts[i + 1])
+        if x1 and x2 then
+            local straight = hasRoad and not (pts[i].road or pts[i + 1].road)
+            local air = pts[i].noRoad      -- voo/barco: linha reta mais fina
+            local a = straight and 0.45 or 0.95
+            PL:Seg(pool, "TOPLEFT", x1 * w, -y1 * h, x2 * w, -y2 * h, air and th * 0.6 or th, ed, col[1], col[2], col[3], air and 0.7 or a, prevOk and not air)
+            prevOk = true
+        else
+            prevOk = false
+        end
+    end
 end
 
 function ML:Draw()
     if not self.overlay then return end
     self:HideAll()
     if RX.db and RX.db.mapLine == false then return end
-    local dest = RX.Arrow and (RX.Arrow.finalStep or RX.Arrow.step)
-    if not dest or not dest.m then return end
-    local pts, to = RX.Travel:RoutePoints(dest)
-    if not pts then return end
     local mapID = WorldMapFrame:GetMapID()
     local w, h = self.overlay:GetWidth(), self.overlay:GetHeight()
     if not mapID or not w or w <= 0 then return end
     local cs = canvasScale()
-    local n = 0
-    local hasRoad = false
-    for _, p in ipairs(pts) do if p.road then hasRoad = true break end end
-    for i = 1, #pts - 1 do
-        local x1, y1 = toMap(mapID, pts[i])
-        local x2, y2 = toMap(mapID, pts[i + 1])
-        if x1 and x2 then
-            n = n + 1
-            local l = self:GetLine(n)
-            l:SetStartPoint("TOPLEFT", self.overlay, x1 * w, -y1 * h)
-            l:SetEndPoint("TOPLEFT", self.overlay, x2 * w, -y2 * h)
-            l:SetThickness(LINE_PX / cs)
-            local sh = l.shadow
-            sh:SetStartPoint("TOPLEFT", self.overlay, x1 * w, -y1 * h)
-            sh:SetEndPoint("TOPLEFT", self.overlay, x2 * w, -y2 * h)
-            sh:SetThickness(SHADOW_PX / cs)
-            sh:Show()
-            -- primeiro trecho laranja forte; os seguintes mais claros
-            if hasRoad and not (pts[i].road or pts[i + 1].road) then l:SetColorTexture(1, 0.85, 0.3, 0.35)      -- reta: só direção
-            elseif n == 1 then l:SetColorTexture(1, 0.5, 0, 0.95) else l:SetColorTexture(1, 0.85, 0.3, 0.75) end
-            l:Show()
-        end
-    end
+    self.pool = self.pool or RX.Polyline:New(self.overlay, 1)
+    self.mpool = self.mpool or RX.Polyline:New(self.overlay, 2)
+    -- rota marcada (Ctrl+clique no mapa, sua ou de alguém do grupo): azul
+    if RX.Mark then self:DrawMark(mapID, w, h, cs) end
+    local dest = RX.Arrow and (RX.Arrow.finalStep or RX.Arrow.step)
+    if not dest or not dest.m then return end
+    local pts, to = RX.Travel:RoutePoints(dest)
+    if not pts then return end
+    drawRoute(self.pool, pts, mapID, w, h, cs, { 1, 0.62, 0.1 })
     local dx, dy = toMap(mapID, to)
     if dx then
         local mk = self.marker
@@ -134,16 +127,57 @@ function ML:Draw()
     end
 end
 
+-- marcador redondo (início/fim da rota marcada), sempre do mesmo tamanho na tela
+function ML:MarkDot(key, x, y, cs, r, g, b, text)
+    self.mark = self.mark or {}
+    local f = self.mark[key]
+    if not f then
+        f = CreateFrame("Frame", nil, self.overlay)
+        f:SetSize(1, 1)
+        f:SetFrameLevel(self.overlay:GetFrameLevel() + 5)
+        local d = f:CreateTexture(nil, "OVERLAY")
+        d:SetSize(14, 14); d:SetPoint("CENTER")
+        if d.SetMask then d:SetMask("Interface\\CharacterFrame\\TempPortraitAlphaMask") end
+        local e = f:CreateTexture(nil, "ARTWORK")
+        e:SetSize(18, 18); e:SetPoint("CENTER"); e:SetColorTexture(0, 0, 0, 0.7)
+        if e.SetMask then e:SetMask("Interface\\CharacterFrame\\TempPortraitAlphaMask") end
+        local l = f:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+        l:SetPoint("TOP", d, "BOTTOM", 0, -2)
+        f.dot, f.label = d, l
+        self.mark[key] = f
+    end
+    f:SetScale(1 / cs)
+    f:ClearAllPoints(); f:SetPoint("CENTER", self.overlay, "TOPLEFT", x * cs, y * cs)
+    f.dot:SetColorTexture(r, g, b, 1)
+    f.label:SetText(text or ""); f.label:SetTextColor(r, g, b)
+    f:Show()
+end
+
+function ML:DrawMark(mapID, w, h, cs)
+    local M = RX.Mark
+    local col = { 0.25, 0.8, 1 }
+    if M.from then
+        local x, y = toMap(mapID, M.from)
+        if x then self:MarkDot("from", x * w, -y * h, cs, 0.3, 1, 0.4, T("Saída", "Start")) end
+    end
+    if M.to then
+        local x, y = toMap(mapID, M.to)
+        if x then self:MarkDot("to", x * w, -y * h, cs, col[1], col[2], col[3], M.label or T("Destino marcado", "Marked destination")) end
+    end
+    local pts = M:Points()
+    if pts then drawRoute(self.mpool, pts, mapID, w, h, cs, col) end
+end
+
 -- Marca também o waypoint padrão do jogo (pino no mapa + indicador na tela), se existir
 function ML:SetGameWaypoint(step)
     if not (RX.db and RX.db.mapPin ~= false) then return end
     if not (step and step.m and step.x and C_Map and C_Map.SetUserWaypoint and UiMapPoint and UiMapPoint.CreateFromCoordinates) then return end
     local ok, point = pcall(UiMapPoint.CreateFromCoordinates, step.m, step.x / 100, step.y / 100)
     if not ok or not point then return end
-    pcall(C_Map.SetUserWaypoint, point)
+    RX:Quiet(C_Map.SetUserWaypoint, point)
     -- quest no log já está super-rastreada; para NPCs sem quest no log usamos o waypoint
     if InCombatLockdown and InCombatLockdown() then return end
     if C_SuperTrack and C_SuperTrack.SetSuperTrackedUserWaypoint and not (step.q and RX.Q:InLog(step.q)) then
-        pcall(C_SuperTrack.SetSuperTrackedUserWaypoint, true)
+        RX:Quiet(C_SuperTrack.SetSuperTrackedUserWaypoint, true)
     end
 end

@@ -5,7 +5,7 @@ _G.RouteXP = RX
 RX.guides = {}
 RX.guideOrder = {}
 RX.questMeta = {}
-RX.version = "0.29.0"
+RX.version = "0.30.0"
 RX.NAME = "RouteXP"
 RX.ICON = "Interface\\AddOns\\RouteXP\\Media\\icon"
 
@@ -42,7 +42,9 @@ local defaults = {
     abandonNotGuide = true, --  fora dos guias
     marketHint = true,     -- segunda via no leilão em cada quest
     marketOffer = true,    -- oferecer busca ao abrir a Casa de Leilões
-    shopWindow = true,     -- janela de compras no leilão ao escolher um guia
+    shopWindow = true,
+    chatMsgs = false,      -- mensagens do RouteXP no chat (desligado: só responde aos comandos /rota)
+    markRoute = true,      -- Ctrl+clique no mapa: rota marcada (e ver as do grupo)     -- janela de compras no leilão ao escolher um guia
     useTomTom = true,
     showArrow = true,
     langMode = "auto",     -- "auto" = idioma do cliente; "pt" ou "en"
@@ -66,8 +68,23 @@ local function copyDefaults(src, dst)
     end
 end
 
-function RX:Print(msg)
+-- Chat: por padrão o RouteXP fica calado. Só fala quando você digitou um comando /rota (ou com force),
+-- a não ser que você ligue Opções > Qualidade de vida > Mensagens no chat.
+function RX:Print(msg, force)
+    if not force and not self.loud and not (self.db and self.db.chatMsgs) then return end
     DEFAULT_CHAT_FRAME:AddMessage("|cffff7f00RouteXP|r: " .. tostring(msg))
+end
+
+-- roda fn sem deixar nada ir para o chat (TomTom e o pino do jogo avisam "waypoint adicionado...")
+function RX:Quiet(fn, ...)
+    local saved = {}
+    for i = 1, (NUM_CHAT_WINDOWS or 10) do
+        local f = _G["ChatFrame" .. i]
+        if f and f.AddMessage then saved[f] = rawget(f, "AddMessage") or false; f.AddMessage = function() end end
+    end
+    local r = { pcall(fn, ...) }
+    for f, a in pairs(saved) do f.AddMessage = a or nil end
+    return (unpack or table.unpack)(r)
 end
 
 ----------------------------------------------------------------------
@@ -1237,5 +1254,16 @@ SlashCmdList.ROUTEXP = function(msg)
         RX:Print(T("Idioma: /rota auto | /rota pt | /rota en  -  /rota pular | /rota seta | /rota reset", "Language: /rota auto | /rota pt | /rota en  -  /rota skip | /rota arrow | /rota reset"))
         RX:Print(T("/rota entregas - Modo Entregas (só quests prontas, em rota) | /rota agora - conselhos para onde você está | /rota aqui - usar o guia desta zona",
             "/rota turnin - Turn-in mode (ready quests only, routed) | /rota now - advice for where you are | /rota here - use this zone's guide"))
+    end
+end
+
+-- tudo que um comando /rota responde aparece no chat, mesmo com as mensagens desligadas
+do
+    local cmd = SlashCmdList.ROUTEXP
+    SlashCmdList.ROUTEXP = function(msg)
+        RX.loud = true
+        local ok, err = pcall(cmd, msg)
+        RX.loud = false
+        if not ok then error(err, 0) end
     end
 end

@@ -421,7 +421,7 @@ local BAR = {
     { key = "turnin", pt = "Entregas", en = "Turn-ins", tipPT = "Modo Entregas: lista só as quests prontas e monta a melhor rota para entregar todas (libera a bolsa). Clique de novo para voltar ao guia.",
       tipEN = "Turn-in mode: lists only ready quests and builds the best route to turn them all in (frees bag space). Click again to go back to the guide.", click = function() RX.Turnin:Toggle() end },
     { key = "share", pt = "Compartilhar quests", en = "Share quests", tipPT = "Compartilha com o seu grupo todas as quests do seu log que fazem parte do guia atual (uma por vez).", tipEN = "Shares with your group every quest in your log that belongs to the current guide (one at a time).", click = function() RX.Party:ShareGuideQuests() end },
-    { key = "timer", pt = "Cronômetro", en = "Timer", tipPT = "Cronômetro de XP: mede quanto XP por hora você ganha num local ou masmorra.", tipEN = "XP timer: measures how much XP per hour you get at a spot or dungeon.", click = function() RX.Timer:ToggleWindow() end },
+    { key = "timer", pt = "Cronômetro", en = "Timer", tipPT = "Cronômetro de farm: mede XP por hora e ouro por hora (moedas dos mobs + valor dos itens saqueados) num local ou masmorra.", tipEN = "Farm timer: measures XP per hour and gold per hour (coins from mobs + value of looted items) at a spot or dungeon.", click = function() RX.Timer:ToggleWindow() end },
     { key = "options", pt = "Opções", en = "Options", tipPT = "Estilo, fonte, idioma, auto aceitar...", tipEN = "Style, font, language, auto accept...", click = function() UI:ShowPanel("options") end },
 }
 
@@ -865,6 +865,24 @@ function UI:GetLine(i)
     l.hl = l:CreateTexture(nil, "BACKGROUND")
     l.hl:SetAllPoints()
     l.hl:SetColorTexture(1, 0.5, 0, 0.12)
+    -- borda dourada: a quest que você escolheu (clique)
+    l.sel = {}
+    -- { ponto1, x1, y1, ponto2, x2, y2, horizontal? }
+    for k, e in ipairs({
+        { "TOPLEFT", -3, 3, "TOPRIGHT", 3, 3, true },            -- cima
+        { "BOTTOMLEFT", -3, -4, "BOTTOMRIGHT", 3, -4, true },    -- baixo
+        { "TOPLEFT", -3, 3, "BOTTOMLEFT", -3, -4 },              -- esquerda
+        { "TOPRIGHT", 3, 3, "BOTTOMRIGHT", 3, -4 },              -- direita
+    }) do
+        local t = l:CreateTexture(nil, "OVERLAY")
+        t:SetColorTexture(1, 0.82, 0, 0.95)
+        t:SetPoint(e[1], l, e[1], e[2], e[3])
+        t:SetPoint(e[4], l, e[4], e[5], e[6])
+        if e[7] then t:SetHeight(2) else t:SetWidth(2) end
+        t:Hide()
+        l.sel[k] = t
+    end
+    function l:ShowSel(on) for _, t in ipairs(self.sel) do if on then t:Show() else t:Hide() end end end
     -- linha separadora entre os passos
     l.sep = l:CreateTexture(nil, "BORDER")
     l.sep:SetColorTexture(1, 1, 1, 0.08)
@@ -879,6 +897,7 @@ function UI:GetLine(i)
             if IsShiftKeyDown() and s.q then RX:SkipQuest(s.q) else RX:MarkStep(s, true) end
         else
             if IsControlKeyDown and IsControlKeyDown() then
+                RX.Arrow:ClearManual()
                 RX:PinQuest(nil)
             else
                 if s.q and not s.turnin and not s.nearby then RX:PinQuest(s.q) end
@@ -1088,7 +1107,10 @@ function UI:Refresh()
             l.abandon:Paint(false)
             l.abandon:Show(); h = h + 12
         else l.abandon:Hide() end
-        if s.q and s.q == self.selectedQuest then l.hl:SetColorTexture(0.2, 0.6, 1, 0.18); l.hl:Show()
+        local picked = s.q and s.q == RX:CharState().pinned
+        l:ShowSel(picked)
+        if picked then l.hl:SetColorTexture(1, 0.82, 0, 0.14); l.hl:Show()
+        elseif s.q and s.q == self.selectedQuest then l.hl:SetColorTexture(0.2, 0.6, 1, 0.18); l.hl:Show()
         elseif i == 1 then l.hl:SetColorTexture(1, 0.5, 0, 0.12); l.hl:Show()
         else l.hl:Hide() end
         l.check:SetChecked(false)
@@ -1744,6 +1766,8 @@ function UI:ShowPanel(which, sub)
         elseif tab == "qol" then
             section(T("Janelas e atalhos", "Windows and shortcuts"))
             check("questItems", T("Janela de itens da quest (clicar para usar)", "Quest item window (click to use)"), T("Botões para usar os itens que as quests dão. Atalho: Opções > Atalhos > AddOns > RouteXP.", "Buttons to use quest items. Hotkey: Options > Keybindings > AddOns > RouteXP."), function() RX.QuestItems:Refresh() end)
+            section(T("Chat", "Chat"))
+            check("chatMsgs", T("Mensagens do RouteXP no chat", "RouteXP messages in chat"), T("Desligado: o RouteXP só escreve no chat quando você digita um comando /rota, e os avisos de waypoint do TomTom e do pino do mapa ficam escondidos.", "Off: RouteXP only writes to chat when you type a /rota command, and TomTom / map pin waypoint notices are hidden."))
             section(T("Duo / grupo", "Duo / group"))
             check("partyShare", T("Compartilhar com quem usa RouteXP no grupo", "Share with RouteXP users in your group"), T("Mesmo guia, progresso do parceiro em cada quest e pontos de farm.", "Same guide, partner progress on each quest and farm spots."))
             section(T("Quests puladas", "Skipped quests"))
@@ -1774,6 +1798,8 @@ function UI:ShowPanel(which, sub)
             section(T("Estradas", "Roads"))
             check("useTrails", T("Rota pelo terreno e pelas estradas", "Route along the terrain and roads"), T("A linha contorna montanhas, penhascos e água funda e prefere as estradas (mapa do terreno de Kalimdor e dos Reinos do Leste que vem com o addon). Desligado: linha reta.", "The line goes around mountains, cliffs and deep water and prefers roads (terrain map of Kalimdor and the Eastern Kingdoms shipped with the addon). Off: straight line."))
             check("learnTrails", T("Aprender também por onde eu corro", "Also learn where I run"), T("Grava por onde você corre (a pé ou montado, fora de combate) e usa isso onde o mapa do terreno não alcança. /rota trilhas mostra o que foi aprendido.", "Records where you run (on foot or mounted, out of combat) and uses it where the terrain map does not reach. /rota trails shows what was learned."))
+            section(T("Rota marcada (grupo)", "Marked route (group)"))
+            check("markRoute", T("Ctrl+clique no mapa traça uma rota", "Ctrl+click on the map draws a route"), T("Ctrl+botão direito no mapa-múndi = saída, Ctrl+botão esquerdo = destino. O caminho (a pé pelo terreno, voo, zepelim/barco) aparece em azul para você e para todo mundo do grupo que tem o RouteXP.", "Ctrl+right click on the world map = start, Ctrl+left click = destination. The way (on foot along the terrain, flights, zeppelins/boats) shows in blue for you and everyone in your group who has RouteXP."))
             section("TomTom")
             check("useTomTom", T("Destino no TomTom", "Destination in TomTom"), nil)
             check("checkpoints", T("Checkpoints no TomTom pelo caminho", "TomTom checkpoints along the way"), T("Poucos pontos: etapas de voo/porto e até 3 pontos nas caminhadas longas.", "Few points: flight/dock legs and up to 3 points on long walks."))

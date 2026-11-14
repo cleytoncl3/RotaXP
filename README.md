@@ -14,7 +14,8 @@
 - **Quest icons**: the ! / ? shows the quest status, and a second icon shows the type (sword = kill, bag = collect drops, gear = pick up / interact, speech bubble = talk only). A preview shows what the quest asks before you accept it.
 - **Prerequisite chains**: when a quest of the guide needs earlier quests that are not in the guide (e.g. the quest line that unlocks an NPC), the guide shows those prerequisite quests in its place, marked `[prerequisite]`, with where to pick them up and which quest they unlock. It never lists a turn-in for a quest you have not taken, and it warns when an NPC does not offer a quest the guide expected.
 - **Route along the terrain**: RouteXP ships a walkability map of Kalimdor and the Eastern Kingdoms, built from the WoW: Forever terrain (slopes, cliffs, deep water and road textures, in 16-yard cells). The route line on the map and minimap takes the shortest walkable way: it goes around mountains and cliffs and prefers roads, instead of a straight line. It is computed over a few frames, so it never freezes the game. Where the map cannot find a way (an elevator, a cave, a building) it also uses the trails you ran, and otherwise stays straight and dimmer. It can be turned off in Options > Navigation.
-- **Pick a quest**: click a quest in the list to pick it: it moves to the top and the arrow points to it until you turn it in, skip it or pick another (Ctrl+click clears the pick).
+- **Pick a quest**: click a quest in the list to pick it: it gets a gold border, moves to the top, and the arrow and route line lead to it (on foot along the terrain, or by flight/boat when needed) until you turn it in, skip it or pick another (Ctrl+click clears the pick).
+- **Marked route for the group**: on the world map, **Ctrl + right click** marks the start and **Ctrl + left click** the destination. RouteXP draws the way in blue (on foot along the terrain and roads, plus any flight, zeppelin or boat), lists the legs in a small window, and sends it at once to everyone in your group who has RouteXP.
 - **Turn-in mode** and **Nearby mode** (closest quests from every guide).
 - **Where to level**: advice for your current zone and level, and zone suggestions.
 - **Dungeons and open-world grinding**: dungeons for your level with XP per hour, **gold + XP farming spots** (solo and duo) with estimated XP/h and gold/h and the best-paying drops, farming gear (GearQuest) and talents (Talents Forever).
@@ -24,8 +25,9 @@
 - **Abandon helpers**: an *abandon quest* link on every quest of the list, optional auto-abandon of slow, low-XP or off-guide quests (`/rota keep` cancels), and a one-time question about grey / low-XP quests in your log, class quests included (`/rota review`).
 - **Clear current guide** empties the list so you can pick another guide, without abandoning anything in the game (`/rota clear`).
 - **Show hidden quests** of the current guide when your style hides everything (good for leftovers).
-- **XP timer** on the main window; drag the corner of the timer window to resize it.
+- **Farm timer**: XP per hour and **gold per hour** (coins looted from mobs, your share in a group, and the vendor value of looted items, plus the Auction House value with Auctionator). The buttons always sit below the text; drag the corner to change the width, Ctrl + mouse wheel for the text size.
 - **Minimize**: the guide becomes a small round icon; click it to bring the guide back. The same icon is on the minimap.
+- **Quiet chat**: RouteXP only writes to chat when you type a  command, and TomTom / map pin waypoint notices are hidden (Options > Quality of life > Chat).
 - **Tabbed options**: Guide & style, Automation, Quality of life, Auction House, Navigation and Appearance.
 - **Blocked action log**: `/rota blocked`.
 

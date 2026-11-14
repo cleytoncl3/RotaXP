@@ -83,10 +83,11 @@ local function samePlan(fps, from, to)
     return { { kind = "walk", to = to, yards = direct } }, direct
 end
 
--- Plano completo da posição atual até o destino (m, x, y)
-function TR:Plan(dest)
+-- Plano completo da posição atual (ou do ponto from = {m, x, y}) até o destino (m, x, y)
+function TR:Plan(dest, from)
     if not dest or not dest.m or not dest.x then return nil end
-    local me = self:PlayerPos()
+    local me
+    if from and from.m and from.x then me = point(from.m, from.x, from.y, nil, nil, "from") else me = self:PlayerPos() end
     if not me then return nil end
     local to = point(dest.m, dest.x, dest.y, dest.name, dest.pname, "dest")
     if not to then return nil end
@@ -128,8 +129,8 @@ local function fpName(p)
 end
 
 -- Transforma o plano em passos "Viagem" para a janela (só quando há mais que uma caminhada simples)
-function TR:Steps(dest)
-    local legs = self:Plan(dest)
+function TR:Steps(dest, from)
+    local legs = self:Plan(dest, from)
     if not legs or #legs == 0 then return nil end
     if #legs == 1 and legs[1].kind == "walk" then return nil, legs end
     local steps = {}
@@ -166,8 +167,8 @@ function TR:Steps(dest)
 end
 
 -- Pontos da rota (mundo) para desenhar a linha no mapa
-function TR:RoutePoints(dest)
-    local legs, me, to = self:Plan(dest)
+function TR:RoutePoints(dest, from)
+    local legs, me, to = self:Plan(dest, from)
     if not legs or not me then return nil end
     local pts = { me }
     for _, l in ipairs(legs) do

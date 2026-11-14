@@ -44,16 +44,6 @@ function MM:Init()
     end)
 end
 
-function MM:Line(i)
-    local l = self.lines[i]
-    if not l then
-        l = self.overlay:CreateLine(nil, "OVERLAY")
-        l:SetThickness(2)
-        self.lines[i] = l
-    end
-    return l
-end
-
 -- converte um ponto do mundo para pixels no minimapa (centro = você); devolve também se ficou dentro
 local function toMini(me, p, radiusYd, radiusPx, rot, square)
     local dx = -(p.wy - me.wy)           -- leste = positivo
@@ -74,48 +64,64 @@ local function toMini(me, p, radiusYd, radiusPx, rot, square)
     return x, y, inside
 end
 
+local LINE_PX, EDGE_PX = 3.5, 1.2
+
+-- desenha pts (mundo) no minimapa a partir da sua posição 'me'; para no primeiro ponto fora do minimapa
+local function drawMini(pool, me, pts, first, view, col, ringAtEnd)
+    local PL = RX.Polyline
+    local hasRoad = false
+    for _, p in ipairs(pts) do if p.road then hasRoad = true break end end
+    local px, py, pin = toMini(me, pts[first], view.r, view.px, view.rot, view.sq)
+    local joint = false
+    for i = first + 1, #pts do
+        if pts[i].cont ~= me.cont then break end
+        local x, y, inside = toMini(me, pts[i], view.r, view.px, view.rot, view.sq)
+        local ex, ey = x, y
+        if ringAtEnd and i == #pts and inside then
+            -- a linha para na borda do anel, sem cobrir o NPC
+            local dx, dy = x - px, y - py
+            local dd = math.sqrt(dx * dx + dy * dy)
+            if dd > RING_R + 1 then ex, ey = x - dx / dd * RING_R, y - dy / dd * RING_R end
+        end
+        local straight = hasRoad and not (pts[i].road or pts[i - 1].road)
+        local air = pts[i - 1].noRoad
+        if ringAtEnd or inside or pin then
+            PL:Seg(pool, "CENTER", px, py, ex, ey, air and LINE_PX * 0.6 or LINE_PX, EDGE_PX, col[1], col[2], col[3], (straight or air) and 0.5 or 0.95, joint and pin and not air)
+            joint = true
+        else
+            joint = false
+        end
+        -- rota até o objetivo: começa em você e para na borda; rota marcada: desenha só o pedaço que cai no minimapa
+        if ringAtEnd and not inside then break end
+        px, py, pin = x, y, inside
+        if ringAtEnd and i == #pts then MM:ShowRing(x, y) end
+    end
+end
+
 function MM:Draw()
-    for _, l in ipairs(self.lines) do l:Hide() end
     for _, l in ipairs(self.ring) do l:Hide() end
+    self.pool = self.pool or RX.Polyline:New(self.overlay, 1)
+    self.mpool = self.mpool or RX.Polyline:New(self.overlay, 2)
+    RX.Polyline:Clear(self.pool); RX.Polyline:Clear(self.mpool)
     if RX.db and RX.db.miniLine == false then return end
+    local me = RX.Travel:PlayerPos()
+    if not me then return end
+    local zoom = Minimap:GetZoom() or 0
+    local indoors = IsIndoors and IsIndoors()
+    local view = {
+        r = ((indoors and SIZE_IN[zoom]) or SIZE_OUT[zoom] or 466) / 2,
+        px = (Minimap:GetWidth() or 140) / 2,
+        rot = (GetCVar and GetCVar("rotateMinimap") == "1") and GetPlayerFacing and -(GetPlayerFacing() or 0) or nil,
+        sq = GetMinimapShape and GetMinimapShape() == "SQUARE",
+    }
+    -- rota marcada (sua ou do grupo), em azul
+    local mpts = RX.Mark and RX.Mark:Points()
+    if mpts and #mpts >= 2 and mpts[1].cont == me.cont then drawMini(self.mpool, me, mpts, 1, view, { 0.25, 0.8, 1 }, false) end
     local dest = RX.Arrow and (RX.Arrow.finalStep or RX.Arrow.step)
     if not dest or not dest.m then return end
     local pts = RX.Travel:RoutePoints(dest)
     if not pts or #pts < 2 then return end
-    local me = pts[1]
-    local zoom = Minimap:GetZoom() or 0
-    local indoors = IsIndoors and IsIndoors()
-    local radiusYd = ((indoors and SIZE_IN[zoom]) or SIZE_OUT[zoom] or 466) / 2
-    local radiusPx = (Minimap:GetWidth() or 140) / 2
-    local rot = (GetCVar and GetCVar("rotateMinimap") == "1") and GetPlayerFacing and -(GetPlayerFacing() or 0) or nil
-    local square = GetMinimapShape and GetMinimapShape() == "SQUARE"
-    local px, py = 0, 0
-    local n = 0
-    local hasRoad = false
-    for _, p in ipairs(pts) do if p.road then hasRoad = true break end end
-    for i = 2, #pts do
-        if pts[i].cont ~= me.cont then break end
-        local x, y, inside = toMini(me, pts[i], radiusYd, radiusPx, rot, square)
-        n = n + 1
-        local l = self:Line(n)
-        local ex, ey = x, y
-        if i == #pts and inside then
-            -- a linha para na borda do anel, sem cobrir o NPC
-            local dx, dy = x - px, y - py
-            local d = math.sqrt(dx * dx + dy * dy)
-            if d > RING_R + 1 then ex, ey = x - dx / d * RING_R, y - dy / d * RING_R end
-        end
-        l:SetStartPoint("CENTER", self.overlay, px, py)
-        l:SetEndPoint("CENTER", self.overlay, ex, ey)
-        if hasRoad and not (pts[i].road or pts[i - 1].road) then l:SetColorTexture(1, 0.85, 0.3, 0.35)
-        elseif n == 1 then l:SetColorTexture(1, 0.5, 0, 0.95) else l:SetColorTexture(1, 0.85, 0.3, 0.8) end
-        l:Show()
-        if not inside then break end
-        px, py = x, y
-        if i == #pts then
-            self:ShowRing(x, y)
-        end
-    end
+    drawMini(self.pool, pts[1], pts, 1, view, { 1, 0.62, 0.1 }, true)
 end
 
 ----------------------------------------------------------------------
@@ -137,7 +143,7 @@ end
 
 function MM:ClearCheckpoints()
     if TomTom and TomTom.RemoveWaypoint then
-        for _, uid in ipairs(self.cps) do pcall(TomTom.RemoveWaypoint, TomTom, uid) end
+        for _, uid in ipairs(self.cps) do RX:Quiet(TomTom.RemoveWaypoint, TomTom, uid) end
     end
     wipe(self.cps)
 end
@@ -148,7 +154,9 @@ function MM:SetCheckpoints(dest)
     local pts = RX.Travel:RoutePoints(dest)
     if not pts or #pts < 2 then return end
     local marks = {}
-    for i = 2, #pts - 1 do table.insert(marks, { p = pts[i], name = T("Etapa", "Leg") .. " " .. (i - 1) }) end
+    for i = 2, #pts - 1 do
+        if not pts[i].road then table.insert(marks, { p = pts[i], name = T("Etapa", "Leg") .. " " .. (#marks + 1) }) end   -- só voo/porto, não cada curva da estrada
+    end
     -- caminhada longa até o destino: pontos intermediários
     local a, b = pts[#pts - 1], pts[#pts]
     if a.cont == b.cont then
@@ -164,7 +172,7 @@ function MM:SetCheckpoints(dest)
         local mk = marks[i]
         local m, x, y = worldToMap(mk.p, mk.p.m or dest.m)
         if m then
-            local ok, uid = pcall(TomTom.AddWaypoint, TomTom, m, x, y, {
+            local ok, uid = RX:Quiet(TomTom.AddWaypoint, TomTom, m, x, y, {
                 title = "RouteXP: " .. mk.name, persistent = false, minimap = false, world = true, crazy = false, silent = true, cleardistance = 25,
             })
             if ok and uid then table.insert(self.cps, uid) end

@@ -128,6 +128,17 @@ function P:SendSpot(step)
     self:Send(string.format("S;%d;%.2f;%.2f;%s", step.m, step.x, step.y, name:sub(1, 120)))
 end
 
+-- rota marcada no mapa (Ctrl+clique): vai para todos do grupo com RouteXP, sem pedir confirmação
+function P:SendMark(from, to)
+    if not enabled() then return end
+    if not to then self:Send("M;-") return end
+    if not from then local me = RX.Travel and RX.Travel:PlayerPos(); if me then from = { m = me.m, x = me.x, y = me.y } end end
+    local fs = from and string.format("%d;%.2f;%.2f", from.m, from.x, from.y) or "-;-;-"
+    self:Send(string.format("M;%s;%d;%.2f;%.2f", fs, to.m, to.x, to.y))
+end
+
+function P:InGroup() return channel() ~= nil end
+
 ----------------------------------------------------------------------
 -- recebimento
 ----------------------------------------------------------------------
@@ -198,6 +209,18 @@ function P:OnMessage(prefix, msg, _, sender)
             local text = string.format(T("|cffff7f00RouteXP|r\n%s marcou um local:\n|cffffff00%s|r (%s %.0f, %.0f)\n\nApontar a seta para lá?", "|cffff7f00RouteXP|r\n%s marked a spot:\n|cffffff00%s|r (%s %.0f, %.0f)\n\nPoint the arrow there?"),
                 who, step.d, step.note or "", x, y)
             if StaticPopup_Show then StaticPopup_Show("ROUTEXP_PARTY_SPOT", text, nil, step) end
+        end
+    elseif kind == "M" then
+        if RX.Mark and RX.db.partyShare ~= false and RX.db.markRoute ~= false then
+            if f[2] == "-" and not f[5] then
+                if RX.Mark.owner == who then RX.Mark:Clear(false) end
+            else
+                local fm, fx, fy = tonumber(f[2]), tonumber(f[3]), tonumber(f[4])
+                local tm, tx, ty = tonumber(f[5]), tonumber(f[6]), tonumber(f[7])
+                if tm and tx and ty then
+                    RX.Mark:Set(fm and { m = fm, x = fx, y = fy } or nil, { m = tm, x = tx, y = ty }, who, false)
+                end
+            end
         end
     elseif kind == "R" then
         self:Hello(true); self:SyncQuests(true)
