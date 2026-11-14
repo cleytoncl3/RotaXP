@@ -32,6 +32,13 @@ if (!GITHUB) {
     'end', ''].join('\n'));
   toc = toc.split(/\r?\n/).filter(l => !/^## X-Website:/.test(l)).join('\r\n');
   fs.writeFileSync(tocPath, toc);
+  // traduções: tira as linhas que só existem para a versão do GitHub (atualizador .bat / link do GitHub)
+  for (const f of ['Data/Locale_esES.lua']) {
+    const p = path.join(dest, f);
+    if (!fs.existsSync(p)) continue;
+    const t = fs.readFileSync(p, 'utf8').split(/\r?\n/).filter(l => !/github|Atualizar-RouteXP|\.bat\b/i.test(l)).join('\n');
+    fs.writeFileSync(p, t);
+  }
 }
 const version = (toc.match(/## Version: (\S+)/) || [])[1] || 'dev';
 // CurseForge: nada de GitHub nem .bat no pacote
